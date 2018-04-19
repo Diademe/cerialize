@@ -124,15 +124,15 @@ describe('autoserializeAs using Serializer', () => {
 
         it("will be deserialized", () => {
             const result = Deserialize(JSON, TestClass);
-            expect(result instanceof TestClass).toBeTruthy();
-            expect(result.children instanceof Set).toBeTruthy();
+            expect(result instanceof TestClass).toBe(true);
+            expect(result.children instanceof Set).toBe(true);
             expect(Utility.unpackSet(result.children)).toEqual(JSON.children.wrap);
         });
 
         it("will be deserializedInto", () => {
             const result = DeserializeInto(JSON, TestClass, new TestClass());
-            expect(result instanceof TestClass).toBeTruthy();
-            expect(result.children instanceof Set).toBeTruthy();
+            expect(result instanceof TestClass).toBe(true);
+            expect(result.children instanceof Set).toBe(true);
             expect(Utility.unpackSet(result.children)).toEqual(JSON.children.wrap);
         });
 
@@ -188,15 +188,15 @@ describe('autoserializeAs using Serializer', () => {
 
         it("will be deserialized", () => {
             const result = Deserialize(JSON, TestClass);
-            expect(result instanceof TestClass).toBeTruthy();
-            expect(result.children instanceof Set).toBeTruthy();
+            expect(result instanceof TestClass).toBe(true);
+            expect(result.children instanceof Set).toBe(true);
             expect(Utility.unpackSet(result.children)).toEqual(JSON.children);
         });
 
         it("will be deserializedInto", () => {
             const result = DeserializeInto(JSON, TestClass, new TestClass());
-            expect(result instanceof TestClass).toBeTruthy();
-            expect(result.children instanceof Set).toBeTruthy();
+            expect(result instanceof TestClass).toBe(true);
+            expect(result.children instanceof Set).toBe(true);
             expect(Utility.unpackSet(result.children)).toEqual(JSON.children);
         });
 

@@ -148,7 +148,7 @@ describe('Deserialize', function () {
         var d3 = new Date();
         var t4 = { dateList: [d1.toString(), d2.toString(), d3] };
         var result = Deserialize(t4, T4);
-        expect(result instanceof T4).toBeTruthy();
+        expect(result instanceof T4).toBe(true);
         expect(Array.isArray(result.dateList)).toBe(true);
         expect(result.dateList[0].toString()).toEqual(d1.toString());
         expect(result.dateList[1].toString()).toEqual(d2.toString());
@@ -158,7 +158,7 @@ describe('Deserialize', function () {
     it('should deserialize a Date property even if source is a Date object', function () {
         var t5 = { date: new Date() }
         var result = Deserialize(t5, T5);
-        expect(result instanceof T5).toBeTruthy();
+        expect(result instanceof T5).toBe(true);
         expect(result.date.toString()).toEqual(t5.date.toString());
     });
 
