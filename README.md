@@ -292,7 +292,7 @@ The default InstantiationMethod can be changed with `SetDefaultInstantiationMeth
         const existingMap = {
             ship0: new Starship(), 
             ship3: new Starship()
-        ];
+        };
         
         const map = DeserializeMap(json, Starship); // make a new map of instances
         
