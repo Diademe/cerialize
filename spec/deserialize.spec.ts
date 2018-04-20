@@ -11,28 +11,28 @@ import {
     deserializeAsMap,
     deserializeUsing, SetDeserializeKeyTransform,
     SetDefaultInstantiationMethod
-}                                                   from "../src";
-import {InstantiationMethod, Indexable, JsonObject} from "../src/util";
+} from "../src";
+import { InstantiationMethod, Indexable, JsonObject } from "../src/util";
 
-function expectInstance(instance : any, type : any, instantiationMethod : InstantiationMethod) {
+function expectInstance(instance: any, type: any, instantiationMethod: InstantiationMethod) {
     switch (instantiationMethod) {
-		case InstantiationMethod.New:
-		case InstantiationMethod.ObjectCreate:
-			expect(instance instanceof type).toBe(true);
-			break;
+        case InstantiationMethod.New:
+        case InstantiationMethod.ObjectCreate:
+            expect(instance instanceof type).toBe(true);
+            break;
 
-		case InstantiationMethod.None:
-			expect(instance instanceof type).toBeFalsy();
-			expect(instance.toString()).toBe("[object Object]");
-			break;
-	}
+        case InstantiationMethod.None:
+            expect(instance instanceof type).toBeFalsy();
+            expect(instance.toString()).toBe("[object Object]");
+            break;
+    }
 }
 
-function expectTarget(target : any, instance : any, shouldMakeTarget : boolean) {
+function expectTarget(target: any, instance: any, shouldMakeTarget: boolean) {
     expect(instance === target).toBe(shouldMakeTarget);
 }
 
-function createTarget(shouldMakeTarget : boolean, shouldinstantiationMethod : InstantiationMethod, type : any) {
+function createTarget(shouldMakeTarget: boolean, shouldinstantiationMethod: InstantiationMethod, type: any) {
     if (!shouldMakeTarget) return null;
 
     switch (shouldinstantiationMethod) {
@@ -54,7 +54,7 @@ describe("Deserializing", function () {
         it("will not deserialize unannotated fields", function () {
 
             class Test {
-                value : number = 1;
+                value: number = 1;
             }
 
             const instance = Deserialize({ value: 2 }, Test);
@@ -67,16 +67,16 @@ describe("Deserializing", function () {
 
     describe("DeserializeAs", function () {
 
-        function runTests(blockName : string, instantiationMethod : InstantiationMethod, deserializeAs : any, makeTarget : boolean) {
+        function runTests(blockName: string, instantiationMethod: InstantiationMethod, deserializeAs: any, makeTarget: boolean) {
 
             describe(blockName, function () {
 
                 it("deserializes basic primitives", function () {
 
                     class Test {
-                        @deserializeAs(String) value0 : string = "strvalue";
-                        @deserializeAs(Boolean) value1 : boolean = true;
-                        @deserializeAs(Number) value2 : number = 100;
+                        @deserializeAs(String) value0: string = "strvalue";
+                        @deserializeAs(Boolean) value1: boolean = true;
+                        @deserializeAs(Number) value2: number = 100;
                     }
 
                     const target = createTarget(makeTarget, instantiationMethod, Test);
@@ -95,7 +95,7 @@ describe("Deserializing", function () {
 
                 it("deserializes a Date", function () {
                     class Test {
-                        @deserializeAs(Date) value0 : Date;
+                        @deserializeAs(Date) value0: Date;
                     }
 
                     const d = new Date().toString();
@@ -109,7 +109,7 @@ describe("Deserializing", function () {
 
                 it("deserializes a RegExp", function () {
                     class Test {
-                        @deserializeAs(RegExp) value0 : RegExp;
+                        @deserializeAs(RegExp) value0: RegExp;
                     }
 
                     const d = (new RegExp("/[123]/g")).toString();
@@ -124,11 +124,11 @@ describe("Deserializing", function () {
 
                 it("deserializes a non primitive value", function () {
                     class Thing {
-                        @deserializeAs(Number) value : number = 1;
+                        @deserializeAs(Number) value: number = 1;
                     }
 
                     class Test {
-                        @deserializeAs(Thing) thing : Thing;
+                        @deserializeAs(Thing) thing: Thing;
                     }
 
                     const target = createTarget(makeTarget, instantiationMethod, Test);
@@ -145,9 +145,9 @@ describe("Deserializing", function () {
 
                 it("deserializes non matching primitive types", function () {
                     class Test {
-                        @deserializeAs(Number) value0 : string;
-                        @deserializeAs(String) value1 : boolean;
-                        @deserializeAs(Boolean) value2 : number;
+                        @deserializeAs(Number) value0: string;
+                        @deserializeAs(String) value1: boolean;
+                        @deserializeAs(Boolean) value2: number;
                     }
 
                     const json = {
@@ -165,9 +165,9 @@ describe("Deserializing", function () {
 
                 it("deserializes with different keys", function () {
                     class Test {
-                        @deserializeAs(String, "str") value0 : string;
-                        @deserializeAs(Boolean, "bool") value1 : boolean;
-                        @deserializeAs(Number, "num") value2 : number;
+                        @deserializeAs(String, "str") value0: string;
+                        @deserializeAs(Boolean, "bool") value1: boolean;
+                        @deserializeAs(Number, "num") value2: number;
                     }
 
                     const json = {
@@ -185,12 +185,12 @@ describe("Deserializing", function () {
 
                 it("skips undefined keys", function () {
                     class Test {
-                        @deserializeAs(String) value0 : string = "val";
-                        @deserializeAs(Boolean) value1 : boolean;
-                        @deserializeAs(Number) value2 : number;
+                        @deserializeAs(String) value0: string = "val";
+                        @deserializeAs(Boolean) value1: boolean;
+                        @deserializeAs(Number) value2: number;
                     }
 
-                    const json : any = {
+                    const json: any = {
                         value0: void 0,
                         value1: true,
                         value2: 100
@@ -209,12 +209,12 @@ describe("Deserializing", function () {
 
                 it("does not skip null keys", function () {
                     class Test {
-                        @deserializeAs(String) value0 : string = "val";
-                        @deserializeAs(Boolean) value1 : boolean;
-                        @deserializeAs(Number) value2 : number;
+                        @deserializeAs(String) value0: string = "val";
+                        @deserializeAs(Boolean) value1: boolean;
+                        @deserializeAs(Number) value2: number;
                     }
 
-                    const json : any = {
+                    const json: any = {
                         value0: null,
                         value1: true,
                         value2: 100
@@ -230,13 +230,13 @@ describe("Deserializing", function () {
 
                 it("deserializes nested types", function () {
                     class Test {
-                        @deserializeAs(String) value0 : string = "bad";
-                        @deserializeAs(Boolean) value1 : boolean = false;
-                        @deserializeAs(Number) value2 : number = 1;
+                        @deserializeAs(String) value0: string = "bad";
+                        @deserializeAs(Boolean) value1: boolean = false;
+                        @deserializeAs(Number) value2: number = 1;
                     }
 
                     class Test0 {
-                        @deserializeAs(Test) test : Test;
+                        @deserializeAs(Test) test: Test;
                     }
 
                     const json = {
@@ -254,17 +254,17 @@ describe("Deserializing", function () {
 
                 it("deserializes doubly nested types", function () {
                     class Test0 {
-                        @deserializeAs(String) value0 : string = "bad";
-                        @deserializeAs(Boolean) value1 : boolean = false;
-                        @deserializeAs(Number) value2 : number = 1;
+                        @deserializeAs(String) value0: string = "bad";
+                        @deserializeAs(Boolean) value1: boolean = false;
+                        @deserializeAs(Number) value2: number = 1;
                     }
 
                     class Test1 {
-                        @deserializeAs(Test0) test0 : Test0;
+                        @deserializeAs(Test0) test0: Test0;
                     }
 
                     class Test2 {
-                        @deserializeAs(Test1) test1 : Test1;
+                        @deserializeAs(Test1) test1: Test1;
                     }
 
                     const json = {
@@ -308,14 +308,14 @@ describe("Deserializing", function () {
 
     describe("DeserializeAsMap", function () {
 
-        function runTests(blockName : string, instantiationMethod : InstantiationMethod, deserializeAs : any, deserializeAsMap : any, makeTarget : boolean) {
+        function runTests(blockName: string, instantiationMethod: InstantiationMethod, deserializeAs: any, deserializeAsMap: any, makeTarget: boolean) {
 
             describe(blockName, function () {
 
                 it("deserializes a map of primitives", function () {
 
                     class Test {
-                        @deserializeAsMap(Number) values : Indexable<number>;
+                        @deserializeAsMap(Number) values: Indexable<number>;
                     }
 
                     const json = { values: { v0: 0, v1: 1, v2: 2 } };
@@ -329,15 +329,15 @@ describe("Deserializing", function () {
 
                 it("deserializes a map of non primitives", function () {
                     class TestType {
-                        @deserializeAs(Number) value : number;
+                        @deserializeAs(Number) value: number;
 
-                        constructor(arg : number) {
+                        constructor(arg: number) {
                             this.value = arg;
                         }
                     }
 
                     class Test {
-                        @deserializeAsMap(TestType) values : Indexable<TestType>;
+                        @deserializeAsMap(TestType) values: Indexable<TestType>;
                     }
 
                     const json = {
@@ -357,15 +357,15 @@ describe("Deserializing", function () {
 
                 it("deserializes nested maps", function () {
                     class TestType {
-                        @deserializeAsMap(Number) value : Indexable<number>;
+                        @deserializeAsMap(Number) value: Indexable<number>;
 
-                        constructor(arg : Indexable<number>) {
+                        constructor(arg: Indexable<number>) {
                             this.value = arg;
                         }
                     }
 
                     class Test {
-                        @deserializeAsMap(TestType) values : Indexable<TestType>;
+                        @deserializeAsMap(TestType) values: Indexable<TestType>;
                     }
 
                     const json = {
@@ -386,10 +386,10 @@ describe("Deserializing", function () {
 
                 it("skips undefined keys", function () {
                     class Test {
-                        @deserializeAsMap(Number) values : Indexable<number>;
+                        @deserializeAsMap(Number) values: Indexable<number>;
                     }
 
-                    const json : any = {
+                    const json: any = {
                         values: {
                             v0: void 0,
                             v1: 1,
@@ -408,15 +408,15 @@ describe("Deserializing", function () {
 
                 it("deserializes a map with different key name", function () {
                     class TestType {
-                        @deserializeAs(Number) value : number;
+                        @deserializeAs(Number) value: number;
 
-                        constructor(arg : number) {
+                        constructor(arg: number) {
                             this.value = arg;
                         }
                     }
 
                     class Test {
-                        @deserializeAsMap(TestType, "different") values : Indexable<TestType>;
+                        @deserializeAsMap(TestType, "different") values: Indexable<TestType>;
                     }
 
                     const json = {
@@ -432,7 +432,7 @@ describe("Deserializing", function () {
 
                 it("throws an exeption if input is not a map type", function () {
                     class Test {
-                        @deserializeAsMap(Number) values : Indexable<number>;
+                        @deserializeAsMap(Number) values: Indexable<number>;
                     }
 
                     expect(function () {
@@ -458,10 +458,10 @@ describe("Deserializing", function () {
                 it("deserializes a null map", function () {
 
                     class Test {
-                        @deserializeAsMap(Number) values : Indexable<number>;
+                        @deserializeAsMap(Number) values: Indexable<number>;
                     }
 
-                    const json : any = { values: null };
+                    const json: any = { values: null };
                     const target = createTarget(makeTarget, instantiationMethod, Test);
                     const instance = Deserialize(json, Test, target, instantiationMethod);
                     expect(instance.values).toBeNull();
@@ -485,13 +485,13 @@ describe("Deserializing", function () {
 
     describe("DeserializeAsArray", function () {
 
-        function runTests(blockName : string, instantiationMethod : InstantiationMethod, deserializeAs : any, deserializeAsArray : any, makeTarget : boolean) {
+        function runTests(blockName: string, instantiationMethod: InstantiationMethod, deserializeAs: any, deserializeAsArray: any, makeTarget: boolean) {
 
             describe(blockName, function () {
 
                 it("deserializes an array of primitives", function () {
                     class Test {
-                        @deserializeAsArray(Number) value : Array<number>;
+                        @deserializeAsArray(Number) value: Array<number>;
                     }
 
                     const json = { value: [1, 2, 3] };
@@ -505,15 +505,15 @@ describe("Deserializing", function () {
 
                 it("deserializes an array of typed objects", function () {
                     class TestType {
-                        @deserializeAs(String) strVal : string;
+                        @deserializeAs(String) strVal: string;
 
-                        constructor(val : string) {
+                        constructor(val: string) {
                             this.strVal = val;
                         }
                     }
 
                     class Test {
-                        @deserializeAsArray(TestType) value : Array<TestType>;
+                        @deserializeAsArray(TestType) value: Array<TestType>;
                     }
 
                     const json = {
@@ -543,25 +543,25 @@ describe("Deserializing", function () {
 
                 it("deserializes nested arrays", function () {
                     class TestTypeL0 {
-                        @deserializeAs(String) strVal : string;
+                        @deserializeAs(String) strVal: string;
 
-                        constructor(val : string) {
+                        constructor(val: string) {
                             this.strVal = val;
                         }
 
                     }
 
                     class TestTypeL1 {
-                        @deserializeAsArray(TestTypeL0) l0List : Array<TestTypeL0>;
+                        @deserializeAsArray(TestTypeL0) l0List: Array<TestTypeL0>;
 
-                        constructor(l0List : TestTypeL0[]) {
+                        constructor(l0List: TestTypeL0[]) {
                             this.l0List = l0List;
                         }
 
                     }
 
                     class Test {
-                        @deserializeAsArray(TestTypeL1) value : Array<TestTypeL1>;
+                        @deserializeAsArray(TestTypeL1) value: Array<TestTypeL1>;
                     }
 
                     const json = {
@@ -592,7 +592,7 @@ describe("Deserializing", function () {
                 it("deserializes an array with a different key", function () {
 
                     class Test {
-                        @deserializeAsArray(Number, "different") value : Array<number>;
+                        @deserializeAsArray(Number, "different") value: Array<number>;
                     }
 
                     const json = { different: [1, 2, 3] };
@@ -609,7 +609,7 @@ describe("Deserializing", function () {
                 it("throws an error if input type is not an array", function () {
 
                     class Test {
-                        @deserializeAsArray(Number) values : Array<number>;
+                        @deserializeAsArray(Number) values: Array<number>;
                     }
 
                     expect(function () {
@@ -655,16 +655,16 @@ describe("Deserializing", function () {
 
     describe("DeserializeJSON", function () {
 
-        function runTests(blockName : string, instantiationMethod : InstantiationMethod, deserializeAs : any, deserializeAsJson : any, makeTarget : boolean) {
+        function runTests(blockName: string, instantiationMethod: InstantiationMethod, deserializeAs: any, deserializeAsJson: any, makeTarget: boolean) {
 
             describe(blockName, function () {
 
                 it("deserializes a primitive as json", function () {
 
                     class Test {
-                        @deserializeAsJson() value0 : string;
-                        @deserializeAsJson() value1 : boolean;
-                        @deserializeAsJson() value2 : number;
+                        @deserializeAsJson() value0: string;
+                        @deserializeAsJson() value1: boolean;
+                        @deserializeAsJson() value2: number;
                     }
 
                     const json = {
@@ -686,9 +686,9 @@ describe("Deserializing", function () {
                 it("deserializes an array of primitives as json", function () {
 
                     class Test {
-                        @deserializeAsJson() value0 : string[];
-                        @deserializeAsJson() value1 : boolean[];
-                        @deserializeAsJson() value2 : number;
+                        @deserializeAsJson() value0: string[];
+                        @deserializeAsJson() value1: boolean[];
+                        @deserializeAsJson() value2: number;
                     }
 
                     const json = {
@@ -708,10 +708,10 @@ describe("Deserializing", function () {
 
                 it("skips undefined keys", function () {
                     class Test {
-                        @deserializeAsJson() value : Indexable<number>;
+                        @deserializeAsJson() value: Indexable<number>;
                     }
 
-                    const json : any = {
+                    const json: any = {
                         value: {
                             v0: 1,
                             v1: void 0,
@@ -733,7 +733,7 @@ describe("Deserializing", function () {
                 it("deserializes an array of non primitives as json", function () {
 
                     class Test {
-                        @deserializeAsJson() things : any[];
+                        @deserializeAsJson() things: any[];
 
                     }
 
@@ -757,7 +757,7 @@ describe("Deserializing", function () {
 
                 it("deserializes a map of primitives as json", function () {
                     class Test {
-                        @deserializeAsJson() things : any;
+                        @deserializeAsJson() things: any;
 
                     }
 
@@ -776,7 +776,7 @@ describe("Deserializing", function () {
 
                 it("deserializes a map of non primitives as json", function () {
                     class Test {
-                        @deserializeAsJson() things : any;
+                        @deserializeAsJson() things: any;
 
                     }
 
@@ -801,7 +801,7 @@ describe("Deserializing", function () {
 
                 it("deserializes nested arrays", function () {
                     class Test {
-                        @deserializeAsJson() things : any;
+                        @deserializeAsJson() things: any;
 
                     }
 
@@ -824,13 +824,13 @@ describe("Deserializing", function () {
 
                 it("does not deserialize functions", function () {
                     class Test {
-                        @deserializeAsJson() things : any;
+                        @deserializeAsJson() things: any;
 
                     }
 
-                    const json : any = {
+                    const json: any = {
                         things: [],
-                        fn: function () {}
+                        fn: function () { }
                     };
                     const target = createTarget(makeTarget, instantiationMethod, Test);
                     const instance = Deserialize(json, Test, target, instantiationMethod);
@@ -843,7 +843,7 @@ describe("Deserializing", function () {
 
                 it("deserializes json with a different key", function () {
                     class Test {
-                        @deserializeAsJson("something") things : any;
+                        @deserializeAsJson("something") things: any;
 
                     }
 
@@ -865,9 +865,9 @@ describe("Deserializing", function () {
                     });
 
                     class Test {
-                        @deserializeAsJson() value0 : string;
-                        @deserializeAsJson() value1 : boolean;
-                        @deserializeAsJson() value2 : number;
+                        @deserializeAsJson() value0: string;
+                        @deserializeAsJson() value1: boolean;
+                        @deserializeAsJson() value2: number;
                     }
 
                     const json = {
@@ -892,9 +892,9 @@ describe("Deserializing", function () {
                     });
 
                     class Test {
-                        @deserializeAsJson(true) value0 : string;
-                        @deserializeAsJson(true) value1 : boolean;
-                        @deserializeAsJson(true) value2 : number;
+                        @deserializeAsJson(true) value0: string;
+                        @deserializeAsJson(true) value1: boolean;
+                        @deserializeAsJson(true) value2: number;
                     }
 
                     const json = {
@@ -933,14 +933,14 @@ describe("Deserializing", function () {
 
     describe("DeserializeUsing", function () {
 
-        function runTests(blockName : string, instantiationMethod : InstantiationMethod, deserializeAs : any, deserializeUsing : any, makeTarget : boolean) {
+        function runTests(blockName: string, instantiationMethod: InstantiationMethod, deserializeAs: any, deserializeUsing: any, makeTarget: boolean) {
 
             it("uses the provided function", function () {
-                function x(value : any) { return 1; }
+                function x(value: any) { return 1; }
 
                 class Test {
-                    @deserializeUsing(x) value : number = 10;
-                    @autoserializeUsing({ Serialize: x, Deserialize: x }) value1 : string;
+                    @deserializeUsing(x) value: number = 10;
+                    @autoserializeUsing({ Serialize: x, Deserialize: x }) value1: string;
                 }
 
                 const json = {
@@ -971,10 +971,10 @@ describe("Deserializing", function () {
 
             class Test {
 
-                @deserializeAs(Number) value : number = 1;
-                something : string;
+                @deserializeAs(Number) value: number = 1;
+                something: string;
 
-                static onDeserialized(json : JsonObject, instance : Test) {
+                static onDeserialized(json: JsonObject, instance: Test) {
                     instance.something = "here";
                 }
 
@@ -993,10 +993,10 @@ describe("Deserializing", function () {
 
             class Test {
 
-                @deserializeAs(Number) value : number = 1;
-                something : string;
+                @deserializeAs(Number) value: number = 1;
+                something: string;
 
-                static onDeserialized(json : JsonObject, instance : Test) {
+                static onDeserialized(json: JsonObject, instance: Test) {
                     const retn = new Test();
                     retn.value = 300;
                     retn.something = "here";
@@ -1015,72 +1015,72 @@ describe("Deserializing", function () {
 
     });
 
-	describe("InstantiationMethod", function () {
+    describe("InstantiationMethod", function () {
 
-		it("New", function () {
+        it("New", function () {
 
-			class Test {
+            class Test {
 
-				constructed : boolean = false;
+                constructed: boolean = false;
 
-				constructor() {
-					this.constructed = true;
-				}
+                constructor() {
+                    this.constructed = true;
+                }
 
-			}
+            }
 
-			const json = {};
-			const instance = Deserialize(json, Test, null, InstantiationMethod.New);
-			expect(instance).toEqual({
-				constructed: true
-			});
+            const json = {};
+            const instance = Deserialize(json, Test, null, InstantiationMethod.New);
+            expect(instance).toEqual({
+                constructed: true
+            });
 
-		});
+        });
 
-		it("ObjectCreate", function () {
+        it("ObjectCreate", function () {
 
-			class Test {
+            class Test {
 
-				constructed : boolean;
+                constructed: boolean;
 
-				constructor() {
-					this.constructed = true;
-				}
+                constructor() {
+                    this.constructed = true;
+                }
 
-			}
+            }
 
-			const json = {};
-			const instance = Deserialize(json, Test, null, InstantiationMethod.ObjectCreate);
-			expect(instance.constructed).toBeUndefined();
+            const json = {};
+            const instance = Deserialize(json, Test, null, InstantiationMethod.ObjectCreate);
+            expect(instance.constructed).toBeUndefined();
 
-		});
+        });
 
-		it("None", function () {
+        it("None", function () {
 
-			class Test {
-			}
+            class Test {
+            }
 
-			const json = {};
-			const instance = Deserialize(json, Test, null, InstantiationMethod.None);
-			expect(typeof instance).toEqual('object');
-			expect(instance instanceof Test).toEqual(false);
-		});
+            const json = {};
+            const instance = Deserialize(json, Test, null, InstantiationMethod.None);
+            expect(typeof instance).toEqual('object');
+            expect(instance instanceof Test).toEqual(false);
+        });
 
-		it("SetDefaultInstantiationMethod", function () {
-			SetDefaultInstantiationMethod(InstantiationMethod.None);
+        it("SetDefaultInstantiationMethod", function () {
+            SetDefaultInstantiationMethod(InstantiationMethod.None);
 
-			class Test {
-			}
+            class Test {
+            }
 
-			const json = {};
-			const instance = Deserialize(json, Test, null, InstantiationMethod.None);
+            const json = {};
+            const instance = Deserialize(json, Test, null, InstantiationMethod.None);
 
-			SetDefaultInstantiationMethod(null); // Reset.
+            SetDefaultInstantiationMethod(null); // Reset.
 
-			expect(typeof instance).toEqual('object');
-			expect(instance instanceof Test).toEqual(false);
-		});
+            expect(typeof instance).toEqual('object');
+            expect(instance instanceof Test).toEqual(false);
+        });
 
-	});
+    });
 
 });
