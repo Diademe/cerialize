@@ -1,8 +1,10 @@
 node_modules
 .idea
 dist
-spec/spec
-spec/src
 .gulp***
 gulp-**
 coverage
+/dcerialize.njsproj
+/bin
+/obj
+/app.ts
