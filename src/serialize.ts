@@ -1,22 +1,22 @@
-import {Indexable, isPrimitiveType, JsonObject, JsonType, SerializablePrimitiveType, SerializableType} from "./util";
-import {MetaData, MetaDataFlag} from "./meta_data";
+import { Indexable, isPrimitiveType, JsonObject, JsonType, SerializablePrimitiveType, SerializableType } from "./util";
+import { MetaData, MetaDataFlag } from "./meta_data";
 
-export function SerializeMap<T>(source : T, type : SerializableType<T>) : Indexable<JsonType> {
-    const target : Indexable<JsonType> = {};
+export function SerializeMap<T>(source: T, type: SerializableType<T>): Indexable<JsonType> {
+    const target: Indexable<JsonType> = {};
     const keys = Object.keys(source);
 
     for (let i = 0; i < keys.length; i++) {
         const key = keys[i];
         const value = (source as any)[key];
-        if(value !== void 0) {
-          target[MetaData.serializeKeyTransform(key)] = Serialize(value, type);
+        if (value !== void 0) {
+            target[MetaData.serializeKeyTransform(key)] = Serialize(value, type);
         }
     }
 
     return target;
 }
 
-export function SerializeArray<T>(source : Array<T>, type : SerializableType<T>) : Array<JsonType> {
+export function SerializeArray<T>(source: Array<T>, type: SerializableType<T>): Array<JsonType> {
     const retn = new Array<JsonType>(source.length);
     for (let i = 0; i < source.length; i++) {
         retn[i] = Serialize(source[i], type);
@@ -24,7 +24,7 @@ export function SerializeArray<T>(source : Array<T>, type : SerializableType<T>)
     return retn;
 }
 
-export function SerializePrimitive<T>(source : SerializablePrimitiveType, type : SerializablePrimitiveType) : JsonType {
+export function SerializePrimitive<T>(source: SerializablePrimitiveType, type: SerializablePrimitiveType): JsonType {
 
     if (source === null || source === void 0) {
         return null;
@@ -48,7 +48,7 @@ export function SerializePrimitive<T>(source : SerializablePrimitiveType, type :
 
 }
 
-export function SerializeJSON(source : any, transformKeys = true) : JsonType {
+export function SerializeJSON(source: any, transformKeys = true): JsonType {
     if (source === null || source === void 0) return null;
 
     if (Array.isArray(source)) {
@@ -67,14 +67,14 @@ export function SerializeJSON(source : any, transformKeys = true) : JsonType {
             return source.toString();
         }
         else {
-            const retn : Indexable<JsonType> = {};
+            const retn: Indexable<JsonType> = {};
             const keys = Object.keys(source);
             for (let i = 0; i < keys.length; i++) {
                 const key = keys[i];
                 const value = source[key];
-                if(value !== void 0) {
-                  const retnKey = transformKeys ? MetaData.serializeKeyTransform(key) : key;
-                  retn[retnKey] = SerializeJSON(value, transformKeys);
+                if (value !== void 0) {
+                    const retnKey = transformKeys ? MetaData.serializeKeyTransform(key) : key;
+                    retn[retnKey] = SerializeJSON(value, transformKeys);
                 }
             }
             return retn;
@@ -88,7 +88,7 @@ export function SerializeJSON(source : any, transformKeys = true) : JsonType {
     return source;
 }
 
-export function Serialize<T>(instance : T, type : SerializableType<T>) : JsonObject | null {
+export function Serialize<T>(instance: T, type: SerializableType<T>): JsonObject | null {
 
     if (instance === void 0 || instance === null) {
         return null;
@@ -106,7 +106,7 @@ export function Serialize<T>(instance : T, type : SerializableType<T>) : JsonObj
         }
     }
 
-    const target : Indexable<JsonType> = {};
+    const target: Indexable<JsonType> = {};
 
     for (let i = 0; i < metadataList.length; i++) {
         const metadata = metadataList[i];

@@ -1,8 +1,8 @@
-import {MetaData, MetaDataFlag} from "./meta_data";
-import {IConstructable, isPrimitiveType, SerializableType, SerializeFn, setBitConditionally, ISerializer} from "./util";
+import { MetaData, MetaDataFlag } from "./meta_data";
+import { IConstructable, isPrimitiveType, SerializableType, SerializeFn, setBitConditionally, ISerializer } from "./util";
 
-export function serializeUsing(serializer : SerializeFn, keyName? : string) {
-    return function (target : IConstructable, actualKeyName : string) : void {
+export function serializeUsing(serializer: SerializeFn, keyName?: string) {
+    return function (target: IConstructable, actualKeyName: string): void {
         const metadata = MetaData.getMetaData(target.constructor, actualKeyName);
         metadata.serializedKey = (keyName) ? keyName : actualKeyName;
         metadata.serializedType = serializer as any;
@@ -10,8 +10,8 @@ export function serializeUsing(serializer : SerializeFn, keyName? : string) {
     };
 }
 
-export function serializeAs(type : SerializableType<any>, keyName? : string) {
-    return function (target : IConstructable, actualKeyName : string) : void {
+export function serializeAs(type: SerializableType<any>, keyName?: string) {
+    return function (target: IConstructable, actualKeyName: string): void {
         const metadata = MetaData.getMetaData(target.constructor, actualKeyName);
         metadata.serializedKey = (keyName) ? keyName : actualKeyName;
         metadata.serializedType = type;
@@ -20,8 +20,8 @@ export function serializeAs(type : SerializableType<any>, keyName? : string) {
     };
 }
 
-export function serializeAsArray<T>(type : SerializableType<T>, keyName? : string) {
-    return function (target : any, actualKeyName : string) : any {
+export function serializeAsArray<T>(type: SerializableType<T>, keyName?: string) {
+    return function (target: any, actualKeyName: string): any {
         const metadata = MetaData.getMetaData(target.constructor, actualKeyName);
         metadata.serializedKey = (keyName) ? keyName : actualKeyName;
         metadata.serializedType = type;
@@ -30,8 +30,8 @@ export function serializeAsArray<T>(type : SerializableType<T>, keyName? : strin
     };
 }
 
-export function serializeAsMap<T>(type : SerializableType<T>, keyName? : string) {
-    return function (target : any, actualKeyName : string) : any {
+export function serializeAsMap<T>(type: SerializableType<T>, keyName?: string) {
+    return function (target: any, actualKeyName: string): any {
         const metadata = MetaData.getMetaData(target.constructor, actualKeyName);
         metadata.serializedKey = (keyName) ? keyName : actualKeyName;
         metadata.serializedType = type;
@@ -40,8 +40,8 @@ export function serializeAsMap<T>(type : SerializableType<T>, keyName? : string)
     };
 }
 
-export function serializeAsJson(keyNameOrTransformKeys? : boolean | string, transformKeys = true) {
-    return function (target : IConstructable, actualKeyName : string) : void {
+export function serializeAsJson(keyNameOrTransformKeys?: boolean | string, transformKeys = true) {
+    return function (target: IConstructable, actualKeyName: string): void {
         const metadata = MetaData.getMetaData(target.constructor, actualKeyName);
         metadata.serializedKey = (typeof keyNameOrTransformKeys === "string") ? keyNameOrTransformKeys : actualKeyName;
         metadata.flags |= (MetaDataFlag.SerializeJSON);
@@ -54,8 +54,8 @@ export function serializeAsJson(keyNameOrTransformKeys? : boolean | string, tran
     };
 }
 
-export function deserializeUsing(serializer : SerializeFn, keyName? : string) {
-    return function (target : IConstructable, actualKeyName : string) : void {
+export function deserializeUsing(serializer: SerializeFn, keyName?: string) {
+    return function (target: IConstructable, actualKeyName: string): void {
         const metadata = MetaData.getMetaData(target.constructor, actualKeyName);
         metadata.deserializedKey = (keyName) ? keyName : actualKeyName;
         metadata.deserializedType = serializer as any;
@@ -63,8 +63,8 @@ export function deserializeUsing(serializer : SerializeFn, keyName? : string) {
     };
 }
 
-export function deserializeAs(type : SerializableType<any>, keyName? : string) {
-    return function (target : IConstructable, actualKeyName : string) : void {
+export function deserializeAs(type: SerializableType<any>, keyName?: string) {
+    return function (target: IConstructable, actualKeyName: string): void {
         const metadata = MetaData.getMetaData(target.constructor, actualKeyName);
         metadata.deserializedKey = (keyName) ? keyName : actualKeyName;
         metadata.deserializedType = type;
@@ -73,8 +73,8 @@ export function deserializeAs(type : SerializableType<any>, keyName? : string) {
     };
 }
 
-export function deserializeAsArray(type : SerializableType<any>, keyName? : string) {
-    return function (target : IConstructable, actualKeyName : string) : void {
+export function deserializeAsArray(type: SerializableType<any>, keyName?: string) {
+    return function (target: IConstructable, actualKeyName: string): void {
         const metadata = MetaData.getMetaData(target.constructor, actualKeyName);
         metadata.deserializedKey = (keyName) ? keyName : actualKeyName;
         metadata.deserializedType = type;
@@ -83,8 +83,8 @@ export function deserializeAsArray(type : SerializableType<any>, keyName? : stri
     };
 }
 
-export function deserializeAsMap(type : SerializableType<any>, keyName? : string) {
-    return function (target : IConstructable, actualKeyName : string) : void {
+export function deserializeAsMap(type: SerializableType<any>, keyName?: string) {
+    return function (target: IConstructable, actualKeyName: string): void {
         const metadata = MetaData.getMetaData(target.constructor, actualKeyName);
         metadata.deserializedKey = (keyName) ? keyName : actualKeyName;
         metadata.deserializedType = type;
@@ -93,23 +93,23 @@ export function deserializeAsMap(type : SerializableType<any>, keyName? : string
     };
 }
 
-export function deserializeAsJson(keyNameOrTransformKeys? : boolean | string, transformKeys = true) {
-  return function (target : IConstructable, actualKeyName : string) : void {
-    const metadata = MetaData.getMetaData(target.constructor, actualKeyName);
-    metadata.deserializedKey = (typeof keyNameOrTransformKeys === "string") ? keyNameOrTransformKeys : actualKeyName;
-    metadata.flags |= (MetaDataFlag.DeserializeJSON);
-    const shouldTransformKeys = typeof keyNameOrTransformKeys === "boolean" ? keyNameOrTransformKeys : transformKeys;
-    metadata.flags = setBitConditionally(
-      metadata.flags,
-      MetaDataFlag.DeserializeJSONTransformKeys,
-      shouldTransformKeys
-    );
-  };
+export function deserializeAsJson(keyNameOrTransformKeys?: boolean | string, transformKeys = true) {
+    return function (target: IConstructable, actualKeyName: string): void {
+        const metadata = MetaData.getMetaData(target.constructor, actualKeyName);
+        metadata.deserializedKey = (typeof keyNameOrTransformKeys === "string") ? keyNameOrTransformKeys : actualKeyName;
+        metadata.flags |= (MetaDataFlag.DeserializeJSON);
+        const shouldTransformKeys = typeof keyNameOrTransformKeys === "boolean" ? keyNameOrTransformKeys : transformKeys;
+        metadata.flags = setBitConditionally(
+            metadata.flags,
+            MetaDataFlag.DeserializeJSONTransformKeys,
+            shouldTransformKeys
+        );
+    };
 }
 
 
-export function autoserializeUsing(serializer : ISerializer<any>, keyName? : string) {
-    return function (target : IConstructable, actualKeyName : string) : void {
+export function autoserializeUsing(serializer: ISerializer<any>, keyName?: string) {
+    return function (target: IConstructable, actualKeyName: string): void {
         const metadata = MetaData.getMetaData(target.constructor, actualKeyName);
         const key = (keyName) ? keyName : actualKeyName;
         metadata.serializedKey = key;
@@ -120,8 +120,8 @@ export function autoserializeUsing(serializer : ISerializer<any>, keyName? : str
     };
 }
 
-export function autoserializeAs(type : SerializableType<any>, keyName? : string) {
-    return function (target : IConstructable, actualKeyName : string) : void {
+export function autoserializeAs(type: SerializableType<any>, keyName?: string) {
+    return function (target: IConstructable, actualKeyName: string): void {
         const metadata = MetaData.getMetaData(target.constructor, actualKeyName);
         const key = (keyName) ? keyName : actualKeyName;
         metadata.deserializedKey = key;
@@ -133,8 +133,8 @@ export function autoserializeAs(type : SerializableType<any>, keyName? : string)
     };
 }
 
-export function autoserializeAsArray(type : SerializableType<any>, keyName? : string) {
-    return function (target : IConstructable, actualKeyName : string) : void {
+export function autoserializeAsArray(type: SerializableType<any>, keyName?: string) {
+    return function (target: IConstructable, actualKeyName: string): void {
         const metadata = MetaData.getMetaData(target.constructor, actualKeyName);
         const key = (keyName) ? keyName : actualKeyName;
         metadata.deserializedKey = key;
@@ -146,8 +146,8 @@ export function autoserializeAsArray(type : SerializableType<any>, keyName? : st
     };
 }
 
-export function autoserializeAsMap(type : SerializableType<any>, keyName? : string) {
-    return function (target : IConstructable, actualKeyName : string) : void {
+export function autoserializeAsMap(type: SerializableType<any>, keyName?: string) {
+    return function (target: IConstructable, actualKeyName: string): void {
         const metadata = MetaData.getMetaData(target.constructor, actualKeyName);
         const key = (keyName) ? keyName : actualKeyName;
         metadata.deserializedKey = key;
@@ -159,8 +159,8 @@ export function autoserializeAsMap(type : SerializableType<any>, keyName? : stri
     };
 }
 
-export function autoserializeAsJson(keyNameOrTransformKeys? : boolean|string, transformKeys = true) {
-    return function (target : IConstructable, actualKeyName : string) : void {
+export function autoserializeAsJson(keyNameOrTransformKeys?: boolean | string, transformKeys = true) {
+    return function (target: IConstructable, actualKeyName: string): void {
         const metadata = MetaData.getMetaData(target.constructor, actualKeyName);
         const key = (typeof keyNameOrTransformKeys === "string") ? keyNameOrTransformKeys : actualKeyName;
         const shouldTransformKeys = typeof keyNameOrTransformKeys === "boolean" ? keyNameOrTransformKeys : transformKeys;
@@ -171,8 +171,8 @@ export function autoserializeAsJson(keyNameOrTransformKeys? : boolean|string, tr
     };
 }
 
-export function inheritSerialization(parentType : IConstructable) {
-    return function (childType : Function) {
+export function inheritSerialization(parentType: IConstructable) {
+    return function (childType: Function) {
         MetaData.inheritMetaData(parentType, childType);
     };
 }
