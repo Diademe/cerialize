@@ -13,6 +13,7 @@ import {
     SetDefaultInstantiationMethod
 } from "../src";
 import { InstantiationMethod, Indexable, JsonObject } from "../src/util";
+import { SetRefCycleDetection, refClean } from "../src/index";
 
 function expectInstance(instance: any, type: any, instantiationMethod: InstantiationMethod) {
     switch (instantiationMethod) {
@@ -1079,6 +1080,75 @@ describe("Deserializing", function () {
 
             expect(typeof instance).toEqual('object');
             expect(instance instanceof Test).toEqual(false);
+        });
+
+    });
+
+    describe("Deserialize References and Cycle", function () {
+
+        it("References", function () {
+
+            class Test {
+                @deserializeAsJson() value: number = 10;
+            }
+
+            class Test0 {
+                @deserializeAsJson() value0: Test;
+                @deserializeAsJson() value1: Test;
+            }
+            const json = {
+                "$id": 1,
+                value0: { "$id": 2, value: 1 },
+                value1: { "$ref": 2 }
+            };
+            SetRefCycleDetection(true);
+            const instance = Deserialize(json, Test0);
+            refClean();
+            SetRefCycleDetection(false);
+            expect(instance.value0).toBe(instance.value1);
+        });
+
+        it("Cycle length 3", function () {
+
+            class Test {
+                @deserializeAsJson() next: Test;
+            }
+            const json = {
+                "$id": 1,
+                next: {
+                    "$id": 2,
+                    next: {
+                        "$id": 3,
+                        next: {
+                            "$ref": 1
+                        }
+                    }
+                }
+            };
+            SetRefCycleDetection(true);
+            const instance = Deserialize(json, Test);
+            refClean();
+            SetRefCycleDetection(false);
+            expect(instance).toBe(instance.next.next.next);
+        });
+
+        it("Cycle length 0", function () {
+
+            class Test {
+                @deserializeAsJson() next: Test;
+            }
+            const json = {
+                "$id": 1,
+
+                next: {
+                    "$ref": 1
+                }
+            };
+            SetRefCycleDetection(true);
+            const instance = Deserialize(json, Test);
+            refClean();
+            SetRefCycleDetection(false);
+            expect(instance).toBe(instance.next.next.next);
         });
 
     });
