@@ -12,7 +12,7 @@ import {
 } from "../src/annotations";
 import { Serialize, SerializeJSON } from "../src/serialize";
 import { Indexable, JsonObject } from "../src/util";
-import { SetSerializeKeyTransform } from "../src/index";
+import { SetSerializeKeyTransform, SetRefCycleDetection, refClean } from "../src/index";
 
 describe("Serializing", function () {
 
@@ -840,6 +840,57 @@ describe("Serializing", function () {
                 v: "hello"
             });
 
+        });
+
+    });
+
+    describe("ReferanceCycle", function () {
+
+        it("Cycle length 3", function () {
+            class Test {
+                @serializeAs(Test) next: Test;
+            }
+
+            const s = new Test();
+            s.next = new Test();
+            s.next.next = new Test();
+            s.next.next.next = s;
+            SetRefCycleDetection(true);
+            const json = Serialize(s, Test);
+            refClean();
+            SetRefCycleDetection(false);
+            expect(json).toEqual({
+                "$id": 1,
+                next: {
+                    "$id": 2,
+                    next: {
+                        "$id": 3,
+                        next: {
+                            "$ref": 1
+                        }
+                    }
+                }
+            });
+
+        });
+
+        it("Cycle length 0", function () {
+            class Test {
+                @serializeAs(Test) next: Test;
+            }
+
+            const s = new Test();
+            s.next = s;
+            SetRefCycleDetection(true);
+            const json = Serialize(s, Test);
+            refClean();
+            SetRefCycleDetection(false);
+            expect(json).toEqual({
+                "$id": 1,
+                next: {
+                    "$ref": 1,
+                }
+            });
         });
 
     });
