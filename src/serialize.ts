@@ -1,9 +1,14 @@
 import { Indexable, isPrimitiveType, JsonObject, JsonType, SerializablePrimitiveType, SerializableType } from "./util";
 import { MetaData, MetaDataFlag } from "./meta_data";
+import { cycleBreaking } from "./ref_cycle";
 
 export function SerializeMap<T>(source: T, type: SerializableType<T>): Indexable<JsonType> {
     const target: Indexable<JsonType> = {};
     const keys = Object.keys(source);
+
+    if (cycleBreaking(target, source)) {
+        return target;
+    }
 
     for (let i = 0; i < keys.length; i++) {
         const key = keys[i];
@@ -17,6 +22,10 @@ export function SerializeMap<T>(source: T, type: SerializableType<T>): Indexable
 }
 
 export function SerializeArray<T>(source: Array<T>, type: SerializableType<T>): Array<JsonType> {
+    var json: any = {};
+    if (cycleBreaking(json, source)) {
+        return json;
+    }
     const retn = new Array<JsonType>(source.length);
     for (let i = 0; i < source.length; i++) {
         retn[i] = Serialize(source[i], type);
@@ -51,6 +60,11 @@ export function SerializePrimitive<T>(source: SerializablePrimitiveType, type: S
 export function SerializeJSON(source: any, transformKeys = true): JsonType {
     if (source === null || source === void 0) return null;
 
+    var json: any = {};
+    if (cycleBreaking(json, source)) {
+        return json;
+    }
+
     if (Array.isArray(source)) {
         const array = new Array<any>(source.length);
         for (let i = 0; i < source.length; i++) {
@@ -68,6 +82,9 @@ export function SerializeJSON(source: any, transformKeys = true): JsonType {
         }
         else {
             const retn: Indexable<JsonType> = {};
+            if (cycleBreaking(retn, source)) {
+                return retn;
+            }
             const keys = Object.keys(source);
             for (let i = 0; i < keys.length; i++) {
                 const key = keys[i];
@@ -107,6 +124,9 @@ export function Serialize<T>(instance: T, type: SerializableType<T>): JsonObject
     }
 
     const target: Indexable<JsonType> = {};
+    if (cycleBreaking(target, instance)) {
+        return target;
+    }
 
     for (let i = 0; i < metadataList.length; i++) {
         const metadata = metadataList[i];

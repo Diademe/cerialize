@@ -128,4 +128,5 @@ export class MetaData {
 
     public static deserializeInstantationMethod = InstantiationMethod.New;
 
+    public static RefCycleDetection = false;
 }
