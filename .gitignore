@@ -1,10 +1,10 @@
 node_modules
 .idea
-dist
-.gulp***
-gulp-**
 coverage
 /dcerialize.njsproj
 /bin
 /obj
 /app.ts
+/dist
+*.js
+*.map
