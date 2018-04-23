@@ -1,4 +1,48 @@
 ﻿import { MetaData } from "./meta_data";
+//throw an exeption if dic doesn't have key
+function lousyGet(dic: any, key: any) {
+    var res = dic.get(key);
+    if (res == undefined) {
+        throw new Error(`The dictionnary doesn't have the key ${key}`);
+    }
+    else
+        return res;
+}
+
+export class TowWayDic {
+    private type2string: Map<string, string>;
+    private string2type: Map<string, any>;
+    private init() {
+        this.type2string = new Map<string, string>();
+        this.string2type = new Map<string, any>();
+    }
+    public constructor() {
+        this.init();
+    }
+    public set(t: any, s: string) {
+        this.type2string.set(Object.getPrototypeOf(t).name, s);
+        this.string2type.set(s, t);
+    }
+    private static typeToString(instance: any) {
+        return Object.getPrototypeOf(Object.getPrototypeOf(instance).constructor).name;
+    }
+    public getString(instance: any) {
+        return lousyGet(this.type2string, TowWayDic.typeToString(instance));
+    }
+    public hasString(instance: any) {
+        return this.type2string.has(TowWayDic.typeToString(instance));
+    }
+    public getType(s: string) {
+        return lousyGet(this.string2type, s);
+    }
+    public hasType(s: string) {
+        return this.string2type.has(s);
+    }
+    public clean() {
+        this.init();
+    }
+}
+
 
 //cycle references
 class Cycle {

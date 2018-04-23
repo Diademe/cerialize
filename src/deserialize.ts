@@ -3,6 +3,7 @@ import {
     SerializableType, InstantiationMethod
 } from "./util";
 import { MetaData, MetaDataFlag } from "./meta_data";
+import { referenceHandeling } from "./ref_cycle";
 
 function _DeserializeMap<T>(data: JsonObject, type: SerializableType<T>, target?: Indexable<T>, instantiationMethod?: InstantiationMethod): Indexable<T> {
     if (typeof data !== "object") {
@@ -39,8 +40,13 @@ function _DeserializeArray<T>(data: JsonArray, type: SerializableType<T>, target
     if (!Array.isArray(data)) {
         throw new Error("Expected input to be an array but received: " + typeof data);
     }
+    var tmp = { a: [] as Array<T> };
+    if (referenceHandeling(data, tmp)) {
+        return tmp.a;
+    }
 
-    if (!Array.isArray(target)) target = [] as Array<T>;
+    //if (!Array.isArray(target)) target = tmp.a as Array<T>;
+    target = tmp.a;
 
     target.length = data.length;
     for (let i = 0; i < data.length; i++) {
@@ -82,6 +88,12 @@ function DeserializePrimitive(data: any, type: SerializablePrimitiveType, target
 
 export function DeserializeJSON<T extends JsonType>(data: JsonType, transformKeys = true, target?: JsonType): JsonType {
     // if (data === null || data === void 0) {}
+    var tmp = { a: {} };//hack to passe argument by ref
+    if (referenceHandeling(data, tmp)) {
+        return tmp.a;
+    }
+    target = tmp.a;
+
 
     if (Array.isArray(data)) {
 
@@ -128,7 +140,7 @@ function _Deserialize<T extends Indexable>(data: JsonObject, type: SerializableT
             if (isPrimitiveType(type)) {
                 return DeserializePrimitive(data, type as any, target as any);
             }
-
+            var tmp1 = { a: {} as T };
             switch (instantiationMethod) {
                 case InstantiationMethod.New:
                     return new type();
@@ -140,11 +152,15 @@ function _Deserialize<T extends Indexable>(data: JsonObject, type: SerializableT
                     return {} as T;
             }
         }
-
         return null;
     }
 
     target = getTarget(type as any, target, instantiationMethod) as T;
+    var tmp = { a: target };//hack to passe argument by ref
+    if (referenceHandeling(data, tmp)) {
+        return tmp.a;
+    }
+    target = tmp.a;
 
     for (let i = 0; i < metadataList.length; i++) {
         const metadata = metadataList[i];
