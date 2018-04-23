@@ -8,3 +8,5 @@ coverage
 /dist
 *.js
 *.map
+/dcerialize.code-workspace
+/.vscode/launch.json
