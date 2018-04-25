@@ -1,4 +1,5 @@
 import {
+    serializeBitMask,
     autoserializeAs,
     autoserializeAsArray,
     autoserializeAsJson,
@@ -10,7 +11,7 @@ import {
     serializeAsMap,
     serializeUsing
 } from "../src/annotations";
-import { Serialize, SerializeJSON } from "../src/serialize";
+import { Serialize, SerializeJSON, SelectiveSerialization } from "../src/serialize";
 import { Indexable, JsonObject } from "../src/util";
 import { SetSerializeKeyTransform, SetRefCycleDetection, refClean } from "../src/index";
 
@@ -891,6 +892,48 @@ describe("Serializing", function () {
                     "$ref": 1,
                 }
             });
+        });
+
+        
+
+    });
+
+    describe("Selective serialisation", function () {
+
+        it("Bitmask", function () {
+            class Test {
+                @serializeBitMask(1)
+                @serializeAs(Number)
+                v1: number = 1;
+                @serializeBitMask(3)
+                @serializeAs(Number)
+                v2: number = 2;
+                @serializeAs(Number)
+                @serializeBitMask(2)
+                v3: number = 3;
+            }
+
+            const s = new Test();
+            SelectiveSerialization(1)
+            const json1 = Serialize(s, Test);
+            expect(json1).toEqual({
+                v1: 1,
+                v2: 2
+            });
+            SelectiveSerialization(2)
+            const json2 = Serialize(s, Test);
+            expect(json2).toEqual({
+                v2: 2,
+                v3: 3
+            });
+            SelectiveSerialization(3)
+            const json3 = Serialize(s, Test);
+            expect(json3).toEqual({
+                v1: 1,
+                v2: 2,
+                v3: 3
+            });
+
         });
 
     });
