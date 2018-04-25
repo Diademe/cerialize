@@ -1,6 +1,14 @@
 import { MetaData, MetaDataFlag } from "./meta_data";
 import { IConstructable, isPrimitiveType, SerializableType, SerializeFn, setBitConditionally, ISerializer } from "./util";
 
+//set a bitmask B. during compilation, if B & x, then the member will be serialized
+export function serializeBitMask(bitMask: number): any {
+    return function (target: any, actualKeyName: string): any {
+        const metadata = MetaData.getMetaData(target.constructor, actualKeyName);
+        metadata.bitMaskSerialize = bitMask;
+    };
+}
+
 export function serializeUsing(serializer: SerializeFn, keyName?: string) {
     return function (target: IConstructable, actualKeyName: string): void {
         const metadata = MetaData.getMetaData(target.constructor, actualKeyName);

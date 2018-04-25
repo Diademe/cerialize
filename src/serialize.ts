@@ -2,6 +2,12 @@ import { Indexable, isPrimitiveType, JsonObject, JsonType, SerializablePrimitive
 import { MetaData, MetaDataFlag } from "./meta_data";
 import { cycleBreaking } from "./ref_cycle";
 
+var serializeBitMask_ = Number.MAX_SAFE_INTEGER;
+
+export function SelectiveSerialization(bitMask: number = Number.MAX_SAFE_INTEGER) {
+    serializeBitMask_ = bitMask;
+}
+
 export function SerializeMap<T>(source: T, type: SerializableType<T>): Indexable<JsonType> {
     const target: Indexable<JsonType> = {};
     const keys = Object.keys(source);
@@ -130,6 +136,8 @@ export function Serialize<T>(instance: T, type: SerializableType<T>): JsonObject
 
     for (let i = 0; i < metadataList.length; i++) {
         const metadata = metadataList[i];
+
+        if (!(metadata.bitMaskSerialize & serializeBitMask_)) continue;
 
         if (metadata.serializedKey === null) continue;
 

@@ -38,6 +38,7 @@ export class MetaData {
     public serializedType: SerializableType<any>; //the type to use when serializing this property
     public deserializedType: SerializableType<any>;  //the type to use when deserializing this property
     public flags: MetaDataFlag;
+    public bitMaskSerialize: number;
 
     constructor(keyName: string) {
         this.keyName = keyName;
@@ -46,6 +47,7 @@ export class MetaData {
         this.deserializedType = Function;
         this.serializedType = Function;
         this.flags = 0;
+        this.bitMaskSerialize = Number.MAX_SAFE_INTEGER;
     }
 
     public getSerializedKey(): string {
