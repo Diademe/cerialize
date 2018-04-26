@@ -80,6 +80,7 @@ export class MetaData {
         metadata.serializedType = data.serializedType;
         metadata.deserializedType = data.deserializedType;
         metadata.flags = data.flags;
+        metadata.bitMaskSerialize = data.bitMaskSerialize;
         return metadata;
     }
 
