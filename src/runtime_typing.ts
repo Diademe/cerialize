@@ -20,7 +20,7 @@ export class TypeStringDictionary {
     public constructor() {
         this.init();
     }
-    public setTypeString(t: IConstructable, s: string) : void {
+    public setTypeString(t: any, s: string) : void {
         this.type2string.set(t, s);
         this.string2type.set(s, t);
     }
