@@ -1018,4 +1018,26 @@ describe("Serializing", function () {
 
     });
 
+    describe("Accessor", function () {
+
+        it("accessor get & set", function () {
+            class Drapeau {
+                b_: number;
+                constructor(n: number) {
+                    this.b_ = n;
+                }
+                @serializeAs(Number, "bprime")
+                public get b() {
+                    return this.b_ + 1;
+                }
+            }
+
+            const d = new Drapeau(2);
+            const json = Serialize(d, Drapeau);
+            expect(json).toEqual({ "bprime" : 3 });
+
+        });
+
+    });
+
 });

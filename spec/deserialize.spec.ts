@@ -1277,4 +1277,29 @@ describe("Deserializing", function () {
 
     });
 
+    describe("Accessor", function () {
+
+        it("accessor get & set", function () {
+            class Drapeau {
+                b_: number;
+                constructor(n: number) {
+                    this.b_ = n;
+                }
+                @deserializeAs(Number, "bprime")
+                public get b() {
+                    return this.b_ + 1;
+                }
+                public set b(_b: number) {
+                    this.b_ = _b - 2;
+                }
+            }
+
+            const d = new Drapeau(2);
+            const json = Deserialize({ "bprime" : 3 }, Drapeau);
+            expect(json.b).toEqual(2);
+
+        });
+
+    });
+
 });
