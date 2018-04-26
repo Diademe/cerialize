@@ -966,8 +966,8 @@ describe("Serializing", function () {
             TypesString.setTypeString(Test1, "my Test1 type");
             TypesString.setTypeString(Test2, "my Test2 type");
             TypesString.setTypeString(Test3, "my Test3 type");
-            TypesString.runtimeTyping = true;
             const json = SerializeArray(s, Test0);
+            TypesString.runtimeTyping = false;
             TypesString.resetDictionnary();
             expect(json).toEqual([
                 { "$type": "my Test0 type", "valueA": 0 },
@@ -1005,8 +1005,8 @@ describe("Serializing", function () {
             TypesString.setTypeString(Test1, "my Test1 type");
             TypesString.setTypeString(Test2, "my Test2 type");
             TypesString.setTypeString(Test3, "my Test3 type");
-            TypesString.runtimeTyping = true;
             const json = Serialize(s, Test3);
+            TypesString.runtimeTyping = false;
             TypesString.resetDictionnary();
             expect(json).toEqual({
                 "$type": "my Test3 type",
