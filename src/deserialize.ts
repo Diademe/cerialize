@@ -16,6 +16,12 @@ function _DeserializeMap<T>(data: JsonObject, type: SerializableType<T>, target?
         return null;
     }
 
+    var tmp = { a: {} as Indexable<T> };
+    if (referenceHandeling(data, tmp)) {
+        return tmp.a;
+    }
+    target = tmp.a;
+
     const keys = Object.keys(data);
     for (let i = 0; i < keys.length; i++) {
         const key = keys[i];
@@ -44,8 +50,6 @@ function _DeserializeArray<T>(data: JsonArray, type: SerializableType<T>, target
     if (referenceHandeling(data, tmp)) {
         return tmp.a;
     }
-
-    //if (!Array.isArray(target)) target = tmp.a as Array<T>;
     target = tmp.a;
 
     target.length = data.length;
@@ -87,7 +91,6 @@ function DeserializePrimitive(data: any, type: SerializablePrimitiveType, target
 }
 
 export function DeserializeJSON<T extends JsonType>(data: JsonType, transformKeys = true, target?: JsonType): JsonType {
-    // if (data === null || data === void 0) {}
     var tmp = { a: {} };//hack to passe argument by ref
     if (referenceHandeling(data, tmp)) {
         return tmp.a;
