@@ -9,11 +9,13 @@ import {
     serializeAsArray,
     serializeAsJson,
     serializeAsMap,
-    serializeUsing
+    serializeUsing,
+    inheritSerialization
 } from "../src/annotations";
-import { Serialize, SerializeJSON, SelectiveSerialization } from "../src/serialize";
+import { Serialize, SerializeJSON, SelectiveSerialization, SerializeArray } from "../src/serialize";
 import { Indexable, JsonObject } from "../src/util";
 import { SetSerializeKeyTransform, SetRefCycleDetection, refClean } from "../src/index";
+import TypesString from "../src/runtime_typing";
 
 describe("Serializing", function () {
 
@@ -892,9 +894,8 @@ describe("Serializing", function () {
                     "$ref": 1,
                 }
             });
-        });
 
-        
+        });
 
     });
 
@@ -932,6 +933,85 @@ describe("Serializing", function () {
                 v1: 1,
                 v2: 2,
                 v3: 3
+            });
+
+        });
+
+    });
+
+    describe("RuntimeTyping serialisation", function () {
+
+        it("Array", function () {
+            class Test0 {
+                @serializeAs(Number)
+                valueA: Number = 0;
+            }
+            class Test1 extends Test0 {
+                @serializeAs(Number)
+                valueB: Number = 1;
+            }
+            class Test2 extends Test1 {
+                @serializeAs(Number)
+                valueC: Number = 2;
+            }
+            class Test3 extends Test1 {
+                @serializeAs(Number)
+                valueD: Number = 3;
+            }
+
+            const s = Array<Test0>();
+            s.push(new Test0(), new Test1(), new Test2(), new Test3())
+            TypesString.runtimeTyping = true;
+            TypesString.setTypeString(Test0, "my Test0 type");
+            TypesString.setTypeString(Test1, "my Test1 type");
+            TypesString.setTypeString(Test2, "my Test2 type");
+            TypesString.setTypeString(Test3, "my Test3 type");
+            TypesString.runtimeTyping = true;
+            const json = SerializeArray(s, Test0);
+            TypesString.resetDictionnary();
+            expect(json).toEqual([
+                { "$type": "my Test0 type", "valueA": 0 },
+                { "$type": "my Test1 type", "valueB": 1 },
+                { "$type": "my Test2 type", "valueC": 2 },
+                { "$type": "my Test3 type", "valueD": 3 }
+            ]);
+
+        });
+
+        it("Object", function () {
+            class Test0 {
+                @serializeAs(Boolean)
+                valueA: boolean = true;
+            }
+            class Test1 {
+                @serializeAs(Boolean)
+                valueB: boolean = true;
+            }
+            @inheritSerialization(Test1)
+            class Test2 extends Test1 {
+            }
+            class Test3 {
+                @serializeAs(Object)
+                m1: Test0;
+                @serializeAs(Test2)
+                m2: Test1;
+            }
+
+            const s = new Test3();
+            s.m1 = new Test0();
+            s.m2 = new Test2();
+            TypesString.runtimeTyping = true;
+            TypesString.setTypeString(Test0, "my Test0 type");
+            TypesString.setTypeString(Test1, "my Test1 type");
+            TypesString.setTypeString(Test2, "my Test2 type");
+            TypesString.setTypeString(Test3, "my Test3 type");
+            TypesString.runtimeTyping = true;
+            const json = Serialize(s, Test3);
+            TypesString.resetDictionnary();
+            expect(json).toEqual({
+                "$type": "my Test3 type",
+                m1: { "$type": "my Test0 type", valueA: true },
+                m2: { "$type": "my Test2 type", valueB: true }
             });
 
         });
