@@ -17,7 +17,7 @@ import {
 import { Serialize, SerializeJSON, SelectiveSerialization, SerializeArray } from "../src/serialize";
 import { Indexable, JsonObject } from "../src/util";
 import { SetSerializeKeyTransform, SetRefCycleDetection, refClean } from "../src/index";
-import TypesString from "../src/runtime_typing";
+import { TypeString } from "../src/runtime_typing";
 
 describe("Serializing", function () {
 
@@ -963,14 +963,14 @@ describe("Serializing", function () {
 
             const s = Array<Test0>();
             s.push(new Test0(), new Test1(), new Test2(), new Test3())
-            TypesString.runtimeTyping = true;
-            TypesString.setTypeString(Test0, "my Test0 type");
-            TypesString.setTypeString(Test1, "my Test1 type");
-            TypesString.setTypeString(Test2, "my Test2 type");
-            TypesString.setTypeString(Test3, "my Test3 type");
+            TypeString.runtimeTyping = true;
+            TypeString.setTypeString(Test0, "my Test0 type");
+            TypeString.setTypeString(Test1, "my Test1 type");
+            TypeString.setTypeString(Test2, "my Test2 type");
+            TypeString.setTypeString(Test3, "my Test3 type");
             const json = SerializeArray(s, Test0);
-            TypesString.runtimeTyping = false;
-            TypesString.resetDictionnary();
+            TypeString.runtimeTyping = false;
+            TypeString.resetDictionnary();
             expect(json).toEqual([
                 { "$type": "my Test0 type", "valueA": 0 },
                 { "$type": "my Test1 type", "valueB": 1 },
@@ -1002,14 +1002,14 @@ describe("Serializing", function () {
             const s = new Test3();
             s.m1 = new Test0();
             s.m2 = new Test2();
-            TypesString.runtimeTyping = true;
-            TypesString.setTypeString(Test0, "my Test0 type");
-            TypesString.setTypeString(Test1, "my Test1 type");
-            TypesString.setTypeString(Test2, "my Test2 type");
-            TypesString.setTypeString(Test3, "my Test3 type");
+            TypeString.runtimeTyping = true;
+            TypeString.setTypeString(Test0, "my Test0 type");
+            TypeString.setTypeString(Test1, "my Test1 type");
+            TypeString.setTypeString(Test2, "my Test2 type");
+            TypeString.setTypeString(Test3, "my Test3 type");
             const json = Serialize(s, Test3);
-            TypesString.runtimeTyping = false;
-            TypesString.resetDictionnary();
+            TypeString.runtimeTyping = false;
+            TypeString.resetDictionnary();
             expect(json).toEqual({
                 "$type": "my Test3 type",
                 m1: { "$type": "my Test0 type", valueA: true },

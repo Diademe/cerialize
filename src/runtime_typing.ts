@@ -41,5 +41,5 @@ export class TypeStringDictionary {
     }
     public runtimeTyping = false;
 }
-var TypesString: TypeStringDictionary = new TypeStringDictionary();
-export default TypesString;
+var TypeString: TypeStringDictionary = new TypeStringDictionary();
+export { TypeString };

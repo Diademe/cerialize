@@ -1,7 +1,7 @@
 import { Indexable, isPrimitiveType, JsonObject, JsonType, SerializablePrimitiveType, SerializableType } from "./util";
 import { MetaData, MetaDataFlag } from "./meta_data";
 import { cycleBreaking } from "./ref_cycle";
-import TypesString from "./runtime_typing";
+import { TypeString } from "./runtime_typing";
 
 var serializeBitMask_ = Number.MAX_SAFE_INTEGER;
 
@@ -17,8 +17,8 @@ export function SerializeMap<T>(source: T, type: SerializableType<T>): Indexable
         return target;
     }
 
-    if (TypesString.runtimeTyping) {
-        target["$type"] = TypesString.getStringFromType(source.constructor);
+    if (TypeString.runtimeTyping) {
+        target["$type"] = TypeString.getStringFromType(source.constructor);
     }
 
     for (let i = 0; i < keys.length; i++) {
@@ -124,8 +124,8 @@ export function Serialize<T>(instance: T, type: SerializableType<T>): JsonObject
 
     const target: Indexable<JsonType> = {};
 
-    if (TypesString.runtimeTyping) {
-        target["$type"] = TypesString.getStringFromType(instance.constructor);
+    if (TypeString.runtimeTyping) {
+        target["$type"] = TypeString.getStringFromType(instance.constructor);
         type = instance.constructor as SerializableType<T>;
     }
 

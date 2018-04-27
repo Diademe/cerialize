@@ -4,7 +4,7 @@ import {
 } from "./util";
 import { MetaData, MetaDataFlag } from "./meta_data";
 import { referenceHandeling } from "./ref_cycle";
-import TypesString from "./runtime_typing";
+import { TypeString } from "./runtime_typing";
 
 function _DeserializeMap<T>(data: JsonObject, type: SerializableType<T>, target?: Indexable<T>, instantiationMethod?: InstantiationMethod): Indexable<T> {
     if (typeof data !== "object") {
@@ -137,8 +137,8 @@ export function DeserializeJSON<T extends JsonType>(data: JsonType, transformKey
 }
 
 function _Deserialize<T extends Indexable>(data: JsonObject, type: SerializableType<T>, target?: T, instantiationMethod?: InstantiationMethod): T | null {
-    if (TypesString.runtimeTyping) {
-        type = TypesString.getTypeFromString(data["$type"] as any) as SerializableType<T>;
+    if (TypeString.runtimeTyping) {
+        type = TypeString.getTypeFromString(data["$type"] as any) as SerializableType<T>;
     }
     
     const metadataList = MetaData.getMetaDataForType(type);
