@@ -1,5 +1,5 @@
 import { IConstructable } from "./util";
-
+export { TypeString };
 //throw an exeption if dic doesn't have key
 function lousyGet(dic:any, key:any) {
     var res = dic.get(key);
@@ -39,7 +39,13 @@ export class TypeStringDictionary {
     public resetDictionnary(): void{
         this.init();
     }
-    public runtimeTyping = false;
+    private runtimeTyping: boolean = false;
+    public setRuntimeTyping(rtt:boolean){
+        this.runtimeTyping = rtt;
+    }
+    public getRuntimeTyping():boolean{
+        return this.runtimeTyping;
+    }
+    
 }
 var TypeString: TypeStringDictionary = new TypeStringDictionary();
-export { TypeString };

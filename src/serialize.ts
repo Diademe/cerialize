@@ -17,7 +17,7 @@ export function SerializeMap<T>(source: T, type: SerializableType<T>): Indexable
         return target;
     }
 
-    if (TypeString.runtimeTyping) {
+    if (TypeString.getRuntimeTyping()) {
         target["$type"] = TypeString.getStringFromType(source.constructor);
     }
 
@@ -124,7 +124,7 @@ export function Serialize<T>(instance: T, type: SerializableType<T>): JsonObject
 
     const target: Indexable<JsonType> = {};
 
-    if (TypeString.runtimeTyping) {
+    if (TypeString.getRuntimeTyping()) {
         target["$type"] = TypeString.getStringFromType(instance.constructor);
         type = instance.constructor as SerializableType<T>;
     }

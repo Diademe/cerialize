@@ -137,7 +137,7 @@ export function DeserializeJSON<T extends JsonType>(data: JsonType, transformKey
 }
 
 function _Deserialize<T extends Indexable>(data: JsonObject, type: SerializableType<T>, target?: T, instantiationMethod?: InstantiationMethod): T | null {
-    if (TypeString.runtimeTyping) {
+    if (TypeString.getRuntimeTyping()) {
         type = TypeString.getTypeFromString(data["$type"] as any) as SerializableType<T>;
     }
     

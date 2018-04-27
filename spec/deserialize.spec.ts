@@ -1181,7 +1181,7 @@ describe("Deserializing", function () {
             TypeString.setTypeString(Test1, "my Test1 type");
             TypeString.setTypeString(Test2, "my Test2 type");
             TypeString.setTypeString(Test3, "my Test3 type");
-            TypeString.runtimeTyping = true;
+            TypeString.setRuntimeTyping(true);
             const json = DeserializeArray([
                 { "$type": "my Test0 type", "valueA": 0 },
                 { "$type": "my Test1 type", "valueB": 1 },
@@ -1189,7 +1189,7 @@ describe("Deserializing", function () {
                 { "$type": "my Test3 type", "valueD": 3 }
             ], Test0);
             TypeString.resetDictionnary();
-            TypeString.runtimeTyping = false;
+            TypeString.setRuntimeTyping(false);
             expect(json[0] instanceof Test0).toBeTruthy();
             expect(json[1] instanceof Test1).toBeTruthy();
             expect(json[2] instanceof Test2).toBeTruthy();
@@ -1223,14 +1223,14 @@ describe("Deserializing", function () {
             TypeString.setTypeString(Test1, "my Test1 type");
             TypeString.setTypeString(Test2, "my Test2 type");
             TypeString.setTypeString(Test3, "my Test3 type");
-            TypeString.runtimeTyping = true;
+            TypeString.setRuntimeTyping(true);
             const json = Deserialize({
                 "$type": "my Test3 type",
                 m1: { "$type": "my Test0 type", valueA: true },
                 m2: { "$type": "my Test2 type", valueB: true }
             }, Test3);
             TypeString.resetDictionnary();
-            TypeString.runtimeTyping = false;
+            TypeString.setRuntimeTyping(false);
             expect(json instanceof Test3).toBeTruthy();
             expect(json.m1 instanceof Test0).toBeTruthy();
             expect(json.m2 instanceof Test1).toBeTruthy();
@@ -1262,14 +1262,14 @@ describe("Deserializing", function () {
             TypeString.setTypeString(Test1, "my Test1 type");
             TypeString.setTypeString(Test2, "my Test2 type");
             TypeString.setTypeString(Test3, "my Test3 type");
-            TypeString.runtimeTyping = true;
+            TypeString.setRuntimeTyping(true);
             const json = Deserialize({
                 "$type": "my Test3 type",
                 m1: { "$type": "my Test0 type", valueA: true },
                 m2: { "$type": "my Test2 type", valueB: true }
             }, Test3, null, InstantiationMethod.ObjectCreate);
             TypeString.resetDictionnary();
-            TypeString.runtimeTyping = false;
+            TypeString.setRuntimeTyping(false);
             expect(json instanceof Test3).toBeTruthy();
             expect(json.m1 instanceof Test0).toBeTruthy();
             expect(json.m2 instanceof Test1).toBeTruthy();
