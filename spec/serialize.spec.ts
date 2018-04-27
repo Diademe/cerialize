@@ -10,7 +10,9 @@ import {
     serializeAsJson,
     serializeAsMap,
     serializeUsing,
-    inheritSerialization
+    inheritSerialization,
+    EmitDefaultValue,
+    DefaultValue
 } from "../src/annotations";
 import { Serialize, SerializeJSON, SelectiveSerialization, SerializeArray } from "../src/serialize";
 import { Indexable, JsonObject } from "../src/util";
@@ -1034,7 +1036,95 @@ describe("Serializing", function () {
 
             const d = new Drapeau(2);
             const json = Serialize(d, Drapeau);
-            expect(json).toEqual({ "bprime" : 3 });
+            expect(json).toEqual({ "bprime": 3 });
+
+        });
+
+    });
+
+    describe("Emit Default", function () {
+
+        it("Boolean", function () {
+            class Test {
+                @serializeAs(Boolean)
+                @EmitDefaultValue(false)
+                valueFalse: Boolean = false;
+
+                @EmitDefaultValue(false)
+                @serializeAs(Boolean)
+                valueTrue: Boolean = true;
+            };
+
+            const t = new Test();
+            const json = Serialize(t, Test);
+            expect(json).toEqual({ "valueTrue": true });
+
+        });
+
+        it("Number", function () {
+            class Test {
+                @EmitDefaultValue(false)
+                @serializeAs(Number)
+                valueDefault: Number = 0;
+
+                @EmitDefaultValue(false)
+                @serializeAs(Number)
+                valueNotDefault: Number = 1;
+            };
+
+            const t = new Test();
+            const json = Serialize(t, Test);
+            expect(json).toEqual({ "valueNotDefault": 1 });
+
+        });
+
+    });
+
+    describe("Default Value", function () {
+
+        it("Boolean", function () {
+            class Test {
+                @EmitDefaultValue(false)
+                @serializeAs(Boolean)
+                valueDefault: Boolean = false;
+
+                @EmitDefaultValue(false)
+                @serializeAs(Boolean)
+                @DefaultValue(true)
+                valueFalse: Boolean = false;
+
+                @serializeAs(Boolean)
+                @DefaultValue(true)
+                @EmitDefaultValue(false)
+                valueTrue: Boolean = true;
+            };
+
+            const t = new Test();
+            const json = Serialize(t, Test);
+            expect(json).toEqual({ "valueFalse": false });
+
+        });
+
+        it("Number", function () {
+            class Test {
+                @EmitDefaultValue(false)
+                @serializeAs(Number)
+                valueDefault: Number = 0;
+
+                @EmitDefaultValue(false)
+                @serializeAs(Number)
+                @DefaultValue(2)
+                valueNotDefault1: Number = 1;
+
+                @EmitDefaultValue(false)
+                @serializeAs(Number)
+                @DefaultValue(2)
+                valueNotDefault2: Number = 2;
+            };
+
+            const t = new Test();
+            const json = Serialize(t, Test);
+            expect(json).toEqual({ "valueNotDefault1": 1 });
 
         });
 
