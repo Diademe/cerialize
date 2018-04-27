@@ -160,22 +160,34 @@ export function Serialize<T>(instance: T, type: SerializableType<T>): JsonObject
         const flags = metadata.flags;
 
         if ((flags & MetaDataFlag.SerializeMap) !== 0) {
-            target[keyName] = SerializeMap(source, metadata.serializedType);
+            let val = SerializeMap(source, metadata.serializedType);
+            if(defaultValue(metadata, val)) continue;
+            target[keyName] = val;
         }
         else if ((flags & MetaDataFlag.SerializeArray) !== 0) {
-            target[keyName] = SerializeArray(source, metadata.serializedType);
+            let val = SerializeArray(source, metadata.serializedType);
+            if(defaultValue(metadata, val)) continue;
+            target[keyName] = val;
         }
         else if ((flags & MetaDataFlag.SerializePrimitive) !== 0) {
-            target[keyName] = SerializePrimitive(source, metadata.serializedType as SerializablePrimitiveType);
+            let val = SerializePrimitive(source, metadata.serializedType as SerializablePrimitiveType);
+            if(defaultValue(metadata, val)) continue;
+            target[keyName] = val;
         }
         else if ((flags & MetaDataFlag.SerializeObject) !== 0) {
-            target[keyName] = Serialize(source, metadata.serializedType);
+            let val = Serialize(source, metadata.serializedType);
+            if(defaultValue(metadata, val)) continue;
+            target[keyName] = val;
         }
         else if ((flags & MetaDataFlag.SerializeJSON) !== 0) {
-            target[keyName] = SerializeJSON(source, (flags & MetaDataFlag.SerializeJSONTransformKeys) !== 0);
+            let val = SerializeJSON(source, (flags & MetaDataFlag.SerializeJSONTransformKeys) !== 0);
+            if(defaultValue(metadata, val)) continue;
+            target[keyName] = val;
         }
         else if ((flags & MetaDataFlag.SerializeUsing) !== 0) {
-            target[keyName] = (metadata.serializedType as any)(source);
+            let val = (metadata.serializedType as any)(source)
+            if(defaultValue(metadata, val)) continue;
+            target[keyName] = val;
         }
 
     }
@@ -188,4 +200,16 @@ export function Serialize<T>(instance: T, type: SerializableType<T>): JsonObject
     }
 
     return target;
+}
+
+function defaultValue (metadata:MetaData, val:any){
+    if(metadata.emitDefaultValue == false){
+        if(metadata.DefaultValue !== null){
+            return val === metadata.DefaultValue;
+        }
+        else {
+            return new metadata.serializedType() == val;
+        }
+    }
+    return false;
 }

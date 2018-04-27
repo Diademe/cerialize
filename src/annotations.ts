@@ -185,3 +185,16 @@ export function inheritSerialization(parentType: IConstructable) {
     };
 }
 
+export function EmitDefaultValue(emitDefaultValue:boolean) {
+    return function (target: IConstructable, actualKeyName: string): void {
+        const metadata = MetaData.getMetaData(target.constructor, actualKeyName);
+        metadata.emitDefaultValue = emitDefaultValue;
+    };
+}
+
+export function DefaultValue(instance: IConstructable) {
+    return function (target: IConstructable, actualKeyName: string): void {
+        const metadata = MetaData.getMetaData(target.constructor, actualKeyName);
+        metadata.DefaultValue = instance;
+    };
+}
