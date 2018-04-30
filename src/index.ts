@@ -2,7 +2,7 @@ import { MetaData } from "./meta_data";
 import { NoOp } from "./string_transforms";
 import { InstantiationMethod } from "./util";
 
-export { TypeString } from "./runtime_typing";
+export { RuntimeTypingResetDictionnary, RuntimeTypingSetTypeString } from "./runtime_typing";
 export * from "./serialize";
 export * from "./deserialize";
 export * from "./annotations";

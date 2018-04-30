@@ -49,3 +49,11 @@ export class TypeStringDictionary {
     
 }
 var TypeString: TypeStringDictionary = new TypeStringDictionary();
+
+export function RuntimeTypingResetDictionnary (){
+    TypeString.resetDictionnary();
+}
+
+export function RuntimeTypingSetTypeString(t: any, s: string) : void{
+    TypeString.setTypeString(t, s);
+}
