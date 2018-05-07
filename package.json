@@ -20,17 +20,15 @@
     "build": "tsc --project src/tsconfig.json",
     "test": "jest",
     "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
-    "tslint": "tslint-config-prettier-check ./tslint.json"
+    "tslint": "tslint --config ./tslint.json -p src/tsconfig.json -p spec/tsconfig.json"
   },
   "devDependencies": {
-    "@types/jest": "^22.1.1",
-    "jest": "^22.1.4",
+    "@types/jest": "^22.2.3",
+    "jest": "^22.4.3",
     "prettier": "^1.12.1",
-    "ts-jest": "^22.0.3",
+    "ts-jest": "^22.4.5",
     "tslint": "^5.10.0",
-    "tslint-config-prettier": "^1.12.0",
-    "tslint-plugin-prettier": "^1.3.0",
-    "typescript": "^2.7.1"
+    "typescript": "^2.8.3"
   },
   "jest": {
     "testRegex": "/spec/.*\\.spec\\.([tj]sx?)$",
