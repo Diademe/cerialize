@@ -19,7 +19,11 @@ import {
     SetRefCycleDetection,
     SetSerializeKeyTransform
 } from "../src/index";
-import { RuntimeTypingSetEnable, TypeString } from "../src/runtime_typing";
+import {
+    RuntimeTypingSetEnable,
+    RuntimeTypingSetTypeString,
+    TypeString
+} from "../src/runtime_typing";
 import {
     SelectiveSerialization,
     Serialize,
@@ -1017,10 +1021,10 @@ describe("Serializing", function() {
             const s = Array<Test0>();
             s.push(new Test0(), new Test1(), new Test2(), new Test3());
             RuntimeTypingSetEnable(true);
-            TypeString.setTypeString(Test0, "my Test0 type");
-            TypeString.setTypeString(Test1, "my Test1 type");
-            TypeString.setTypeString(Test2, "my Test2 type");
-            TypeString.setTypeString(Test3, "my Test3 type");
+            RuntimeTypingSetTypeString(Test0, "my Test0 type");
+            RuntimeTypingSetTypeString(Test1, "my Test1 type");
+            RuntimeTypingSetTypeString(Test2, "my Test2 type");
+            RuntimeTypingSetTypeString(Test3, "my Test3 type");
             const json = SerializeArray(s, Test0);
             RuntimeTypingSetEnable(false);
             TypeString.resetDictionnary();
@@ -1050,10 +1054,10 @@ describe("Serializing", function() {
             s.m1 = new Test0();
             s.m2 = new Test2();
             RuntimeTypingSetEnable(true);
-            TypeString.setTypeString(Test0, "my Test0 type");
-            TypeString.setTypeString(Test1, "my Test1 type");
-            TypeString.setTypeString(Test2, "my Test2 type");
-            TypeString.setTypeString(Test3, "my Test3 type");
+            RuntimeTypingSetTypeString(Test0, "my Test0 type");
+            RuntimeTypingSetTypeString(Test1, "my Test1 type");
+            RuntimeTypingSetTypeString(Test2, "my Test2 type");
+            RuntimeTypingSetTypeString(Test3, "my Test3 type");
             const json = Serialize(s, Test3);
             RuntimeTypingSetEnable(false);
             TypeString.resetDictionnary();
