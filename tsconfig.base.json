@@ -2,7 +2,7 @@
   "compilerOptions": {
     "noImplicitReturns": true,
     "noImplicitAny": true,
-    "declarationDir": "./dist/src",
+    "declarationDir": "./dist",
     "outDir": "./dist",
     "preserveConstEnums": false,
     "removeComments": true,
@@ -16,6 +16,5 @@
     "declaration": true,
     "sourceMap": true,
     "moduleResolution": "node"
-  },
-  "exclude": ["node_modules", "dist"]
+  }
 }
