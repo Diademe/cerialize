@@ -2,7 +2,11 @@ import { MetaData } from "./meta_data";
 import { NoOp } from "./string_transforms";
 import { InstantiationMethod } from "./util";
 
-export { RuntimeTypingResetDictionnary, RuntimeTypingSetTypeString, RuntimeTypingSetEnable } from "./runtime_typing";
+export {
+    RuntimeTypingResetDictionnary,
+    RuntimeTypingSetTypeString,
+    RuntimeTypingSetEnable
+} from "./runtime_typing";
 export * from "./serialize";
 export * from "./deserialize";
 export * from "./annotations";
@@ -11,29 +15,20 @@ export { InstantiationMethod } from "./util";
 export { RefClean } from "./ref_cycle";
 
 export function SetSerializeKeyTransform(fn: (str: string) => string): void {
-    if (typeof fn === "function") {
-        MetaData.serializeKeyTransform = fn;
-    }
-    else {
-        MetaData.serializeKeyTransform = NoOp;
-    }
+    MetaData.serializeKeyTransform = typeof fn === "function" ? fn : NoOp;
 }
 
 export function SetDeserializeKeyTransform(fn: (str: string) => string): void {
-    if (typeof fn === "function") {
-        MetaData.deserializeKeyTransform = fn;
-    }
-    else {
-        MetaData.deserializeKeyTransform = NoOp;
-    }
+    MetaData.deserializeKeyTransform = typeof fn === "function" ? fn : NoOp;
 }
 
-export function SetDefaultInstantiationMethod(instantiationMethod: InstantiationMethod): void {
-    if (instantiationMethod === null) {
-        MetaData.deserializeInstantationMethod = InstantiationMethod.New;
-    } else {
-        MetaData.deserializeInstantationMethod = instantiationMethod;
-    }
+export function SetDefaultInstantiationMethod(
+    instantiationMethod: InstantiationMethod
+): void {
+    MetaData.deserializeInstantationMethod =
+        instantiationMethod === null
+            ? InstantiationMethod.New
+            : instantiationMethod;
 }
 
 // if true it deales with referances and cycle referances

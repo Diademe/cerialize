@@ -19,7 +19,11 @@ import { RefClean, SetRefCycleDetection } from "../src/index";
 import { TypeString } from "../src/runtime_typing";
 import { Indexable, InstantiationMethod, JsonObject } from "../src/util";
 
-function expectInstance(instance: any, type: any, instantiationMethod: InstantiationMethod) {
+function expectInstance(
+    instance: any,
+    type: any,
+    instantiationMethod: InstantiationMethod
+) {
     switch (instantiationMethod) {
         case InstantiationMethod.New:
         case InstantiationMethod.ObjectCreate:

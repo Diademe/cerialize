@@ -5,8 +5,7 @@ function lousyGet(dic: any, key: any) {
     const res = dic.get(key);
     if (res === undefined) {
         throw new Error(`The dictionnary doesn't have the key ${key}`);
-    }
-    else {
+    } else {
         return res;
     }
 }
@@ -14,7 +13,7 @@ function lousyGet(dic: any, key: any) {
 export class TypeStringDictionary {
     private type2string: Map<IConstructable, string>;
     private string2type: Map<string, IConstructable>;
-    private init(): void{
+    private init(): void {
         this.type2string = new Map<IConstructable, string>();
         this.string2type = new Map<string, IConstructable>();
     }
@@ -34,30 +33,30 @@ export class TypeStringDictionary {
     public getTypeFromString(s: string): IConstructable {
         return lousyGet(this.string2type, s);
     }
-    public hasTypeFromString(s: string): boolean{
+    public hasTypeFromString(s: string): boolean {
         return this.string2type.has(s);
     }
-    public resetDictionnary(): void{
+    public resetDictionnary(): void {
         this.init();
     }
     private runtimeTyping: boolean = false;
-    public setRuntimeTyping(rtt: boolean){
+    public setRuntimeTyping(rtt: boolean) {
         this.runtimeTyping = rtt;
     }
-    public getRuntimeTyping(): boolean{
+    public getRuntimeTyping(): boolean {
         return this.runtimeTyping;
     }
 }
 const TypeString: TypeStringDictionary = new TypeStringDictionary();
 
-export function RuntimeTypingResetDictionnary(){
+export function RuntimeTypingResetDictionnary() {
     TypeString.resetDictionnary();
 }
 
-export function RuntimeTypingSetTypeString(t: any, s: string): void{
+export function RuntimeTypingSetTypeString(t: any, s: string): void {
     TypeString.setTypeString(t, s);
 }
 
-export function RuntimeTypingSetEnable(b: boolean): void{
+export function RuntimeTypingSetEnable(b: boolean): void {
     TypeString.setRuntimeTyping(b);
 }
