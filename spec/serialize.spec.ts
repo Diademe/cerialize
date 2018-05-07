@@ -20,6 +20,7 @@ import {
     SetSerializeKeyTransform
 } from "../src/index";
 import {
+    RuntimeTypingResetDictionnary,
     RuntimeTypingSetEnable,
     RuntimeTypingSetTypeString,
     TypeString
@@ -1027,7 +1028,7 @@ describe("Serializing", function() {
             RuntimeTypingSetTypeString(Test3, "my Test3 type");
             const json = SerializeArray(s, Test0);
             RuntimeTypingSetEnable(false);
-            TypeString.resetDictionnary();
+            RuntimeTypingResetDictionnary();
             expect(json).toEqual([
                 { $type: "my Test0 type", valueA: 0 },
                 { $type: "my Test1 type", valueB: 1 },
@@ -1060,7 +1061,7 @@ describe("Serializing", function() {
             RuntimeTypingSetTypeString(Test3, "my Test3 type");
             const json = Serialize(s, Test3);
             RuntimeTypingSetEnable(false);
-            TypeString.resetDictionnary();
+            RuntimeTypingResetDictionnary();
             expect(json).toEqual({
                 $type: "my Test3 type",
                 m1: { $type: "my Test0 type", valueA: true },
