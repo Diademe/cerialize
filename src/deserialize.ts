@@ -197,7 +197,7 @@ function _Deserialize<T extends Indexable>(
     target?: T,
     instantiationMethod?: InstantiationMethod
 ): T | null {
-    if (TypeString.getRuntimeTyping()) {
+    if (TypeString.getRuntimeTyping() && !isPrimitiveType(type)) {
         type = TypeString.getTypeFromString(
             data.$type as any
         ) as SerializableType<T>;

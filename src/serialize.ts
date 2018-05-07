@@ -29,7 +29,7 @@ export function SerializeMap<T>(
         return target;
     }
 
-    if (TypeString.getRuntimeTyping()) {
+    if (TypeString.getRuntimeTyping() && !isPrimitiveType(type)) {
         target.$type = TypeString.getStringFromType(source.constructor);
     }
 
@@ -153,7 +153,7 @@ export function Serialize<T>(
 
     const target: Indexable<JsonType> = {};
 
-    if (TypeString.getRuntimeTyping()) {
+    if (TypeString.getRuntimeTyping() && !isPrimitiveType(type)) {
         target.$type = TypeString.getStringFromType(instance.constructor);
         type = instance.constructor as SerializableType<T>;
     }
