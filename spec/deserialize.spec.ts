@@ -15,7 +15,7 @@ import {
     SetDefaultInstantiationMethod,
     SetDeserializeKeyTransform
 } from "../src";
-import { refClean, SetRefCycleDetection } from "../src/index";
+import { RefClean, SetRefCycleDetection } from "../src/index";
 import { TypeString } from "../src/runtime_typing";
 import { Indexable, InstantiationMethod, JsonObject } from "../src/util";
 
@@ -1155,7 +1155,7 @@ describe("Deserializing", function() {
             };
             SetRefCycleDetection(true);
             const instance = Deserialize(json, Test0);
-            refClean();
+            RefClean();
             SetRefCycleDetection(false);
             expect(instance.value0).toBe(instance.value1);
         });
@@ -1179,7 +1179,7 @@ describe("Deserializing", function() {
             };
             SetRefCycleDetection(true);
             const instance = Deserialize(json, Test);
-            refClean();
+            RefClean();
             SetRefCycleDetection(false);
             expect(instance).toBe(instance.next.next.next);
         });
@@ -1198,7 +1198,7 @@ describe("Deserializing", function() {
             };
             SetRefCycleDetection(true);
             const instance = Deserialize(json, Test);
-            refClean();
+            RefClean();
             SetRefCycleDetection(false);
             expect(instance).toBe(instance.next.next.next);
         });

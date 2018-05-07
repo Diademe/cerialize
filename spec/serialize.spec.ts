@@ -14,7 +14,7 @@ import {
   serializeBitMask,
   serializeUsing
 } from "../src/annotations";
-import { refClean, SetRefCycleDetection, SetSerializeKeyTransform } from "../src/index";
+import { RefClean, SetRefCycleDetection, SetSerializeKeyTransform } from "../src/index";
 import { RuntimeTypingSetEnable, TypeString } from "../src/runtime_typing";
 import { SelectiveSerialization, Serialize, SerializeArray, SerializeJSON } from "../src/serialize";
 import { Indexable, JsonObject } from "../src/util";
@@ -878,7 +878,7 @@ describe("Serializing", function() {
             s.next.next.next = s;
             SetRefCycleDetection(true);
             const json = Serialize(s, Test);
-            refClean();
+            RefClean();
             SetRefCycleDetection(false);
             expect(json).toEqual({
                 $id: 1,
@@ -904,7 +904,7 @@ describe("Serializing", function() {
             s.next = s;
             SetRefCycleDetection(true);
             const json = Serialize(s, Test);
-            refClean();
+            RefClean();
             SetRefCycleDetection(false);
             expect(json).toEqual({
                 $id: 1,

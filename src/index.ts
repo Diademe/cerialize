@@ -8,7 +8,7 @@ export * from "./deserialize";
 export * from "./annotations";
 export * from "./string_transforms";
 export { InstantiationMethod } from "./util";
-export { refClean } from "./ref_cycle";
+export { RefClean } from "./ref_cycle";
 
 export function SetSerializeKeyTransform(fn: (str: string) => string): void {
     if (typeof fn === "function") {

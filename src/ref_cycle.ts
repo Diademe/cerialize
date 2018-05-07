@@ -53,6 +53,6 @@ export function cycleBreaking(json: any, instance: any) {
     }
 }
 
-export function refClean() {
+export function RefClean() {
     cycle = new Cycle();
 }
