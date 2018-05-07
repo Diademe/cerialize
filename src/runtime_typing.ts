@@ -57,3 +57,7 @@ export function RuntimeTypingResetDictionnary (){
 export function RuntimeTypingSetTypeString(t: any, s: string) : void{
     TypeString.setTypeString(t, s);
 }
+
+export function RuntimeTypingSetEnable(b: boolean) : void{
+    TypeString.setRuntimeTyping(b);
+}
