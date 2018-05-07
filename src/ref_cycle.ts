@@ -1,6 +1,6 @@
 ﻿import { MetaData } from "./meta_data";
 
-//cycle references
+// cycle references
 class Cycle {
     public ref2obj: Map<number, any>;
     public obj2ref: Map<any, number>;
@@ -14,40 +14,41 @@ class Cycle {
         this.obj2ref.set(obj, this.refIndex);
         return this.refIndex++;
     }
-    public clean() { //allow garbage collection of the objects
+    public clean() {
+        // allow garbage collection of the objects
         this.ref2obj = this.obj2ref = null;
     }
 }
 
-var cycle = new Cycle();
+let cycle = new Cycle();
 
 export function referenceHandeling(json: any, tmp: any) {
-    if (MetaData.RefCycleDetection == false)
+    if (MetaData.RefCycleDetection === false) {
         return false;
-    if (json.hasOwnProperty("$ref")) {
-        if (!cycle.ref2obj.has(json["$ref"])) {
-            throw new Error('Reference found befor its definiton');
-        }
-        tmp.a = cycle.ref2obj.get(json["$ref"]);
-        return true;
     }
-    else if (json.hasOwnProperty("$id")) {
-        cycle.ref2obj.set(json["$id"], tmp.a);
+    if (json.hasOwnProperty("$ref")) {
+        if (!cycle.ref2obj.has(json.$ref)) {
+            throw new Error("Reference found befor its definiton");
+        }
+        tmp.a = cycle.ref2obj.get(json.$ref);
+        return true;
+    } else if (json.hasOwnProperty("$id")) {
+        cycle.ref2obj.set(json.$id, tmp.a);
     }
     return false;
 }
 
 export function cycleBreaking(json: any, instance: any) {
-    if (MetaData.RefCycleDetection === false)
+    if (MetaData.RefCycleDetection === false) {
         return false;
-    if (cycle.obj2ref.has(instance)) {
-        let id = cycle.obj2ref.get(instance);
-        json["$ref"] = id;
-        return true;
     }
-    else {
-        let id = cycle.setObject(instance);
-        json["$id"] = id;
+    if (cycle.obj2ref.has(instance)) {
+        const id = cycle.obj2ref.get(instance);
+        json.$ref = id;
+        return true;
+    } else {
+        const id = cycle.setObject(instance);
+        json.$id = id;
         return false;
     }
 }

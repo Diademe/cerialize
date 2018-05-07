@@ -1,41 +1,66 @@
-import {
-    getTarget, Indexable, isPrimitiveType, JsonArray, JsonObject, JsonType, SerializablePrimitiveType,
-    SerializableType, InstantiationMethod
-} from "./util";
 import { MetaData, MetaDataFlag } from "./meta_data";
 import { referenceHandeling } from "./ref_cycle";
 import { TypeString } from "./runtime_typing";
+import {
+    getTarget,
+    Indexable,
+    InstantiationMethod,
+    isPrimitiveType,
+    JsonArray,
+    JsonObject,
+    JsonType,
+    SerializablePrimitiveType,
+    SerializableType
+} from "./util";
 
-function _DeserializeMap<T>(data: JsonObject, type: SerializableType<T>, target?: Indexable<T>, instantiationMethod?: InstantiationMethod): Indexable<T> {
+function _DeserializeMap<T>(
+    data: JsonObject,
+    type: SerializableType<T>,
+    target?: Indexable<T>,
+    instantiationMethod?: InstantiationMethod
+): Indexable<T> {
     if (typeof data !== "object") {
-        throw new Error("Expected input to be of type `object` but received: " + typeof data);
+        throw new Error(
+            "Expected input to be of type `object` but received: " + typeof data
+        );
     }
 
-    if (target === null || target === void 0) target = {};
+    if (target === null || target === void 0) {
+        target = {};
+    }
 
     if (data === null || data === void 0) {
         return null;
     }
 
-    var tmp = { a: {} as Indexable<T> };
+    const tmp = { a: {} as Indexable<T> };
     if (referenceHandeling(data, tmp)) {
         return tmp.a;
     }
     target = tmp.a;
 
     const keys = Object.keys(data);
-    for (let i = 0; i < keys.length; i++) {
-        const key = keys[i];
+    for (const key of keys) {
         const value = data[key];
         if (value !== void 0) {
-            target[MetaData.deserializeKeyTransform(key)] = _Deserialize(data[key] as any, type, target[key], instantiationMethod) as T;
+            target[MetaData.deserializeKeyTransform(key)] = _Deserialize(
+                data[key] as any,
+                type,
+                target[key],
+                instantiationMethod
+            ) as T;
         }
     }
 
     return target;
 }
 
-export function DeserializeMap<T>(data: JsonObject, type: SerializableType<T>, target?: Indexable<T>, instantiationMethod?: InstantiationMethod): Indexable<T> {
+export function DeserializeMap<T>(
+    data: JsonObject,
+    type: SerializableType<T>,
+    target?: Indexable<T>,
+    instantiationMethod?: InstantiationMethod
+): Indexable<T> {
     if (instantiationMethod === void 0) {
         instantiationMethod = MetaData.deserializeInstantationMethod;
     }
@@ -43,11 +68,18 @@ export function DeserializeMap<T>(data: JsonObject, type: SerializableType<T>, t
     return _DeserializeMap(data, type, target, instantiationMethod);
 }
 
-function _DeserializeArray<T>(data: JsonArray, type: SerializableType<T>, target?: Array<T>, instantiationMethod?: InstantiationMethod) {
+function _DeserializeArray<T>(
+    data: JsonArray,
+    type: SerializableType<T>,
+    target?: T[],
+    instantiationMethod?: InstantiationMethod
+) {
     if (!Array.isArray(data)) {
-        throw new Error("Expected input to be an array but received: " + typeof data);
+        throw new Error(
+            "Expected input to be an array but received: " + typeof data
+        );
     }
-    var tmp = { a: [] as Array<T> };
+    const tmp = { a: [] as T[] };
     if (referenceHandeling(data, tmp)) {
         return tmp.a;
     }
@@ -55,13 +87,23 @@ function _DeserializeArray<T>(data: JsonArray, type: SerializableType<T>, target
 
     target.length = data.length;
     for (let i = 0; i < data.length; i++) {
-        target[i] = _Deserialize(data[i] as any, type, target[i], instantiationMethod) as T;
+        target[i] = _Deserialize(
+            data[i] as any,
+            type,
+            target[i],
+            instantiationMethod
+        ) as T;
     }
 
     return target;
 }
 
-export function DeserializeArray<T>(data: JsonArray, type: SerializableType<T>, target?: Array<T>, instantiationMethod?: InstantiationMethod) {
+export function DeserializeArray<T>(
+    data: JsonArray,
+    type: SerializableType<T>,
+    target?: T[],
+    instantiationMethod?: InstantiationMethod
+) {
     if (instantiationMethod === void 0) {
         instantiationMethod = MetaData.deserializeInstantationMethod;
     }
@@ -69,44 +111,52 @@ export function DeserializeArray<T>(data: JsonArray, type: SerializableType<T>, 
     return _DeserializeArray(data, type, target, instantiationMethod);
 }
 
-function DeserializePrimitive(data: any, type: SerializablePrimitiveType, target?: Date) {
+function DeserializePrimitive(
+    data: any,
+    type: SerializablePrimitiveType,
+    target?: Date
+) {
     if (type === Date) {
         const deserializedDate = new Date(data as string);
         if (target instanceof Date) {
             target.setTime(deserializedDate.getTime());
-        }
-        else {
+        } else {
             return deserializedDate;
         }
-    }
-    else if (type === RegExp) {
+    } else if (type === RegExp) {
         const fragments = data.match(/\/(.*?)\/([gimy])?$/);
         return new RegExp(fragments[1], fragments[2] || "");
-    }
-    else if (data === null) {
+    } else if (data === null) {
         return null;
-    }
-    else {
+    } else {
         return (type as any)(data);
     }
 }
 
-export function DeserializeJSON<T extends JsonType>(data: JsonType, transformKeys = true, target?: JsonType): JsonType {
-    var tmp = { a: {} };//hack to passe argument by ref
+export function DeserializeJSON<T extends JsonType>(
+    data: JsonType,
+    transformKeys = true,
+    target?: JsonType
+): JsonType {
+    const tmp = { a: {} }; // hack to passe argument by ref
     if (referenceHandeling(data, tmp)) {
         return tmp.a;
     }
     target = tmp.a;
 
-
     if (Array.isArray(data)) {
+        if (!Array.isArray(target)) {
+            target = new Array<any>(data.length);
+        }
 
-        if (!Array.isArray(target)) target = new Array<any>(data.length);
-
-        (target as Array<JsonType>).length = data.length;
+        (target as JsonType[]).length = data.length;
 
         for (let i = 0; i < data.length; i++) {
-            (target as Array<JsonType>)[i] = DeserializeJSON(data[i], transformKeys, (target as Array<JsonType>)[i]);
+            (target as JsonType[])[i] = DeserializeJSON(
+                data[i],
+                transformKeys,
+                (target as JsonType[])[i]
+            );
         }
 
         return target;
@@ -115,32 +165,44 @@ export function DeserializeJSON<T extends JsonType>(data: JsonType, transformKey
     const type = typeof data;
 
     if (type === "object") {
-
-        const retn = (target && typeof target === "object" ? target : {}) as Indexable<JsonType>;
+        const retn = (target && typeof target === "object"
+            ? target
+            : {}) as Indexable<JsonType>;
         const keys = Object.keys(data as object);
-        for (let i = 0; i < keys.length; i++) {
-            const key = keys[i];
+        for (const key of keys) {
             const value = (data as Indexable<JsonType>)[key];
             if (value !== void 0) {
-                const retnKey = transformKeys ? MetaData.deserializeKeyTransform(key) : key;
-                retn[retnKey] = DeserializeJSON((data as Indexable<JsonType>)[key], transformKeys);
+                const retnKey = transformKeys
+                    ? MetaData.deserializeKeyTransform(key)
+                    : key;
+                retn[retnKey] = DeserializeJSON(
+                    (data as Indexable<JsonType>)[key],
+                    transformKeys
+                );
             }
         }
         return retn;
-
+    } else if (type === "function") {
+        throw new Error(
+            "Cannot deserialize a function, input is not a valid json object"
+        );
     }
-    else if (type === "function") {
-        throw new Error("Cannot deserialize a function, input is not a valid json object");
-    }
-    //primitive case
+    // primitive case
     return data;
 }
 
-function _Deserialize<T extends Indexable>(data: JsonObject, type: SerializableType<T>, target?: T, instantiationMethod?: InstantiationMethod): T | null {
+function _Deserialize<T extends Indexable>(
+    data: JsonObject,
+    type: SerializableType<T>,
+    target?: T,
+    instantiationMethod?: InstantiationMethod
+): T | null {
     if (TypeString.getRuntimeTyping()) {
-        type = TypeString.getTypeFromString(data["$type"] as any) as SerializableType<T>;
+        type = TypeString.getTypeFromString(
+            data.$type as any
+        ) as SerializableType<T>;
     }
-    
+
     const metadataList = MetaData.getMetaDataForType(type);
 
     if (metadataList === null) {
@@ -148,7 +210,7 @@ function _Deserialize<T extends Indexable>(data: JsonObject, type: SerializableT
             if (isPrimitiveType(type)) {
                 return DeserializePrimitive(data, type as any, target as any);
             }
-            var tmp1 = { a: {} as T };
+            const tmp1 = { a: {} as T };
             switch (instantiationMethod) {
                 case InstantiationMethod.New:
                     return new type();
@@ -164,54 +226,84 @@ function _Deserialize<T extends Indexable>(data: JsonObject, type: SerializableT
     }
 
     target = getTarget(type as any, target, instantiationMethod) as T;
-    var tmp = { a: target };//hack to passe argument by ref
+    const tmp = { a: target }; // hack to passe argument by ref
     if (referenceHandeling(data, tmp)) {
         return tmp.a;
     }
     target = tmp.a;
 
-    for (let i = 0; i < metadataList.length; i++) {
-        const metadata = metadataList[i];
-
-        if (metadata.deserializedKey === null) continue;
+    for (const metadata of metadataList) {
+        if (metadata.deserializedKey === null) {
+            continue;
+        }
 
         const source: any = data[metadata.getDeserializedKey()];
 
-        if (source === void 0) continue;
+        if (source === void 0) {
+            continue;
+        }
 
         const keyName = metadata.keyName;
         const flags = metadata.flags;
 
         if ((flags & MetaDataFlag.DeserializeMap) !== 0) {
-            target[keyName] = _DeserializeMap(source, metadata.deserializedType, target[keyName], instantiationMethod);
+            target[keyName] = _DeserializeMap(
+                source,
+                metadata.deserializedType,
+                target[keyName],
+                instantiationMethod
+            );
+        } else if ((flags & MetaDataFlag.DeserializeArray) !== 0) {
+            target[keyName] = _DeserializeArray(
+                source,
+                metadata.deserializedType,
+                target[keyName],
+                instantiationMethod
+            );
+        } else if ((flags & MetaDataFlag.DeserializePrimitive) !== 0) {
+            target[keyName] = DeserializePrimitive(
+                source,
+                metadata.deserializedType as SerializablePrimitiveType,
+                target[keyName]
+            );
+        } else if ((flags & MetaDataFlag.DeserializeObject) !== 0) {
+            target[keyName] = _Deserialize(
+                source,
+                metadata.deserializedType,
+                target[keyName],
+                instantiationMethod
+            );
+        } else if ((flags & MetaDataFlag.DeserializeJSON) !== 0) {
+            target[keyName] = DeserializeJSON(
+                source,
+                (flags & MetaDataFlag.DeserializeJSONTransformKeys) !== 0,
+                instantiationMethod
+            );
+        } else if ((flags & MetaDataFlag.DeserializeUsing) !== 0) {
+            target[keyName] = (metadata.deserializedType as any)(
+                source,
+                target[keyName],
+                instantiationMethod
+            );
         }
-        else if ((flags & MetaDataFlag.DeserializeArray) !== 0) {
-            target[keyName] = _DeserializeArray(source, metadata.deserializedType, target[keyName], instantiationMethod);
-        }
-        else if ((flags & MetaDataFlag.DeserializePrimitive) !== 0) {
-            target[keyName] = DeserializePrimitive(source, metadata.deserializedType as SerializablePrimitiveType, target[keyName]);
-        }
-        else if ((flags & MetaDataFlag.DeserializeObject) !== 0) {
-            target[keyName] = _Deserialize(source, metadata.deserializedType, target[keyName], instantiationMethod);
-        }
-        else if ((flags & MetaDataFlag.DeserializeJSON) !== 0) {
-            target[keyName] = DeserializeJSON(source, (flags & MetaDataFlag.DeserializeJSONTransformKeys) !== 0, instantiationMethod);
-        }
-        else if ((flags & MetaDataFlag.DeserializeUsing) !== 0) {
-            target[keyName] = (metadata.deserializedType as any)(source, target[keyName], instantiationMethod);
-        }
-
     }
 
     if (typeof type.onDeserialized === "function") {
         const value = type.onDeserialized(data, target, instantiationMethod);
-        if (value !== void 0) return value as any;
+        if (value !== void 0) {
+            return value as any;
+        }
     }
 
     return target as T;
 }
 
-export function Deserialize<T extends Indexable>(data: JsonObject, type: SerializableType<T>, target?: T, instantiationMethod?: InstantiationMethod): T | null {
+export function Deserialize<T extends Indexable>(
+    data: JsonObject,
+    type: SerializableType<T>,
+    target?: T,
+    instantiationMethod?: InstantiationMethod
+): T | null {
     if (instantiationMethod === void 0) {
         instantiationMethod = MetaData.deserializeInstantationMethod;
     }
@@ -219,14 +311,26 @@ export function Deserialize<T extends Indexable>(data: JsonObject, type: Seriali
     return _Deserialize(data, type, target, instantiationMethod);
 }
 
-export function DeserializeRaw<T>(data: JsonObject, type: SerializableType<T>, target?: T): T | null {
+export function DeserializeRaw<T>(
+    data: JsonObject,
+    type: SerializableType<T>,
+    target?: T
+): T | null {
     return _Deserialize(data, type, target, InstantiationMethod.None);
 }
 
-export function DeserializeArrayRaw<T>(data: JsonArray, type: SerializableType<T>, target?: Array<T>): Array<T> | null {
+export function DeserializeArrayRaw<T>(
+    data: JsonArray,
+    type: SerializableType<T>,
+    target?: T[]
+): T[] | null {
     return _DeserializeArray(data, type, target, InstantiationMethod.None);
 }
 
-export function DeserializeMapRaw<T>(data: Indexable<JsonType>, type: SerializableType<T>, target?: Indexable<T>): Indexable<T> | null {
+export function DeserializeMapRaw<T>(
+    data: Indexable<JsonType>,
+    type: SerializableType<T>,
+    target?: Indexable<T>
+): Indexable<T> | null {
     return _DeserializeMap(data, type, target, InstantiationMethod.None);
 }

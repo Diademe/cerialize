@@ -1,14 +1,24 @@
-export type JsonType = null | string | number | boolean | JsonObject | JsonArray;
+export type JsonType =
+    | null
+    | string
+    | number
+    | boolean
+    | JsonObject
+    | JsonArray;
 export type Serializer<T> = (target: T) => JsonType;
-export type Deserializer<T> = (data: JsonType, target?: T, instantiationMethod?: InstantiationMethod) => T;
+export type Deserializer<T> = (
+    data: JsonType,
+    target?: T,
+    instantiationMethod?: InstantiationMethod
+) => T;
 export type IConstructable = { constructor: Function };
 export type SerializeFn = <T>(data: T) => JsonType;
 export type SerializablePrimitiveType =
-    DateConstructor |
-    NumberConstructor |
-    BooleanConstructor |
-    RegExpConstructor |
-    StringConstructor;
+    | DateConstructor
+    | NumberConstructor
+    | BooleanConstructor
+    | RegExpConstructor
+    | StringConstructor;
 
 export enum InstantiationMethod {
     None = 0,
@@ -20,7 +30,7 @@ export interface JsonObject {
     [idx: string]: JsonType | JsonObject;
 }
 
-export interface JsonArray extends Array<JsonType> { }
+export interface JsonArray extends Array<JsonType> {}
 
 export interface ISerializer<T> {
     Serialize: Serializer<T>;
@@ -32,17 +42,25 @@ export interface Indexable<T = any | null> {
 }
 
 export interface SerializableType<T> {
-    new(...args: any[]): T;
+    new (...args: any[]): T;
 
     onSerialized?: (data: JsonObject, instance: T) => JsonObject | void;
-    onDeserialized?: (data: JsonObject, instance: T, instantiationMethod?: InstantiationMethod) => T | void;
+    onDeserialized?: (
+        data: JsonObject,
+        instance: T,
+        instantiationMethod?: InstantiationMethod
+    ) => T | void;
 }
 
-
 /** @internal */
-export function getTarget<T>(type: SerializableType<T>, target: T, instantiationMethod: InstantiationMethod): T {
-
-    if (target !== null && target !== void 0) return target;
+export function getTarget<T>(
+    type: SerializableType<T>,
+    target: T,
+    instantiationMethod: InstantiationMethod
+): T {
+    if (target !== null && target !== void 0) {
+        return target;
+    }
 
     if (type !== null) {
         switch (instantiationMethod) {
@@ -69,11 +87,14 @@ export function isPrimitiveType(type: Function): boolean {
 }
 
 /** @internal */
-export function setBitConditionally(value: number, bits: number, condition: boolean): number {
+export function setBitConditionally(
+    value: number,
+    bits: number,
+    condition: boolean
+): number {
     if (condition) {
         return value | bits;
-    }
-    else {
+    } else {
         return value & ~bits;
     }
 }

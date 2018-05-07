@@ -36,7 +36,7 @@ export function SetDefaultInstantiationMethod(instantiationMethod: Instantiation
     }
 }
 
-//if true it deales with referances and cycle referances 
+// if true it deales with referances and cycle referances
 export function SetRefCycleDetection(b: boolean) {
-    MetaData.RefCycleDetection = b; 
+    MetaData.RefCycleDetection = b;
 }

@@ -1,11 +1,11 @@
-//helper class to contain serialization meta data for a property, each property
-//in a type tagged with a serialization annotation will contain an array of these
-//objects each describing one property
+// helper class to contain serialization meta data for a property, each property
+// in a type tagged with a serialization annotation will contain an array of these
+// objects each describing one property
 
-import { IConstructable, SerializableType, InstantiationMethod } from "./util";
 import { NoOp } from "./string_transforms";
+import { IConstructable, InstantiationMethod, SerializableType } from "./util";
 
-const TypeMap = new Map<any, Array<MetaData>>();
+const TypeMap = new Map<any, MetaData[]>();
 
 /** @internal */
 export const enum MetaDataFlag {
@@ -26,17 +26,17 @@ export const enum MetaDataFlag {
 
     AutoPrimitive = SerializePrimitive | DeserializePrimitive,
     AutoUsing = SerializeUsing | DeserializeUsing,
-    AutoJSONTransformKeys = DeserializeJSONTransformKeys | SerializeJSONTransformKeys
+    AutoJSONTransformKeys = DeserializeJSONTransformKeys |
+        SerializeJSONTransformKeys
 }
 
 /** @internal */
 export class MetaData {
-
-    public keyName: string;    //the key name of the property this meta data describes
-    public serializedKey: string; //the target keyname for serializing
-    public deserializedKey: string;    //the target keyname for deserializing
-    public serializedType: SerializableType<any>; //the type to use when serializing this property
-    public deserializedType: SerializableType<any>;  //the type to use when deserializing this property
+    public keyName: string; // the key name of the property this meta data describes
+    public serializedKey: string; // the target keyname for serializing
+    public deserializedKey: string; // the target keyname for deserializing
+    public serializedType: SerializableType<any>; // the type to use when serializing this property
+    public deserializedType: SerializableType<any>; //  sthe type to use when deserializing this property
     public flags: MetaDataFlag;
     public bitMaskSerialize: number;
     public emitDefaultValue: boolean;
@@ -65,18 +65,22 @@ export class MetaData {
         if (this.deserializedKey === this.keyName) {
             return MetaData.deserializeKeyTransform(this.keyName);
         }
-        return MetaData.deserializeKeyTransform(this.deserializedKey ? this.deserializedKey : this.keyName);
+        return MetaData.deserializeKeyTransform(
+            this.deserializedKey ? this.deserializedKey : this.keyName
+        );
     }
 
-    //checks for a key name in a meta data array
-    public static hasKeyName(metadataArray: Array<MetaData>, key: string): boolean {
-        for (var i = 0; i < metadataArray.length; i++) {
-            if (metadataArray[i].keyName === key) return true;
+    // checks for a key name in a meta data array
+    public static hasKeyName(metadataArray: MetaData[], key: string): boolean {
+        for (const metadata of metadataArray) {
+            if (metadata.keyName === key) {
+                return true;
+            }
         }
         return false;
     }
 
-    //clone a meta data instance, used for inheriting serialization properties
+    // clone a meta data instance, used for inheriting serialization properties
     public static clone(data: MetaData): MetaData {
         const metadata = new MetaData(data.keyName);
         metadata.deserializedKey = data.deserializedKey;
@@ -90,33 +94,35 @@ export class MetaData {
         return metadata;
     }
 
-    //gets meta data for a key name, creating a new meta data instance
-    //if the input array doesn't already define one for the given keyName
+    // gets meta data for a key name, creating a new meta data instance
+    // if the input array doesn't already define one for the given keyName
     public static getMetaData(target: Function, keyName: string): MetaData {
-        var metaDataList = TypeMap.get(target);
+        let metaDataList = TypeMap.get(target);
 
         if (metaDataList === void 0) {
             metaDataList = [];
             TypeMap.set(target, metaDataList);
         }
 
-        for (var i = 0; i < metaDataList.length; i++) {
-            if (metaDataList[i].keyName === keyName) {
-                return metaDataList[i];
+        for (const metadata of metaDataList) {
+            if (metadata.keyName === keyName) {
+                return metadata;
             }
         }
         metaDataList.push(new MetaData(keyName));
         return metaDataList[metaDataList.length - 1];
-
     }
 
-    public static inheritMetaData(parentType: IConstructable, childType: IConstructable) {
-        var parentMetaData: Array<MetaData> = TypeMap.get(parentType) || [];
-        var childMetaData: Array<MetaData> = TypeMap.get(childType) || [];
-        for (var i = 0; i < parentMetaData.length; i++) {
-            const keyName = parentMetaData[i].keyName;
+    public static inheritMetaData(
+        parentType: IConstructable,
+        childType: IConstructable
+    ) {
+        const parentMetaData: MetaData[] = TypeMap.get(parentType) || [];
+        const childMetaData: MetaData[] = TypeMap.get(childType) || [];
+        for (const metadata of parentMetaData) {
+            const keyName = metadata.keyName;
             if (!MetaData.hasKeyName(childMetaData, keyName)) {
-                childMetaData.push(MetaData.clone(parentMetaData[i]));
+                childMetaData.push(MetaData.clone(metadata));
             }
         }
         TypeMap.set(childType, childMetaData);
