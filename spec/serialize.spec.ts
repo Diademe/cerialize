@@ -11,8 +11,8 @@ import {
     serializeAsMap,
     serializeUsing,
     inheritSerialization,
-    EmitDefaultValue,
-    DefaultValue
+    emitDefaultValue,
+    defaultValue
 } from "../src/annotations";
 import { Serialize, SerializeJSON, SelectiveSerialization, SerializeArray } from "../src/serialize";
 import { Indexable, JsonObject } from "../src/util";
@@ -1047,10 +1047,10 @@ describe("Serializing", function () {
         it("Boolean", function () {
             class Test {
                 @serializeAs(Boolean)
-                @EmitDefaultValue(false)
+                @emitDefaultValue(false)
                 valueFalse: Boolean = false;
 
-                @EmitDefaultValue(false)
+                @emitDefaultValue(false)
                 @serializeAs(Boolean)
                 valueTrue: Boolean = true;
             };
@@ -1063,11 +1063,11 @@ describe("Serializing", function () {
 
         it("Number", function () {
             class Test {
-                @EmitDefaultValue(false)
+                @emitDefaultValue(false)
                 @serializeAs(Number)
                 valueDefault: Number = 0;
 
-                @EmitDefaultValue(false)
+                @emitDefaultValue(false)
                 @serializeAs(Number)
                 valueNotDefault: Number = 1;
             };
@@ -1084,18 +1084,18 @@ describe("Serializing", function () {
 
         it("Boolean", function () {
             class Test {
-                @EmitDefaultValue(false)
+                @emitDefaultValue(false)
                 @serializeAs(Boolean)
                 valueDefault: Boolean = false;
 
-                @EmitDefaultValue(false)
+                @emitDefaultValue(false)
                 @serializeAs(Boolean)
-                @DefaultValue(true)
+                @defaultValue(true)
                 valueFalse: Boolean = false;
 
                 @serializeAs(Boolean)
-                @DefaultValue(true)
-                @EmitDefaultValue(false)
+                @defaultValue(true)
+                @emitDefaultValue(false)
                 valueTrue: Boolean = true;
             };
 
@@ -1107,18 +1107,18 @@ describe("Serializing", function () {
 
         it("Number", function () {
             class Test {
-                @EmitDefaultValue(false)
+                @emitDefaultValue(false)
                 @serializeAs(Number)
                 valueDefault: Number = 0;
 
-                @EmitDefaultValue(false)
+                @emitDefaultValue(false)
                 @serializeAs(Number)
-                @DefaultValue(2)
+                @defaultValue(2)
                 valueNotDefault1: Number = 1;
 
-                @EmitDefaultValue(false)
+                @emitDefaultValue(false)
                 @serializeAs(Number)
-                @DefaultValue(2)
+                @defaultValue(2)
                 valueNotDefault2: Number = 2;
             };
 
