@@ -1,12 +1,7 @@
 node_modules
-.idea
-coverage
-/dcerialize.njsproj
-/bin
-/obj
-/app.ts
-/dist
+dist
 *.js
-*.map
+*.map.js
+/.vscode
+/dcerialize.njsproj
 /dcerialize.code-workspace
-/.vscode/launch.json
