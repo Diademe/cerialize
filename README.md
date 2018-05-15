@@ -1,8 +1,8 @@
-# Cerialize
+# Dcerialize
 
 Easy serialization through ES7/Typescript annotations
 
-This is a library to make serializing and deserializing complex JS objects a breeze. It works by applying meta data annotations (as described in ES7 proposal and experimental Typescript feature) to fields in a user defined class. 
+This is a library to make serializing and deserializing complex JS objects a breeze. It works by applying meta data annotations (as described in ES7 proposal and experimental Typescript feature) to fields in a user defined class. It also aime to be compatible with [Newtonsoft](https://www.newtonsoft.com/) a C# library for serialisation.
 
 ## Concepts
 This library works by processing annotations on class types. Annotations are provided for reading (deserializing) and writing (serializing) values to and from json.
@@ -438,3 +438,136 @@ When using `SetDeserializeKeyTransform(fn : (str : string) => string)` you need 
         value: "strvalue"
     });
 ```
+
+## Runtime Typing
+consider the followin case :
+```typescript
+    class Living;
+        whoIAm(): string{
+            return "I am a living beeing";
+        }
+    }
+
+    @inheritSerialization(Living)
+    class Dog extends Living;
+        whoIAm(): string{
+            return "I am a dog";
+        }
+    }
+
+    @inheritSerialization(Living)
+    class Fish extends Living;
+        whoIAm(): string{
+            return "I am a fish";
+        }
+    }
+
+    let animal: Living[] = [new Fish(), new Dog(), new Living()];
+    let json = SerializeAsArray(animal, Living);
+```
+But then, at decerialization you end up with a bunch of Living, but no dog nor fish. The runtime serialisation will detect at runtime that there are other types in the array (it also work with simple variable). To do so, a ```$type``` attribut will be added. You have to provide the content of this attribute (it allows you to be compatible with [Newtonsoft](https://www.newtonsoft.com/)).
+The Runtime typing is anable as follow :
+```typescript
+    let animal: Living[] = [new Fish(), new Dog(), new Living()];
+    RuntimeTypingSetEnable(true);
+    RuntimeTypingSetTypeString(Fish, "It's a fich");
+    RuntimeTypingSetTypeString(Dog, "and that is a dog");
+    RuntimeTypingSetTypeString(Living, "every thing is fine as long as there are no colision");
+
+    let json = SerializeArray(animal, Living);
+    ...
+    let animal_d = DeserializeArray(json, Living);
+    RuntimeTypingSetEnable(false);
+    RuntimeTypingResetDictionnary();
+
+```
+
+### Note
+In the previous case, it will not enforce a class to be a subclass of Living.
+The last two line are not mandatory (if you whant to serialize/deserialize more).
+
+## Default value
+### emitDefaultValue
+if this decorator has false in it's arguement, the variable will not be serailized if it's value is the default.
+|   type  | default value |
+|:-------:|:-------------:|
+| number  |       0       |
+| string  |       ""      |
+| object  |      null     |
+| boolean |     false     |
+
+### defaultValue
+This decorator permits to change the default value. It only work with primitive type.
+```typescript
+    class Test {
+        @emitDefaultValue(false)
+        @serializeAs(Number)
+        public valueDefault: number = 0;
+
+        @emitDefaultValue(false)
+        @serializeAs(Number)
+        @defaultValue(2)
+        public valueNotDefault1: number = 1;
+
+        @emitDefaultValue(false)
+        @serializeAs(Number)
+        @defaultValue(2)
+        public valueNotDefault2: number = 2;
+    }
+    const t = new Test();
+    const json = Serialize(t, Test);
+    /* { valueNotDefault1: 1 } */
+
+```
+
+## Reference and circular reference
+Without this option, the following happens :
+```typescript
+    class Test {
+        @autoserializeAs(Number) public value: number = 10;
+    }
+
+    class Test0 {
+        @autoserializeAs(Test) public value0: Test;
+        @autoserializeAs(Test) public value1: Test;
+    }
+    const t = new Test();
+    const t0 = new Test0();
+    t0.value0 = t0.value1 = t;
+    const json = Serialize(t0, Test0); /*json = {"value0":{"value":10},"value1":{"value":10}}*/
+    const obj = Deserialize(json, Test0);
+    obj.value1 == obj.value0; /*false*/
+```
+Even if ```t0.value0``` and ```t0.value1``` are the same, they are serialized as to separate object. Event worse, if the references form a loop, the serialisation will crash. Whith SetRefCycleDetection, each object will have its own id, and will be refereced for any other references exepte the first one.
+```typescript
+    class Test {
+        @deserializeAsJson() public value: number = 10;
+    }
+
+    class Test0 {
+        @deserializeAsJson() public value0: Test;
+        @deserializeAsJson() public value1: Test;
+    }
+    const json = {
+        $id: 1,
+        value0: { $id: 2, value: 1 },
+        value1: { $ref: 2 }
+    };
+    SetRefCycleDetection(true);
+    const instance = Deserialize(json, Test0);
+    RefClean();
+    SetRefCycleDetection(false);
+    obj.value1 == obj.value0; /*true*/
+```
+
+### Note
+For architectural code choice, during deserialization, the parser must read the object id before any mention of it's reference. For example the following json would crash during deserialization :
+```typescript
+{
+    $id: 1,
+    value1: { $ref: 2 },
+    value2: { $id: 2, value: 1 }
+}
+```
+because the reference of object 2 would be readen before its id.
+The generated json from SetRefCycleDetection is compatible with [PreserveReferencesHandling](https://www.newtonsoft.com/json/help/html/PreserveReferencesHandlingObject.htm) option form newtonsoft.
