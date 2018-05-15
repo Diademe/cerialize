@@ -1161,8 +1161,8 @@ describe("Deserializing", function() {
             }
 
             class Test0 {
-                @deserializeAsJson() public value0: Test;
-                @deserializeAsJson() public value1: Test;
+                @deserializeAs(Test) public value0: Test;
+                @deserializeAs(Test) public value1: Test;
             }
             const json = {
                 $id: 1,
