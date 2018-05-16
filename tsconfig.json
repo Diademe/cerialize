@@ -11,7 +11,6 @@
     "stripInternal": true,
     "strictNullChecks": false,
     "experimentalDecorators": true,
-    "importHelpers": false,
     "noEmitHelpers": false,
     "declaration": true,
     "sourceMap": true,

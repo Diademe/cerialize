@@ -42,7 +42,5 @@
       "jsx"
     ]
   },
-  "dependencies": {
-    "tslib": "^1.9.0"
-  }
+  "dependencies": {}
 }
