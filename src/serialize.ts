@@ -22,6 +22,9 @@ export function SerializeMap<T>(
     source: T,
     type: SerializableType<T>
 ): Indexable<JsonType> {
+    if (source === null || source === void 0) {
+        return null;
+    }
     const target: Indexable<JsonType> = {};
     const keys = Object.keys(source);
 
@@ -50,6 +53,9 @@ export function SerializeArray<T>(
     source: T[],
     type: SerializableType<T>
 ): JsonType[] {
+    if (source === null || source === void 0) {
+        return null;
+    }
     const json: any = {};
     if (cycleBreaking(json, source)) {
         return json;
@@ -248,7 +254,9 @@ export function Serialize<T>(
 
 function defaultValue(metadata: MetaData, val: any) {
     if (metadata.emitDefaultValue === false) {
-        if (metadata.DefaultValue !== null) {
+        if (val === null){
+            return true;
+        } else if (metadata.DefaultValue !== null) {
             return val === metadata.DefaultValue;
         } else {
             // tslint:disable-next-line:triple-equals
