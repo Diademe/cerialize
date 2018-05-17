@@ -19,7 +19,7 @@
   "scripts": {
     "build": "pwd && ls && tsc --project src/tsconfig.json",
     "test": "jest",
-    "install": "npm run build",
+    "postinstall": "npm run build",
     "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
     "tslint": "tslint --config ./tslint.json -p src/tsconfig.json -p spec/tsconfig.json"
   },
