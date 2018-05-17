@@ -13,7 +13,7 @@
     "experimentalDecorators": true,
     "noEmitHelpers": false,
     "declaration": true,
-    "sourceMap": true,
+    "sourceMap": false,
     "moduleResolution": "node"
   }
 }
