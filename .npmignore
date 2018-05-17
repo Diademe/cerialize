@@ -3,4 +3,3 @@ src
 .git
 spec
 .vscode
-dist/spec
