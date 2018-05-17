@@ -17,7 +17,7 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "tsc --project src/tsconfig.json",
+    "build": "pwd && ls && tsc --project src/tsconfig.json",
     "test": "jest",
     "install": "npm run build",
     "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
