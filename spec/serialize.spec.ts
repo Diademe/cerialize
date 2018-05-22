@@ -1000,6 +1000,7 @@ describe("Serializing", function() {
                 v2: 2,
                 v3: 3
             });
+            SelectiveSerialization();
         });
     });
 

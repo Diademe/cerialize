@@ -310,7 +310,8 @@ The default InstantiationMethod can be changed with `SetDefaultInstantiationMeth
         const json = DeserializeJson(value);
     ```
 
-- `DeserializeRaw<T>(data : JsonObject, type : SerializableType<T>, target? : T) : T`
+- `DeserializeRaw<T>(data : JsonObject, type : SerializableType<T>, target? : T) : T`  
+    `Raw` is a invoke the decerialization with InstantiationMethod set to None.
     ```typescript
         const json = {/* some values from server */};
 
@@ -569,5 +570,70 @@ For architectural code choice, during deserialization, the parser must read the 
     value2: { $id: 2, value: 1 }
 }
 ```
-because the reference of object 2 would be readen before its id.
+Because the reference of object 2 would be readen before its id.
 The generated json from SetRefCycleDetection is compatible with [PreserveReferencesHandling](https://www.newtonsoft.com/json/help/html/PreserveReferencesHandlingObject.htm) option form newtonsoft.
+
+## Selective serialization
+You can serialize only some member and take this decision at runtime using bitmask : affect a bitmask to a member with `serializeBitMask` (up to 2^53). Befor serialization, you can set a global bitmask using `SelectiveSerialization`. If and only if the bitmask of the member AND the global bitmask evaluate to true, then the memeber will be serialized.
+```typescript
+{
+    class Test {
+        @serializeBitMask(1)
+        @serializeAs(Number)
+        public v1: number = 1;
+        @serializeBitMask(3)
+        @serializeAs(Number)
+        public v2: number = 2;
+        @serializeAs(Number)
+        @serializeBitMask(2)
+        public v3: number = 3;
+    }
+    SelectiveSerialization(1);
+    Serialize(s, Test); // {v1: 1, v2: 2}
+    SelectiveSerialization(2);
+    Serialize(s, Test); // {v2: 2, v3: 3}
+    SelectiveSerialization(3);
+    Serialize(s, Test); // {v1: 1, v2: 2, v3: 3}
+}
+```
+To reset the selective serialization do `SelectiveSerialization()`.
+## Summary
+
+### Decorator
+| serialize         | deserialize         | autoserialize         | 
+|-------------------|---------------------|-----------------------| 
+| serializeAs       | deserializeAs       | autoserializeAs       | 
+| serializeAsArray  | deserializeAsArray  | autoserializeAsArray  | 
+| serializeAsJson   | deserializeAsJson   | autoserializeAsJson   | 
+| serializeAsMap    | deserializeAsMap    | autoserializeAsMap    | 
+| serializeUsing    | deserializeUsing    | autoserializeUsing    | 
+
+Other decorators
+* inheritSerialization
+* serializeBitMask
+* emitDefaultValue
+* defaultValue
+
+### Setting Accessor
+* SetRefCycleDetection
+* RefClean
+* SetDefaultInstantiationMethod
+* SetDeserializeKeyTransform
+* SetSerializeKeyTransform
+* RuntimeTypingResetDictionnary
+* RuntimeTypingSetTypeString
+* RuntimeTypingSetEnable
+* SelectiveSerialization
+
+### Callback
+* onDeserialized
+* onSerialized
+
+### Good to know
+* To reset the selective serialization do `SelectiveSerialization()`.
+* You need to specify the type of each member that you want to (de)serialize. Use String, Number, Boolean, Date, or RegExp for primitives types
+* Serialization return an *object* that can be stringifyed (use JSON.stringify after a call to Serialize).
+* Deserialization expect an *object* (use JSON.parse befor a call to Deserialize).
+* You must use the `inheritSerialization` if you want to serialize object with inheritance.
+* Use RefClean if you want that `$id` start to one again.
+* You don't need to call `RuntimeTypingSetEnable(false)` after a serialisation if you want to use it again.
