@@ -344,6 +344,6 @@ export function defaultValue(instance: IConstructable) {
             target.constructor,
             actualKeyName
         );
-        metadata.DefaultValue = instance;
+        metadata.defaultValue = instance;
     };
 }

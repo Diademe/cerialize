@@ -1,5 +1,5 @@
 import { MetaData, MetaDataFlag } from "./meta_data";
-import { referenceHandeling } from "./ref_cycle";
+import { referenceHandling } from "./ref_cycle";
 import { TypeString } from "./runtime_typing";
 import {
     getTarget,
@@ -34,7 +34,7 @@ function _DeserializeMap<T>(
     }
 
     const tmp = { a: {} as Indexable<T> };
-    if (referenceHandeling(data, tmp)) {
+    if (referenceHandling(data, tmp)) {
         return tmp.a;
     }
     target = tmp.a;
@@ -80,7 +80,7 @@ function _DeserializeArray<T>(
         );
     }
     const tmp = { a: [] as T[] };
-    if (referenceHandeling(data, tmp)) {
+    if (referenceHandling(data, tmp)) {
         return tmp.a;
     }
     target = tmp.a;
@@ -139,7 +139,7 @@ export function DeserializeJSON<T extends JsonType>(
     target?: JsonType
 ): JsonType {
     const tmp = { a: {} }; // hack to passe argument by ref
-    if (referenceHandeling(data, tmp)) {
+    if (referenceHandling(data, tmp)) {
         return tmp.a;
     }
     target = tmp.a;
@@ -227,7 +227,7 @@ function _Deserialize<T extends Indexable>(
 
     target = getTarget(type as any, target, instantiationMethod) as T;
     const tmp = { a: target }; // hack to passe argument by ref
-    if (referenceHandeling(data, tmp)) {
+    if (referenceHandling(data, tmp)) {
         return tmp.a;
     }
     target = tmp.a;

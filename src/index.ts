@@ -33,5 +33,5 @@ export function SetDefaultInstantiationMethod(
 
 // if true it deales with referances and cycle referances
 export function SetRefCycleDetection(b: boolean) {
-    MetaData.RefCycleDetection = b;
+    MetaData.refCycleDetection = b;
 }

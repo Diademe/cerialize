@@ -40,7 +40,7 @@ export class MetaData {
     public flags: MetaDataFlag;
     public bitMaskSerialize: number;
     public emitDefaultValue: boolean;
-    public DefaultValue: IConstructable;
+    public defaultValue: IConstructable;
 
     constructor(keyName: string) {
         this.keyName = keyName;
@@ -51,7 +51,7 @@ export class MetaData {
         this.flags = 0;
         this.bitMaskSerialize = Number.MAX_SAFE_INTEGER;
         this.emitDefaultValue = true;
-        this.DefaultValue = null;
+        this.defaultValue = null;
     }
 
     public getSerializedKey(): string {
@@ -90,7 +90,7 @@ export class MetaData {
         metadata.flags = data.flags;
         metadata.bitMaskSerialize = data.bitMaskSerialize;
         metadata.emitDefaultValue = data.emitDefaultValue;
-        metadata.DefaultValue = data.DefaultValue;
+        metadata.defaultValue = data.defaultValue;
         return metadata;
     }
 
@@ -143,5 +143,5 @@ export class MetaData {
 
     public static deserializeInstantationMethod = InstantiationMethod.New;
 
-    public static RefCycleDetection = false;
+    public static refCycleDetection = false;
 }

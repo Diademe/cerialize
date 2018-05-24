@@ -22,8 +22,8 @@ class Cycle {
 
 let cycle = new Cycle();
 
-export function referenceHandeling(json: any, tmp: any) {
-    if (MetaData.RefCycleDetection === false) {
+export function referenceHandling(json: any, tmp: any) {
+    if (MetaData.refCycleDetection === false) {
         return false;
     }
     if (json.hasOwnProperty("$ref")) {
@@ -39,7 +39,7 @@ export function referenceHandeling(json: any, tmp: any) {
 }
 
 export function cycleBreaking(json: any, instance: any) {
-    if (MetaData.RefCycleDetection === false) {
+    if (MetaData.refCycleDetection === false) {
         return false;
     }
     if (cycle.obj2ref.has(instance)) {
