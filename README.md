@@ -637,3 +637,4 @@ Other decorators
 * You must use the `inheritSerialization` if you want to serialize object with inheritance.
 * Use RefClean if you want that `$id` start to one again.
 * You don't need to call `RuntimeTypingSetEnable(false)` after a serialisation if you want to use it again.
+* `@serializeAsArray` expect a non array type (ie if it's an array of `Boolean`, you should give `Boolean` as parameter). Same goes for `@serializeAsMap`.
