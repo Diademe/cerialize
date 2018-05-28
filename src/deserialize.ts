@@ -25,30 +25,58 @@ function _DeserializeMap<T>(
         );
     }
 
+    let mapType;
+    if (TypeString.getRuntimeTyping()) {
+        mapType = TypeString.getTypeFromString(
+            data.$type as any
+        ) as SerializableType<T>;
+        delete data.$type;
+        if (target){
+            delete target.$type;
+        }
+    }
     if (target === null || target === void 0) {
-        target = {};
+        switch (instantiationMethod) {
+            case InstantiationMethod.New:
+            target = new mapType() as any;
+            break;
+
+            case InstantiationMethod.ObjectCreate:
+            target = Object.create(mapType.prototype) as any;
+            break;
+
+            default:
+            target = {} as any;
+            break;
+        }
     }
 
     if (data === null || data === void 0) {
         return null;
     }
 
-    const tmp = { a: {} as Indexable<T> };
+    const tmp = { a: target as Indexable<T> };
     if (referenceHandling(data, tmp)) {
         return tmp.a;
     }
     target = tmp.a;
-
+    const isTrueMap = target instanceof Map;
     const keys = Object.keys(data);
     for (const key of keys) {
         const value = data[key];
         if (value !== void 0) {
-            target[MetaData.deserializeKeyTransform(key)] = _Deserialize(
+            const value = _Deserialize(
                 data[key] as any,
                 type,
-                target[key],
+                isTrueMap ? (target as any).get(key) : target[key],
                 instantiationMethod
             ) as T;
+            if (isTrueMap) {
+                (target as any).set(key, value);
+            }
+            else {
+                target[MetaData.deserializeKeyTransform(key)] = value;
+            }
         }
     }
 
