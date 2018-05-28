@@ -486,6 +486,23 @@ The Runtime typing is anable as follow :
 ### Note
 In the previous case, it will not enforce a class to be a subclass of Living.
 The last two line are not mandatory (if you whant to serialize/deserialize more).
+Unfortunately, I didn't found a way to add Runtime Typing for Map (or object used as map). You can do the following (use a class that inherite form Map)
+```typescript
+class MyDico1 extends Map<string, Number>{
+}
+class Test0 {
+    @serializeAsMap(Number) public dico1: MyDico1;
+}
+const s = new Test0();
+s.dico1 = new MyDico1([["1", 2], ["2", 3]]);
+s.dico1.set("3" , 4);
+RuntimeTypingSetEnable(true);
+RuntimeTypingSetTypeString(Test0, "my Test0 type");
+RuntimeTypingSetTypeString(MyDico1, "my MyDico1 type");
+const json = Serialize(s, Test0); // {$type: "my Test0 type", dico1: {$type: "my 1 type", 1: 2, 2: 3, 3: 4}}
+RuntimeTypingSetEnable(false);
+RuntimeTypingResetDictionnary();
+```
 
 ## Default value
 ### emitDefaultValue
@@ -638,3 +655,4 @@ Other decorators
 * Use RefClean if you want that `$id` start to one again.
 * You don't need to call `RuntimeTypingSetEnable(false)` after a serialisation if you want to use it again.
 * `@serializeAsArray` expect a non array type (ie if it's an array of `Boolean`, you should give `Boolean` as parameter). Same goes for `@serializeAsMap`.
+* `@serializeAsMap` works on [`Map` object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map).
