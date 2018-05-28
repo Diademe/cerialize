@@ -13,7 +13,8 @@ import {
     deserializeUsing,
     inheritSerialization,
     SetDefaultInstantiationMethod,
-    SetDeserializeKeyTransform
+    SetDeserializeKeyTransform,
+    DeserializeMap
 } from "../src";
 import {
     RefClean,
@@ -1260,6 +1261,40 @@ describe("Deserializing", function() {
             expect(json[3] instanceof Test3).toBeTruthy();
         });
 
+        it("Dictionnary", function() {
+            @inheritSerialization(Map)
+            class MyDico1 extends Map<string, Number>{
+            }
+            class Test0 {
+                @deserializeAsMap(Number) public dico1: MyDico1;
+                @deserializeAsMap(Number) public dico2: Indexable<Number>;
+            }
+            RuntimeTypingSetTypeString(Test0, "my Test0 type");
+            RuntimeTypingSetTypeString(Object, "my 2 type");
+            RuntimeTypingSetTypeString(MyDico1, "my 1 type");
+            RuntimeTypingSetEnable(true);
+            const json = Deserialize({
+                $type: "my Test0 type",
+                dico1: {
+                    $type: "my 1 type",
+                    1: 2,
+                    2: 3,
+                    3: 4},
+                dico2: {
+                    $type: "my 2 type",
+                    1: 1,
+                    blp: 2
+                }
+            }, Test0);
+            RuntimeTypingResetDictionnary();
+            RuntimeTypingSetEnable(false);
+            expect(json.dico1 instanceof MyDico1).toBeTruthy();
+            expect(json.dico1.get("1")).toBe(2);
+            expect(json.dico1.get("2")).toBe(3);
+            expect(json.dico1.get("3")).toBe(4);
+            expect(json.dico2 instanceof Object).toBeTruthy();
+            expect(json.dico2[1]).toBe(1);
+            expect(json.dico2.blp).toBe(2);
         });
 
         it("Object", function() {
