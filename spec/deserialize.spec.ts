@@ -1258,6 +1258,7 @@ describe("Deserializing", function() {
             expect(json[1] instanceof Test1).toBeTruthy();
             expect(json[2] instanceof Test2).toBeTruthy();
             expect(json[3] instanceof Test3).toBeTruthy();
+        });
 
         });
 
