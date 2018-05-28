@@ -1038,6 +1038,41 @@ describe("Serializing", function() {
             ]);
         });
 
+        it("Dictionary", function() {
+            @inheritSerialization(Map)
+            class MyDico1 extends Map<string, Number>{
+            }
+            class Test0 {
+                @serializeAsMap(Number) public dico1: MyDico1;
+                @serializeAsMap(Number) public dico2: Indexable<Number>;
+            }
+
+            const s = new Test0();
+            s.dico1 = new MyDico1([["1", 2], ["2", 3]]);
+            s.dico1.set("3" , 4);
+            s.dico2 = {1 : 1, blp : 2};
+            RuntimeTypingSetEnable(true);
+            RuntimeTypingSetTypeString(Test0, "my Test0 type");
+            RuntimeTypingSetTypeString(Object, "my 2 type");
+            RuntimeTypingSetTypeString(MyDico1, "my 1 type");
+            const json = Serialize(s, Test0);
+            RuntimeTypingSetEnable(false);
+            RuntimeTypingResetDictionnary();
+            expect(json).toEqual({
+                $type: "my Test0 type",
+                dico1: {
+                    $type: "my 1 type",
+                    1: 2,
+                    2: 3,
+                    3: 4},
+                dico2: {
+                    $type: "my 2 type",
+                    1: 1,
+                    blp: 2
+                }
+            });
+        });
+
         it("Object", function() {
             class Test0 {
                 @serializeAs(Boolean) public valueA: boolean = true;
