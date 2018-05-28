@@ -25,19 +25,20 @@ export function SerializeMap<T>(
     if (source === null || source === void 0) {
         return null;
     }
+    const isTrueMap = source instanceof Map;
     const target: Indexable<JsonType> = {};
-    const keys = Object.keys(source);
+    const keys = isTrueMap ? (source as any).keys() : Object.keys(source);
 
     if (cycleBreaking(target, source)) {
         return target;
     }
 
-    if (TypeString.getRuntimeTyping() && !isPrimitiveType(type)) {
+    if (TypeString.getRuntimeTyping()) {
         target.$type = TypeString.getStringFromType(source.constructor);
     }
 
     for (const key of keys) {
-        const value = (source as any)[key];
+        const value = isTrueMap ? (source as any).get(key) : (source as any)[key];
         if (value !== void 0) {
             target[MetaData.serializeKeyTransform(key)] = Serialize(
                 value,
