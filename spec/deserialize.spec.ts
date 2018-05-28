@@ -13,8 +13,7 @@ import {
     deserializeUsing,
     inheritSerialization,
     SetDefaultInstantiationMethod,
-    SetDeserializeKeyTransform,
-    DeserializeMap
+    SetDeserializeKeyTransform
 } from "../src";
 import {
     RefClean,
