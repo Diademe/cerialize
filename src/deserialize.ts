@@ -36,18 +36,23 @@ function _DeserializeMap<T>(
         }
     }
     if (target === null || target === void 0) {
-        switch (instantiationMethod) {
-            case InstantiationMethod.New:
-            target = new mapType() as any;
-            break;
+        if (mapType){
+            switch (instantiationMethod) {
+                case InstantiationMethod.New:
+                target = new mapType() as any;
+                break;
 
-            case InstantiationMethod.ObjectCreate:
-            target = Object.create(mapType.prototype) as any;
-            break;
+                case InstantiationMethod.ObjectCreate:
+                target = Object.create(mapType.prototype) as any;
+                break;
 
-            default:
-            target = {} as any;
-            break;
+                default:
+                target = {} as any;
+                break;
+            }
+        }
+        else {
+            target = {};
         }
     }
 
