@@ -26,7 +26,7 @@ function _DeserializeMap<T>(
     }
 
     let mapType;
-    if (TypeString.getRuntimeTyping()) {
+    if (TypeString.getRuntimeTyping() && data.$type) {
         mapType = TypeString.getTypeFromString(
             data.$type as any
         ) as SerializableType<T>;
@@ -230,7 +230,7 @@ function _Deserialize<T extends Indexable>(
     target?: T,
     instantiationMethod?: InstantiationMethod
 ): T | null {
-    if (TypeString.getRuntimeTyping() && !isPrimitiveType(type)) {
+    if (TypeString.getRuntimeTyping() && !isPrimitiveType(type) && data.$type) {
         type = TypeString.getTypeFromString(
             data.$type as any
         ) as SerializableType<T>;
