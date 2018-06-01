@@ -25,35 +25,8 @@ function _DeserializeMap<T>(
         );
     }
 
-    let mapType;
-    if (TypeString.getRuntimeTyping() && data.$type) {
-        mapType = TypeString.getTypeFromString(
-            data.$type as any
-        ) as SerializableType<T>;
-        delete data.$type;
-        if (target){
-            delete target.$type;
-        }
-    }
     if (target === null || target === void 0) {
-        if (mapType){
-            switch (instantiationMethod) {
-                case InstantiationMethod.New:
-                target = new mapType() as any;
-                break;
-
-                case InstantiationMethod.ObjectCreate:
-                target = Object.create(mapType.prototype) as any;
-                break;
-
-                default:
-                target = {} as any;
-                break;
-            }
-        }
-        else {
-            target = {};
-        }
+        target = {};
     }
 
     if (data === null || data === void 0) {
@@ -65,23 +38,17 @@ function _DeserializeMap<T>(
         return tmp.a;
     }
     target = tmp.a;
-    const isTrueMap = target instanceof Map;
+
     const keys = Object.keys(data);
     for (const key of keys) {
         const value = data[key];
         if (value !== void 0) {
-            const value = _Deserialize(
+            target[MetaData.deserializeKeyTransform(key)] = _Deserialize(
                 data[key] as any,
                 type,
-                isTrueMap ? (target as any).get(key) : target[key],
+                target[key],
                 instantiationMethod
             ) as T;
-            if (isTrueMap) {
-                (target as any).set(key, value);
-            }
-            else {
-                target[MetaData.deserializeKeyTransform(key)] = value;
-            }
         }
     }
 
@@ -230,7 +197,7 @@ function _Deserialize<T extends Indexable>(
     target?: T,
     instantiationMethod?: InstantiationMethod
 ): T | null {
-    if (TypeString.getRuntimeTyping() && !isPrimitiveType(type) && data.$type) {
+    if (TypeString.getRuntimeTyping() && !isPrimitiveType(type)) {
         type = TypeString.getTypeFromString(
             data.$type as any
         ) as SerializableType<T>;
