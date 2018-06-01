@@ -2,7 +2,7 @@ import {
     autoserializeAs,
     autoserializeAsArray,
     autoserializeAsJson,
-    autoserializeAsMap,
+    autoserializeAsObjectMap,
     autoserializeUsing,
     defaultValue,
     emitDefaultValue,
@@ -10,7 +10,7 @@ import {
     serializeAs,
     serializeAsArray,
     serializeAsJson,
-    serializeAsMap,
+    serializeAsObjectMap,
     serializeBitMask,
     serializeUsing
 } from "../src/annotations";
@@ -50,7 +50,7 @@ describe("Serializing", function() {
         function runTests(
             blockName: string,
             serializeAs: any,
-            serializeAsMap: any,
+            serializeAsObjectMap: any,
             serializeAsArray: any,
             serializeAsJson: any
         ) {
@@ -232,31 +232,31 @@ describe("Serializing", function() {
         runTests(
             "Normal",
             serializeAs,
-            serializeAsMap,
+            serializeAsObjectMap,
             serializeAsArray,
             serializeAsJson
         );
         runTests(
             "Auto",
             autoserializeAs,
-            autoserializeAsMap,
+            autoserializeAsObjectMap,
             autoserializeAsArray,
             autoserializeAsJson
         );
     });
 
-    describe("SerializeAsMap", function() {
+    describe("SerializeAsObjectMap", function() {
         function runTests(
             blockName: string,
             serializeAs: any,
-            serializeAsMap: any,
+            serializeAsObjectMap: any,
             serializeAsArray: any,
             serializeAsJson: any
         ) {
             describe(blockName, function() {
                 it("serializes a map of primitives", function() {
                     class Test {
-                        @serializeAsMap(Number)
+                        @serializeAsObjectMap(Number)
                         public values: Indexable<number>;
                     }
 
@@ -284,7 +284,7 @@ describe("Serializing", function() {
                     }
 
                     class Test {
-                        @serializeAsMap(TestType)
+                        @serializeAsObjectMap(TestType)
                         public values: Indexable<TestType>;
                     }
 
@@ -312,7 +312,7 @@ describe("Serializing", function() {
                     }
 
                     class Test {
-                        @serializeAsMap(TestType, "different")
+                        @serializeAsObjectMap(TestType, "different")
                         public values: Indexable<TestType>;
                     }
 
@@ -333,7 +333,8 @@ describe("Serializing", function() {
 
                 it("serializes nested maps", function() {
                     class TestType {
-                        @serializeAsMap(Number) public value: Indexable<number>;
+                        @serializeAsObjectMap(Number)
+                        public value: Indexable<number>;
 
                         constructor(arg: Indexable<number>) {
                             this.value = arg;
@@ -341,7 +342,7 @@ describe("Serializing", function() {
                     }
 
                     class Test {
-                        @serializeAsMap(TestType)
+                        @serializeAsObjectMap(TestType)
                         public values: Indexable<TestType>;
                     }
 
@@ -362,7 +363,7 @@ describe("Serializing", function() {
 
             it("skips undefined keys", function() {
                 class Test {
-                    @serializeAsMap(Number) public values: Indexable<number>;
+                    @serializeAsObjectMap(Number) public values: Indexable<number>;
                 }
 
                 const t = new Test();
@@ -384,14 +385,14 @@ describe("Serializing", function() {
         runTests(
             "Normal",
             serializeAs,
-            serializeAsMap,
+            serializeAsObjectMap,
             serializeAsArray,
             serializeAsJson
         );
         runTests(
             "Auto",
             autoserializeAs,
-            autoserializeAsMap,
+            autoserializeAsObjectMap,
             autoserializeAsArray,
             autoserializeAsJson
         );
@@ -401,7 +402,7 @@ describe("Serializing", function() {
         function runTests(
             blockName: string,
             serializeAs: any,
-            serializeAsMap: any,
+            serializeAsObjectMap: any,
             serializeAsArray: any,
             serializeAsJson: any
         ) {
@@ -508,14 +509,14 @@ describe("Serializing", function() {
         runTests(
             "Normal",
             serializeAs,
-            serializeAsMap,
+            serializeAsObjectMap,
             serializeAsArray,
             serializeAsJson
         );
         runTests(
             "Auto",
             autoserializeAs,
-            autoserializeAsMap,
+            autoserializeAsObjectMap,
             autoserializeAsArray,
             autoserializeAsJson
         );
@@ -525,7 +526,7 @@ describe("Serializing", function() {
         function runTests(
             blockName: string,
             serializeAs: any,
-            serializeAsMap: any,
+            serializeAsObjectMap: any,
             serializeAsArray: any,
             serializeAsJson: any
         ) {
@@ -845,14 +846,14 @@ describe("Serializing", function() {
         runTests(
             "Normal",
             serializeAs,
-            serializeAsMap,
+            serializeAsObjectMap,
             serializeAsArray,
             serializeAsJson
         );
         runTests(
             "Auto",
             autoserializeAs,
-            autoserializeAsMap,
+            autoserializeAsObjectMap,
             autoserializeAsArray,
             autoserializeAsJson
         );
@@ -1043,8 +1044,8 @@ describe("Serializing", function() {
             class MyDico1 extends Map<string, Number>{
             }
             class Test0 {
-                @serializeAsMap(Number) public dico1: MyDico1;
-                @serializeAsMap(Number) public dico2: Indexable<Number>;
+                @serializeAsObjectMap(Number) public dico1: MyDico1;
+                @serializeAsObjectMap(Number) public dico2: Indexable<Number>;
             }
 
             const s = new Test0();

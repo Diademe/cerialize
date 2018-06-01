@@ -126,7 +126,7 @@ Once you have annotated your class types, you can use the `Serialize*` and `Dese
         @autoserializeAsArray(CrewMember) : crew : Array<CrewMember>;
 
         // serialize and deserialize our planet log as an indexable map by planet name
-        @autoserializeAsMap(Planet) : planetsVisited : Indexable<PlanetLog>;
+        @autoserializeAsObjectMap(Planet) : planetsVisited : Indexable<PlanetLog>;
 
         // we don't have a specific format for cargo, so just serialize and deserialize it as normal json
         @autoserializeAsJSON() cargo : any; 
@@ -148,19 +148,19 @@ If you want the same behavior for a property when serializing and deserializing,
 
 ##### Serialization
 - `@serializeAs(type : ClassConstructor, customKey? : string)`
-- `@serializeAsMap(type : ClassConstructor, customKey? : string)`
+- `@serializeAsObjectMap(type : ClassConstructor, customKey? : string)`
 - `@serializeAsArray(type : ClassConstructor, customKey? : string)`
 - `@serializeUsing(transform : SerializerFn, customKey? : string)`
 - `@serializeAsJson(customKey? : string)`
 ##### Deserialization
 - `@deserializeAs(type : ClassConstructor, customKey? : string)`
 - `@deserializeAsArray(type : ClassConstructor, customKey? : string)`
-- `@deserializeAsMap(type : ClassConstructor, customKey? : string)`
+- `@deserializeAsObjectMap(type : ClassConstructor, customKey? : string)`
 - `@deserializeUsing(transform : DeserializerFn, customKey? : string)`
 - `@deserializeAsJson(customKey? : string)`
 ##### Serialization and Deserialization
 - `@autoserializeAs(type : ClassConstructor, customKey? : string)`
-- `@autoserializeAsMap(type : ClassConstructor, customKey? : string)`
+- `@autoserializeAsObjectMap(type : ClassConstructor, customKey? : string)`
 - `@autoserializeAsArray(type : ClassConstructor, customKey? : string)`
 - `@autoserializeUsing(transforms : SerializeAndDeserializeFns, customKey? : string)`
 - `@autoserializeAsJson(customKey? : string)`
@@ -491,7 +491,7 @@ Unfortunately, I didn't found a way to add Runtime Typing for Map (or object use
 class MyDico1 extends Map<string, Number>{
 }
 class Test0 {
-    @serializeAsMap(Number) public dico1: MyDico1;
+    @serializeAsObjectMap(Number) public dico1: MyDico1;
 }
 const s = new Test0();
 s.dico1 = new MyDico1([["1", 2], ["2", 3]]);
@@ -622,7 +622,7 @@ To reset the selective serialization do `SelectiveSerialization()`.
 | serializeAs       | deserializeAs       | autoserializeAs       | 
 | serializeAsArray  | deserializeAsArray  | autoserializeAsArray  | 
 | serializeAsJson   | deserializeAsJson   | autoserializeAsJson   | 
-| serializeAsMap    | deserializeAsMap    | autoserializeAsMap    | 
+| serializeAsObjectMap    | deserializeAsObjectMap    | autoserializeAsObjectMap    | 
 | serializeUsing    | deserializeUsing    | autoserializeUsing    | 
 
 Other decorators
@@ -654,5 +654,5 @@ Other decorators
 * You must use the `inheritSerialization` if you want to serialize object with inheritance.
 * Use RefClean if you want that `$id` start to one again.
 * You don't need to call `RuntimeTypingSetEnable(false)` after a serialisation if you want to use it again.
-* `@serializeAsArray` expect a non array type (ie if it's an array of `Boolean`, you should give `Boolean` as parameter). Same goes for `@serializeAsMap`.
-* `@serializeAsMap` works on [`Map` object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map).
+* `@serializeAsArray` expect a non array type (ie if it's an array of `Boolean`, you should give `Boolean` as parameter). Same goes for `@serializeAsObjectMap`.
+* `@serializeAsObjectMap` works on [`Map` object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map).

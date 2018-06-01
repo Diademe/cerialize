@@ -18,7 +18,7 @@ export function SelectiveSerialization(
     serializeBitMaskPrivate = bitMask;
 }
 
-export function SerializeMap<T>(
+export function SerializeObjectMap<T>(
     source: T,
     type: SerializableType<T>
 ): Indexable<JsonType> {
@@ -197,8 +197,8 @@ export function Serialize<T>(
         const keyName = metadata.getSerializedKey();
         const flags = metadata.flags;
 
-        if ((flags & MetaDataFlag.SerializeMap) !== 0) {
-            const val = SerializeMap(source, metadata.serializedType);
+        if ((flags & MetaDataFlag.SerializeObjectMap) !== 0) {
+            const val = SerializeObjectMap(source, metadata.serializedType);
             if (defaultValue(metadata, val)) {
                 continue;
             }

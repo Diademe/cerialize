@@ -14,7 +14,7 @@ export const enum MetaDataFlag {
     DeserializeArray = 1 << 3,
     SerializeArray = 1 << 4,
     DeserializeMap = 1 << 5,
-    SerializeMap = 1 << 6,
+    SerializeObjectMap = 1 << 6,
     DeserializeJSON = 1 << 7,
     SerializeJSON = 1 << 8,
     DeserializeJSONTransformKeys = 1 << 9,

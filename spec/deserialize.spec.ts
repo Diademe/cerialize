@@ -2,14 +2,14 @@ import {
     autoserializeAs,
     autoserializeAsArray,
     autoserializeAsJson,
-    autoserializeAsMap,
+    autoserializeAsObjectMap,
     autoserializeUsing,
     Deserialize,
     DeserializeArray,
     deserializeAs,
     deserializeAsArray,
     deserializeAsJson,
-    deserializeAsMap,
+    deserializeAsObjectMap,
     deserializeUsing,
     inheritSerialization,
     SetDefaultInstantiationMethod,
@@ -334,12 +334,12 @@ describe("Deserializing", function() {
 
     });
 
-    describe("DeserializeAsMap", function() {
+    describe("DeserializeAsObjectMap", function() {
 
         function runTests(blockName: string,
                           instantiationMethod: InstantiationMethod,
                           deserializeAs: any,
-                          deserializeAsMap: any,
+                          deserializeAsObjectMap: any,
                           makeTarget: boolean) {
 
             describe(blockName, function() {
@@ -347,7 +347,7 @@ describe("Deserializing", function() {
                 it("deserializes a map of primitives", function() {
 
                     class Test {
-                        @deserializeAsMap(Number) public values: Indexable<number>;
+                        @deserializeAsObjectMap(Number) public values: Indexable<number>;
                     }
 
                     const json = { values: { v0: 0, v1: 1, v2: 2 } };
@@ -369,7 +369,7 @@ describe("Deserializing", function() {
                     }
 
                     class Test {
-                        @deserializeAsMap(TestType) public values: Indexable<TestType>;
+                        @deserializeAsObjectMap(TestType) public values: Indexable<TestType>;
                     }
 
                     const json = {
@@ -389,7 +389,7 @@ describe("Deserializing", function() {
 
                 it("deserializes nested maps", function() {
                     class TestType {
-                        @deserializeAsMap(Number) public value: Indexable<number>;
+                        @deserializeAsObjectMap(Number) public value: Indexable<number>;
 
                         constructor(arg: Indexable<number>) {
                             this.value = arg;
@@ -397,7 +397,7 @@ describe("Deserializing", function() {
                     }
 
                     class Test {
-                        @deserializeAsMap(TestType) public values: Indexable<TestType>;
+                        @deserializeAsObjectMap(TestType) public values: Indexable<TestType>;
                     }
 
                     const json = {
@@ -418,7 +418,7 @@ describe("Deserializing", function() {
 
                 it("skips undefined keys", function() {
                     class Test {
-                        @deserializeAsMap(Number) public values: Indexable<number>;
+                        @deserializeAsObjectMap(Number) public values: Indexable<number>;
                     }
 
                     const json: any = {
@@ -448,7 +448,7 @@ describe("Deserializing", function() {
                     }
 
                     class Test {
-                        @deserializeAsMap(TestType, "different") public values: Indexable<TestType>;
+                        @deserializeAsObjectMap(TestType, "different") public values: Indexable<TestType>;
                     }
 
                     const json = {
@@ -464,7 +464,7 @@ describe("Deserializing", function() {
 
                 it("throws an exeption if input is not a map type", function() {
                     class Test {
-                        @deserializeAsMap(Number) public values: Indexable<number>;
+                        @deserializeAsObjectMap(Number) public values: Indexable<number>;
                     }
 
                     expect(function() {
@@ -490,7 +490,7 @@ describe("Deserializing", function() {
                 it("deserializes a null map", function() {
 
                     class Test {
-                        @deserializeAsMap(Number) public values: Indexable<number>;
+                        @deserializeAsObjectMap(Number) public values: Indexable<number>;
                     }
 
                     const json: any = { values: null };
@@ -505,21 +505,21 @@ describe("Deserializing", function() {
         }
 
         runTests("Normal > Create Instances > With Target",
-        InstantiationMethod.New, deserializeAs, deserializeAsMap, true);
+        InstantiationMethod.New, deserializeAs, deserializeAsObjectMap, true);
         runTests("Normal > Create Instances > Without Target",
-        InstantiationMethod.New, deserializeAs, deserializeAsMap, false);
+        InstantiationMethod.New, deserializeAs, deserializeAsObjectMap, false);
         runTests("Normal > No Instances > With Target",
-        InstantiationMethod.None, deserializeAs, deserializeAsMap, true);
+        InstantiationMethod.None, deserializeAs, deserializeAsObjectMap, true);
         runTests("Normal > No Instances > Without Target",
-        InstantiationMethod.None, deserializeAs, deserializeAsMap, false);
+        InstantiationMethod.None, deserializeAs, deserializeAsObjectMap, false);
         runTests("Auto > Create Instances > With Target",
-        InstantiationMethod.New, autoserializeAs, autoserializeAsMap, true);
+        InstantiationMethod.New, autoserializeAs, autoserializeAsObjectMap, true);
         runTests("Auto > Create Instances > Without Target",
-        InstantiationMethod.New, autoserializeAs, autoserializeAsMap, false);
+        InstantiationMethod.New, autoserializeAs, autoserializeAsObjectMap, false);
         runTests("Auto > No Instances > With Target",
-        InstantiationMethod.None, autoserializeAs, autoserializeAsMap, true);
+        InstantiationMethod.None, autoserializeAs, autoserializeAsObjectMap, true);
         runTests("Auto > No Instances > Without Target",
-        InstantiationMethod.None, autoserializeAs, autoserializeAsMap, false);
+        InstantiationMethod.None, autoserializeAs, autoserializeAsObjectMap, false);
 
     });
 
@@ -1265,8 +1265,8 @@ describe("Deserializing", function() {
             class MyDico1 extends Map<string, Number>{
             }
             class Test0 {
-                @deserializeAsMap(Number) public dico1: MyDico1;
-                @deserializeAsMap(Number) public dico2: Indexable<Number>;
+                @deserializeAsObjectMap(Number) public dico1: MyDico1;
+                @deserializeAsObjectMap(Number) public dico2: Indexable<Number>;
             }
             RuntimeTypingSetTypeString(Test0, "my Test0 type");
             RuntimeTypingSetTypeString(Object, "my 2 type");

@@ -68,7 +68,7 @@ export function serializeAsArray<T>(
     };
 }
 
-export function serializeAsMap<T>(type: SerializableType<T>, keyName?: string) {
+export function serializeAsObjectMap<T>(type: SerializableType<T>, keyName?: string) {
     return function(target: any, actualKeyName: string): any {
         const metadata = MetaData.getMetaData(
             target.constructor,
@@ -76,7 +76,7 @@ export function serializeAsMap<T>(type: SerializableType<T>, keyName?: string) {
         );
         metadata.serializedKey = keyName ? keyName : actualKeyName;
         metadata.serializedType = type;
-        metadata.flags |= MetaDataFlag.SerializeMap;
+        metadata.flags |= MetaDataFlag.SerializeObjectMap;
         metadata.flags = setBitConditionally(
             metadata.flags,
             MetaDataFlag.SerializePrimitive,
@@ -160,7 +160,7 @@ export function deserializeAsArray(
     };
 }
 
-export function deserializeAsMap(
+export function deserializeAsObjectMap(
     type: SerializableType<any>,
     keyName?: string
 ) {
@@ -269,7 +269,7 @@ export function autoserializeAsArray(
     };
 }
 
-export function autoserializeAsMap(
+export function autoserializeAsObjectMap(
     type: SerializableType<any>,
     keyName?: string
 ) {
@@ -284,7 +284,7 @@ export function autoserializeAsMap(
         metadata.deserializedType = type;
         metadata.serializedType = type;
         metadata.flags |=
-            MetaDataFlag.SerializeMap | MetaDataFlag.DeserializeMap;
+            MetaDataFlag.SerializeObjectMap | MetaDataFlag.DeserializeMap;
         metadata.flags = setBitConditionally(
             metadata.flags,
             MetaDataFlag.AutoPrimitive,
