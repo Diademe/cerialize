@@ -9,6 +9,7 @@ import {
     deserializeAs,
     deserializeAsArray,
     deserializeAsJson,
+    deserializeAsMap,
     deserializeAsObjectMap,
     deserializeUsing,
     inheritSerialization,
@@ -523,6 +524,100 @@ describe("Deserializing", function() {
 
     });
 
+    describe("DeserializeAsMap", function() {
+                it("deserializes a map of primitives", function() {
+
+                    class Test {
+                        @deserializeAsMap(String, Number) public values: Map<string, number>;
+                    }
+
+                    const json = { values: { v0: 0, v1: 1, v2: 2 } };
+                    const instance = Deserialize(json, Test);
+                    expect(instance.values.get("v0")).toEqual(0);
+                    expect(instance.values.get("v1")).toEqual(1);
+                    expect(instance.values.get("v2")).toEqual(2);
+                });
+
+                it("deserializes nested maps", function() {
+                    class TestType {
+                        @deserializeAsMap(String, Number) public value: Map<string, Number>;
+
+                        constructor(arg: Map<string, number>) {
+                            this.value = arg;
+                        }
+                    }
+
+                    class Test {
+                        @deserializeAsMap(String, TestType) public values: Map<string, TestType>;
+                    }
+
+                    const json = {
+                        values: {
+                            v0: { value: { v00: 1, v01: 2 } },
+                            v1: { value: { v10: 2, v11: 2 } },
+                            v2: { value: { v20: 3, v21: 2 } }
+                        }
+                    };
+                    const instance = Deserialize(json, Test);
+                    expect(instance.values.get("v0").value.get("v00")).toEqual(1);
+                    expect(instance.values.get("v0").value.get("v01")).toEqual(2);
+                    expect(instance.values.get("v1").value.get("v10")).toEqual(2);
+                    expect(instance.values.get("v1").value.get("v11")).toEqual(2);
+                    expect(instance.values.get("v2").value.get("v20")).toEqual(3);
+                    expect(instance.values.get("v2").value.get("v21")).toEqual(2);
+                });
+
+                it("skips undefined keys", function() {
+                    class Test {
+                        @deserializeAsMap(String, Number) public values: Map<string, number>;
+                    }
+
+                    const json: any = {
+                        values: {
+                            v0: void 0,
+                            v1: 1,
+                            v2: 2
+                        }
+                    };
+                    const instance = Deserialize(json, Test);
+                    expect(instance.values.size).toEqual(2);
+                });
+
+                it("deserializes a map with different key name", function() {
+                    class TestType {
+                        @deserializeAs(Number) public value: number;
+
+                        constructor(arg: number) {
+                            this.value = arg;
+                        }
+                    }
+
+                    class Test {
+                        @deserializeAsMap(String, TestType, Map, "different")
+                        public values: Map<String, TestType>;
+                    }
+
+                    const json = {
+                        different: { v0: { value: 1 }, v1: { value: 2 } }
+                    };
+                    const instance = Deserialize(json, Test);
+                    expect(instance.values.get("v0").value).toEqual(1);
+                    expect(instance.values.get("v1").value).toEqual(2);
+
+                });
+
+                it("deserializes a null map", function() {
+
+                    class Test {
+                        @deserializeAsMap(Number, String) public values: Map<number, string>;
+                    }
+
+                    const json: any = { values: null };
+                    const instance = Deserialize(json, Test);
+                    expect(instance.values).toBeNull();
+
+                });
+            });
     describe("DeserializeAsArray", function() {
 
         function runTests(blockName: string,
@@ -1258,42 +1353,6 @@ describe("Deserializing", function() {
             expect(json[1] instanceof Test1).toBeTruthy();
             expect(json[2] instanceof Test2).toBeTruthy();
             expect(json[3] instanceof Test3).toBeTruthy();
-        });
-
-        it("Dictionnary", function() {
-            @inheritSerialization(Map)
-            class MyDico1 extends Map<string, Number>{
-            }
-            class Test0 {
-                @deserializeAsObjectMap(Number) public dico1: MyDico1;
-                @deserializeAsObjectMap(Number) public dico2: Indexable<Number>;
-            }
-            RuntimeTypingSetTypeString(Test0, "my Test0 type");
-            RuntimeTypingSetTypeString(Object, "my 2 type");
-            RuntimeTypingSetTypeString(MyDico1, "my 1 type");
-            RuntimeTypingSetEnable(true);
-            const json = Deserialize({
-                $type: "my Test0 type",
-                dico1: {
-                    $type: "my 1 type",
-                    1: 2,
-                    2: 3,
-                    3: 4},
-                dico2: {
-                    $type: "my 2 type",
-                    1: 1,
-                    blp: 2
-                }
-            }, Test0);
-            RuntimeTypingResetDictionnary();
-            RuntimeTypingSetEnable(false);
-            expect(json.dico1 instanceof MyDico1).toBeTruthy();
-            expect(json.dico1.get("1")).toBe(2);
-            expect(json.dico1.get("2")).toBe(3);
-            expect(json.dico1.get("3")).toBe(4);
-            expect(json.dico2 instanceof Object).toBeTruthy();
-            expect(json.dico2[1]).toBe(1);
-            expect(json.dico2.blp).toBe(2);
         });
 
         it("Object", function() {

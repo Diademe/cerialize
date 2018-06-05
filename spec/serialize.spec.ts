@@ -10,6 +10,7 @@ import {
     serializeAs,
     serializeAsArray,
     serializeAsJson,
+    serializeAsMap,
     serializeAsObjectMap,
     serializeBitMask,
     serializeUsing
@@ -243,6 +244,134 @@ describe("Serializing", function() {
             autoserializeAsArray,
             autoserializeAsJson
         );
+    });
+
+    describe("SerializeAsMap", function() {
+        it("serializes a map of primitives", function() {
+            class Test {
+                @serializeAsObjectMap(Number)
+                public values: Indexable<number>;
+            }
+
+            const t = new Test();
+            t.values = {
+                v0: 1,
+                v1: 2,
+                v2: 3
+            };
+            const json = Serialize(t, Test);
+            expect(json.values).toEqual({
+                v0: 1,
+                v1: 2,
+                v2: 3
+            });
+        });
+
+        it("serializes a map of typed objects", function() {
+            class TestType {
+                @serializeAs(Number) public value: number;
+
+                constructor(arg: number) {
+                    this.value = arg;
+                }
+            }
+
+            class Test {
+                @serializeAsObjectMap(TestType)
+                public values: Indexable<TestType>;
+            }
+
+            const t = new Test();
+            t.values = {
+                v0: new TestType(0),
+                v1: new TestType(1),
+                v2: new TestType(2)
+            };
+            const json = Serialize(t, Test);
+            expect(json.values).toEqual({
+                v0: { value: 0 },
+                v1: { value: 1 },
+                v2: { value: 2 }
+            });
+        });
+
+        it("serializes a map with a different key name", function() {
+            class TestType {
+                @serializeAs(Number) public value: number;
+
+                constructor(arg: number) {
+                    this.value = arg;
+                }
+            }
+
+            class Test {
+                @serializeAsObjectMap(TestType, "different")
+                public values: Indexable<TestType>;
+            }
+
+            const t = new Test();
+            t.values = {
+                v0: new TestType(0),
+                v1: new TestType(1),
+                v2: new TestType(2)
+            };
+            const json = Serialize(t, Test);
+            expect(json.values).not.toBeDefined();
+            expect(json.different).toEqual({
+                v0: { value: 0 },
+                v1: { value: 1 },
+                v2: { value: 2 }
+            });
+        });
+
+        it("serializes nested maps", function() {
+            class TestType {
+                @serializeAsMap(String, Number)
+                public value: Map<string, number>;
+
+                constructor(arg: Map<string, number>) {
+                    this.value = arg;
+                }
+            }
+
+            class Test {
+                @serializeAsMap(String, TestType)
+                public values: Map<String, TestType>;
+            }
+
+            const t = new Test();
+            t.values = new Map([
+                ["v0", new TestType(new Map([["v00", 1], ["v01", 2] ]))],
+                ["v1", new TestType(new Map([["v10", 2], ["v11", 2] ]))],
+                ["v2", new TestType(new Map([["v20", 3], ["v21", 2] ]))]
+                ]);
+            const json = Serialize(t, Test);
+            expect(json.values).toEqual({
+                v0: { value: { v00: 1, v01: 2 } },
+                v1: { value: { v10: 2, v11: 2 } },
+                v2: { value: { v20: 3, v21: 2 } }
+            });
+        });
+
+        it("skips undefined keys", function() {
+            class Test {
+                @serializeAsMap(String, Number) public values: Map<string, number>;
+            }
+
+            const t = new Test();
+            t.values = new Map([
+                ["v0", void 0],
+                ["v1", 1],
+                ["v2", 2]
+            ]);
+            const json = Serialize(t, Test);
+            expect(json).toEqual({
+                values: {
+                    v1: 1,
+                    v2: 2
+                }
+            });
+        });
     });
 
     describe("SerializeAsObjectMap", function() {
@@ -1037,41 +1166,6 @@ describe("Serializing", function() {
                 { $type: "my Test2 type", valueC: 2 },
                 { $type: "my Test3 type", valueD: 3 }
             ]);
-        });
-
-        it("Dictionary", function() {
-            @inheritSerialization(Map)
-            class MyDico1 extends Map<string, Number>{
-            }
-            class Test0 {
-                @serializeAsObjectMap(Number) public dico1: MyDico1;
-                @serializeAsObjectMap(Number) public dico2: Indexable<Number>;
-            }
-
-            const s = new Test0();
-            s.dico1 = new MyDico1([["1", 2], ["2", 3]]);
-            s.dico1.set("3" , 4);
-            s.dico2 = {1 : 1, blp : 2};
-            RuntimeTypingSetEnable(true);
-            RuntimeTypingSetTypeString(Test0, "my Test0 type");
-            RuntimeTypingSetTypeString(Object, "my 2 type");
-            RuntimeTypingSetTypeString(MyDico1, "my 1 type");
-            const json = Serialize(s, Test0);
-            RuntimeTypingSetEnable(false);
-            RuntimeTypingResetDictionnary();
-            expect(json).toEqual({
-                $type: "my Test0 type",
-                dico1: {
-                    $type: "my 1 type",
-                    1: 2,
-                    2: 3,
-                    3: 4},
-                dico2: {
-                    $type: "my 2 type",
-                    1: 1,
-                    blp: 2
-                }
-            });
         });
 
         it("Object", function() {
