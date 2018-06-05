@@ -146,24 +146,28 @@ Most annotations take a class constructor. For primitives, use `String`, `Number
 
 If you want the same behavior for a property when serializing and deserializing, you can either tag that property with a `@serialize*` and `@deserialize*` or you can use `@autoserializeXXX` which will do this in a single annotation and behave exactly the same as `@serialize*` and `@deserialize*`. The only difference in behavior is that `@autoserializingUsing()` takes an argument of type `SerializeAndDeserializeFns` instead of a single function argument like it's siblings do.
 
+`@serializeAsMap` will convert a [Map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map) to an map object (ie an object with keys and values). Due to syntaxe of javascript, keys can only be int or string. `@deserializeAsMap` will corectly deserialize into a Map.
 ##### Serialization
 - `@serializeAs(type : ClassConstructor, customKey? : string)`
 - `@serializeAsObjectMap(type : ClassConstructor, customKey? : string)`
 - `@serializeAsArray(type : ClassConstructor, customKey? : string)`
 - `@serializeUsing(transform : SerializerFn, customKey? : string)`
 - `@serializeAsJson(customKey? : string)`
+- `@serializeAsMap(keyType: SerializableType<any>, valueType: SerializableType<any>, constructor?: SerializableType<any>, keyName?: string)`
 ##### Deserialization
 - `@deserializeAs(type : ClassConstructor, customKey? : string)`
 - `@deserializeAsArray(type : ClassConstructor, customKey? : string)`
 - `@deserializeAsObjectMap(type : ClassConstructor, customKey? : string)`
 - `@deserializeUsing(transform : DeserializerFn, customKey? : string)`
 - `@deserializeAsJson(customKey? : string)`
+- `@deserializeAsMap(keyType: SerializableType<any>, valueType: SerializableType<any>, constructor?: SerializableType<any>, keyName?: string)`
 ##### Serialization and Deserialization
 - `@autoserializeAs(type : ClassConstructor, customKey? : string)`
 - `@autoserializeAsObjectMap(type : ClassConstructor, customKey? : string)`
 - `@autoserializeAsArray(type : ClassConstructor, customKey? : string)`
 - `@autoserializeUsing(transforms : SerializeAndDeserializeFns, customKey? : string)`
 - `@autoserializeAsJson(customKey? : string)`
+- `@autoserializeAsMap(keyType: SerializableType<any>, valueType: SerializableType<any>, constructor?: SerializableType<any>, keyName?: string)`
 ##### Types
 ```typescript
  type SerializationFn = <T>(target : T) => JsonType;
@@ -466,7 +470,7 @@ consider the followin case :
     let animal: Living[] = [new Fish(), new Dog(), new Living()];
     let json = SerializeAsArray(animal, Living);
 ```
-But then, at decerialization you end up with a bunch of Living, but no dog nor fish. The runtime serialisation will detect at runtime that there are other types in the array (it also work with simple variable). To do so, a ```$type``` attribut will be added. You have to provide the content of this attribute (it allows you to be compatible with [Newtonsoft](https://www.newtonsoft.com/)).
+But then, at decerialization you end up with a bunch of Living, but no dog nor fish. The runtime serialisation will detect at runtime that there are other types in the array (it also work with simple variable). To do so, a ```$type``` attribut will be added. You have to provide the content of this attribute (it allows you to be compatible with [Newtonsoft](https://www.newtonsoft.com/) TypeNameHandling.Objects settings).
 The Runtime typing is anable as follow :
 ```typescript
     let animal: Living[] = [new Fish(), new Dog(), new Living()];
@@ -485,7 +489,7 @@ The Runtime typing is anable as follow :
 
 ### Note
 In the previous case, it will not enforce a class to be a subclass of Living.
-The last two line are not mandatory (if you whant to serialize/deserialize more).
+The last two line are not mandatory (if you want to serialize/deserialize more).
 Unfortunately, I didn't found a way to add Runtime Typing for Map (or object used as map). You can do the following (use a class that inherite form Map)
 ```typescript
 class MyDico1 extends Map<string, Number>{
@@ -623,6 +627,7 @@ To reset the selective serialization do `SelectiveSerialization()`.
 | serializeAsArray  | deserializeAsArray  | autoserializeAsArray  | 
 | serializeAsJson   | deserializeAsJson   | autoserializeAsJson   | 
 | serializeAsObjectMap    | deserializeAsObjectMap    | autoserializeAsObjectMap    | 
+| serializeAsMap    | deserializeAsMap    | autoserializeAsMap    |
 | serializeUsing    | deserializeUsing    | autoserializeUsing    | 
 
 Other decorators
@@ -655,4 +660,4 @@ Other decorators
 * Use RefClean if you want that `$id` start to one again.
 * You don't need to call `RuntimeTypingSetEnable(false)` after a serialisation if you want to use it again.
 * `@serializeAsArray` expect a non array type (ie if it's an array of `Boolean`, you should give `Boolean` as parameter). Same goes for `@serializeAsObjectMap`.
-* `@serializeAsObjectMap` works on [`Map` object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map).
+* `@serializeAsMap` works on [`Map` object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map).
