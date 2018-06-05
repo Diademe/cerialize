@@ -11,6 +11,7 @@ import {
     deserializeAsJson,
     deserializeAsMap,
     deserializeAsObjectMap,
+    deserializeAsSet,
     deserializeUsing,
     inheritSerialization,
     SetDefaultInstantiationMethod,
@@ -618,185 +619,153 @@ describe("Deserializing", function() {
 
                 });
             });
-    describe("DeserializeAsArray", function() {
 
-        function runTests(blockName: string,
-                          instantiationMethod: InstantiationMethod,
-                          deserializeAs: any, deserializeAsArray: any,
-                          makeTarget: boolean) {
+    describe("DeserializeAsSet", function() {
+        it("deserializes a Set of primitives", function() {
+            class Test {
+                @deserializeAsSet(Number) public value: Set<number>;
+            }
 
-            describe(blockName, function() {
+            const json = { value: [1, 2, 3] };
+            const instance = Deserialize(json, Test);
+            expect(instance.value instanceof Set).toBeTruthy();
+            expect(instance.value.size).toEqual(3);
+            expect(instance.value.has(1)).toBe(true);
+            expect(instance.value.has(2)).toBe(true);
+            expect(instance.value.has(3)).toBe(true);
+        });
 
-                it("deserializes an array of primitives", function() {
-                    class Test {
-                        @deserializeAsArray(Number) public value: number[];
-                    }
+        it("deserializes a custome Set of primitives", function() {
+            class MySet<T> extends Set<T> {}
+            class Test {
+                @deserializeAsSet(Number, MySet) public value: MySet<number>;
+            }
 
-                    const json = { value: [1, 2, 3] };
-                    const target = createTarget(makeTarget, instantiationMethod, Test);
-                    const instance = Deserialize(json, Test, target, instantiationMethod);
-                    expect(Array.isArray(instance.value)).toBeTruthy();
-                    expect(instance.value).toEqual([1, 2, 3]);
-                    expectInstance(instance, Test, instantiationMethod);
-                    expectTarget(target, instance, makeTarget);
-                });
+            const json = { value: [1, 2, 3] };
+            const instance = Deserialize(json, Test);
+            expect(instance.value instanceof MySet).toBeTruthy();
+            expect(instance.value.size).toEqual(3);
+            expect(instance.value.has(1)).toBe(true);
+            expect(instance.value.has(2)).toBe(true);
+            expect(instance.value.has(3)).toBe(true);
+        });
 
-                it("deserializes an array of typed objects", function() {
-                    class TestType {
-                        @deserializeAs(String) public strVal: string;
+        it("deserializes a Set of typed objects", function() {
+            class TestType {
+                @deserializeAs(String) public strVal: string;
 
-                        constructor(val: string) {
-                            this.strVal = val;
-                        }
-                    }
+                constructor(val: string) {
+                    this.strVal = val;
+                }
+            }
 
-                    class Test {
-                        @deserializeAsArray(TestType) public value: TestType[];
-                    }
+            class Test {
+                @deserializeAsSet(TestType) public value: Set<TestType>;
+            }
 
-                    const json = {
-                        value: [
-                            { strVal: "0" },
-                            { strVal: "1" },
-                            { strVal: "2" }
-                        ]
-                    };
+            const json = {
+                value: [
+                    { strVal: "0" },
+                    { strVal: "1" },
+                    { strVal: "2" }
+                ]
+            };
 
-                    const target = createTarget(makeTarget, instantiationMethod, Test);
-                    const instance = Deserialize(json, Test, target, instantiationMethod);
-                    expectInstance(instance, Test, instantiationMethod);
-                    expectTarget(target, instance, makeTarget);
-                    expect(instance.value).toEqual([
-                        { strVal: "0" },
-                        { strVal: "1" },
-                        { strVal: "2" }
-                    ]);
-                    if (instantiationMethod) {
-                        expect(instance.value[0] instanceof TestType).toBeTruthy();
-                        expect(instance.value[1] instanceof TestType).toBeTruthy();
-                        expect(instance.value[2] instanceof TestType).toBeTruthy();
-                    }
-                    expect(instance.value.length).toBe(3);
-                });
+            const instance = Deserialize(json, Test);
+            const value = Array.from(instance.value.keys());
+            expect(value[0] instanceof TestType).toBeTruthy();
+            expect(value[1] instanceof TestType).toBeTruthy();
+            expect(value[2] instanceof TestType).toBeTruthy();
 
-                it("deserializes nested arrays", function() {
-                    class TestTypeL0 {
-                        @deserializeAs(String) public strVal: string;
+            expect(instance.value.size).toBe(3);
+        });
 
-                        constructor(val: string) {
-                            this.strVal = val;
-                        }
+        it("deserializes nested Sets", function() {
+            class TestTypeL0 {
+                @deserializeAs(String) public strVal: string;
 
-                    }
+                constructor(val: string) {
+                    this.strVal = val;
+                }
 
-                    class TestTypeL1 {
-                        @deserializeAsArray(TestTypeL0) public l0List: TestTypeL0[];
+            }
 
-                        constructor(l0List: TestTypeL0[]) {
-                            this.l0List = l0List;
-                        }
+            class TestTypeL1 {
+                @deserializeAsSet(TestTypeL0) public l0List: Set<TestTypeL0>;
 
-                    }
+                constructor(l0List: Set<TestTypeL0>) {
+                    this.l0List = l0List;
+                }
 
-                    class Test {
-                        @deserializeAsArray(TestTypeL1) public value: TestTypeL1[];
-                    }
+            }
 
-                    const json = {
-                        value: [
-                            { l0List: [{ strVal: "00" }, { strVal: "01" }] },
-                            { l0List: [{ strVal: "10" }, { strVal: "11" }] },
-                            { l0List: [{ strVal: "20" }, { strVal: "21" }] }
-                        ]
-                    };
+            class Test {
+                @deserializeAsSet(TestTypeL1) public value: Set<TestTypeL1>;
+            }
 
-                    const array = [
-                        new TestTypeL1([new TestTypeL0("00"), new TestTypeL0("01")]),
-                        new TestTypeL1([new TestTypeL0("10"), new TestTypeL0("11")]),
-                        new TestTypeL1([new TestTypeL0("20"), new TestTypeL0("21")])
-                    ];
+            const json = {
+                value: [
+                    { l0List: [{ strVal: "00" }, { strVal: "01" }] },
+                    { l0List: [{ strVal: "10" }, { strVal: "11" }] },
+                    { l0List: [{ strVal: "20" }, { strVal: "21" }] }
+                ]
+            };
 
-                    const target = createTarget(makeTarget, instantiationMethod, Test);
-                    const instance = Deserialize(json, Test, target, instantiationMethod);
-                    expect(instance).toEqual({ value: array });
-                    if (instantiationMethod) {
-                        expect(instance.value[0] instanceof TestTypeL1).toBeTruthy();
-                        expect(instance.value[1] instanceof TestTypeL1).toBeTruthy();
-                        expect(instance.value[2] instanceof TestTypeL1).toBeTruthy();
-                    }
+            const array = [
+                new TestTypeL1(new Set([new TestTypeL0("00"), new TestTypeL0("01")])),
+                new TestTypeL1(new Set([new TestTypeL0("10"), new TestTypeL0("11")])),
+                new TestTypeL1(new Set([new TestTypeL0("20"), new TestTypeL0("21")]))
+            ];
 
-                });
+            const instance = Deserialize(json, Test);
+            const value = Array.from(instance.value.keys());
+            expect(value[0] instanceof TestTypeL1).toBeTruthy();
+            expect(value[1] instanceof TestTypeL1).toBeTruthy();
+            expect(value[2] instanceof TestTypeL1).toBeTruthy();
 
-                it("deserializes an array with a different key", function() {
+        });
 
-                    class Test {
-                        @deserializeAsArray(Number, "different") public value: number[];
-                    }
+        it("deserializes a Set with a different key", function() {
 
-                    const json = { different: [1, 2, 3] };
+            class Test {
+                @deserializeAsSet(Number, Set, "different") public value: Set<number>;
+            }
 
-                    const target = createTarget(makeTarget, instantiationMethod, Test);
-                    const instance = Deserialize(json, Test, target, instantiationMethod);
-                    expectInstance(instance, Test, instantiationMethod);
-                    expectTarget(target, instance, makeTarget);
-                    expect(instance).toEqual({
-                        value: [1, 2, 3]
-                    });
-                });
+            const json = { different: [1, 2, 3] };
 
-                it("throws an error if input type is not an array", function() {
+            const instance = Deserialize(json, Test);
+            expect(instance.value.has(1)).toBe(true);
+            expect(instance.value.has(2)).toBe(true);
+            expect(instance.value.has(3)).toBe(true);
+        });
 
-                    class Test {
-                        @deserializeAsArray(Number) public values: number[];
-                    }
+        it("throws an error if input type is not a Set", function() {
 
-                    expect(function() {
-                        const json = { values: 1 };
-                        const target = createTarget(makeTarget, instantiationMethod, Test);
-                        const instance = Deserialize(json, Test, target, instantiationMethod);
-                    }).toThrow("Expected input to be an array but received: number");
+            class Test {
+                @deserializeAsSet(Number) public values: Set<number>;
+            }
 
-                    expect(function() {
-                        const json = { values: false };
-                        const target = createTarget(makeTarget, instantiationMethod, Test);
-                        const instance = Deserialize(json, Test, target, instantiationMethod);
-                    }).toThrow("Expected input to be an array but received: boolean");
+            expect(function() {
+                const json = { values: 1 };
+                const instance = Deserialize(json, Test);
+            }).toThrow("Expected input to be an array but received: number");
 
-                    expect(function() {
-                        const json = { values: "str" };
-                        const target = createTarget(makeTarget, instantiationMethod, Test);
-                        const instance = Deserialize(json, Test, target, instantiationMethod);
-                    }).toThrow("Expected input to be an array but received: string");
+            expect(function() {
+                const json = { values: false };
+                const instance = Deserialize(json, Test);
+            }).toThrow("Expected input to be an array but received: boolean");
 
-                    expect(function() {
-                        const json = { values: {} };
-                        const target = createTarget(makeTarget, instantiationMethod, Test);
-                        const instance = Deserialize(json, Test, target, instantiationMethod);
-                    }).toThrow("Expected input to be an array but received: object");
+            expect(function() {
+                const json = { values: "str" };
+                const instance = Deserialize(json, Test);
+            }).toThrow("Expected input to be an array but received: string");
 
-                });
+            expect(function() {
+                const json = { values: {} };
+                const instance = Deserialize(json, Test);
+            }).toThrow("Expected input to be an array but received: object");
 
-            });
-
-        }
-
-        runTests("Normal > Create Instances > With Target",
-        InstantiationMethod.New, deserializeAs, deserializeAsArray, true);
-        runTests("Normal > Create Instances > Without Target",
-        InstantiationMethod.New, deserializeAs, deserializeAsArray, false);
-        runTests("Normal > No Instances > With Target",
-        InstantiationMethod.None, deserializeAs, deserializeAsArray, true);
-        runTests("Normal > No Instances > Without Target",
-        InstantiationMethod.None, deserializeAs, deserializeAsArray, false);
-        runTests("Auto > Create Instances > With Target",
-        InstantiationMethod.New, autoserializeAs, autoserializeAsArray, true);
-        runTests("Auto > Create Instances > Without Target",
-        InstantiationMethod.New, autoserializeAs, autoserializeAsArray, false);
-        runTests("Auto > No Instances > With Target",
-        InstantiationMethod.None, autoserializeAs, autoserializeAsArray, true);
-        runTests("Auto > No Instances > Without Target",
-        InstantiationMethod.None, autoserializeAs, autoserializeAsArray, false);
-
+        });
     });
 
     describe("DeserializeJSON", function() {
