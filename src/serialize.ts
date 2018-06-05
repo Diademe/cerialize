@@ -106,6 +106,13 @@ export function SerializeArray<T>(
     return retn;
 }
 
+export function SerializeSet<T>(
+    source: T[],
+    type: SerializableType<T>
+): JsonType[] {
+    return SerializeArray(Array.from(source.values()), type);
+}
+
 export function SerializePrimitive<T>(
     source: SerializablePrimitiveType,
     type: SerializablePrimitiveType
@@ -247,6 +254,12 @@ export function Serialize<T>(
             target[keyName] = val;
         } else if ((flags & MetaDataFlag.SerializeObjectMap) !== 0) {
             const val = SerializeObjectMap(source, metadata.serializedType);
+            if (defaultValue(metadata, val)) {
+                continue;
+            }
+            target[keyName] = val;
+        } else if ((flags & MetaDataFlag.SerializeSet) !== 0) {
+            const val = SerializeSet(source, metadata.serializedKeyType);
             if (defaultValue(metadata, val)) {
                 continue;
             }
