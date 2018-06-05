@@ -12,6 +12,7 @@ import {
     serializeAsJson,
     serializeAsMap,
     serializeAsObjectMap,
+    serializeAsSet,
     serializeBitMask,
     serializeUsing
 } from "../src/annotations";
@@ -249,16 +250,58 @@ describe("Serializing", function() {
     describe("SerializeAsMap", function() {
         it("serializes a map of primitives", function() {
             class Test {
-                @serializeAsObjectMap(Number)
-                public values: Indexable<number>;
+                @serializeAsMap(String, Number)
+                public values: Map<string, number>;
             }
 
             const t = new Test();
-            t.values = {
+            t.values = new Map([
+                ["v0", 1],
+                ["v1", 2],
+                ["v2", 3]
+            ]);
+            const json = Serialize(t, Test);
+            expect(json.values).toEqual({
                 v0: 1,
                 v1: 2,
                 v2: 3
-            };
+            });
+        });
+
+        it("serializes a custom Map of primitives 1", function() {
+            class MyMap<K, T> extends Map<K, T> {}
+            class Test {
+                @serializeAsMap(String, Number)
+                public values: Map<string, number>;
+            }
+
+            const t = new Test();
+            t.values = new Map([
+                ["v0", 1],
+                ["v1", 2],
+                ["v2", 3]
+            ]);
+            const json = Serialize(t, Test);
+            expect(json.values).toEqual({
+                v0: 1,
+                v1: 2,
+                v2: 3
+            });
+        });
+
+        it("serializes a custom Map of primitives 2", function() {
+            class MyMap extends Map<string, number> {}
+            class Test {
+                @serializeAsMap(String, Number)
+                public values: Map<string, number>;
+            }
+
+            const t = new Test();
+            t.values = new Map([
+                ["v0", 1],
+                ["v1", 2],
+                ["v2", 3]
+            ]);
             const json = Serialize(t, Test);
             expect(json.values).toEqual({
                 v0: 1,
@@ -277,16 +320,16 @@ describe("Serializing", function() {
             }
 
             class Test {
-                @serializeAsObjectMap(TestType)
-                public values: Indexable<TestType>;
+                @serializeAsMap(String, TestType)
+                public values: Map<string, TestType>;
             }
 
             const t = new Test();
-            t.values = {
-                v0: new TestType(0),
-                v1: new TestType(1),
-                v2: new TestType(2)
-            };
+            t.values = new Map ([
+                ["v0", new TestType(0)],
+                ["v1", new TestType(1)],
+                ["v2", new TestType(2)]
+            ]);
             const json = Serialize(t, Test);
             expect(json.values).toEqual({
                 v0: { value: 0 },
@@ -305,16 +348,16 @@ describe("Serializing", function() {
             }
 
             class Test {
-                @serializeAsObjectMap(TestType, "different")
-                public values: Indexable<TestType>;
+                @serializeAsMap(String, TestType, Map, "different")
+                public values: Map<string, TestType>;
             }
 
             const t = new Test();
-            t.values = {
-                v0: new TestType(0),
-                v1: new TestType(1),
-                v2: new TestType(2)
-            };
+            t.values = new Map ([
+                ["v0", new TestType(0)],
+                ["v1", new TestType(1)],
+                ["v2", new TestType(2)]
+            ]);
             const json = Serialize(t, Test);
             expect(json.values).not.toBeDefined();
             expect(json.different).toEqual({
@@ -649,6 +692,116 @@ describe("Serializing", function() {
             autoserializeAsArray,
             autoserializeAsJson
         );
+    });
+
+    describe("SerializeAsSet", function() {
+        it("serializes a Set of primitives", function() {
+            class MySet<T> extends Set<T> {}
+            class Test {
+                @serializeAsSet(Number, MySet) public value: MySet<number>;
+            }
+
+            const t = new Test();
+            t.value = new MySet([1, 2, 3]);
+            const json = Serialize(t, Test);
+            expect(json.value).toEqual([1, 2, 3]);
+        });
+
+        it("serializes a Set of primitives", function() {
+            class Test {
+                @serializeAsSet(Number) public value: Set<number>;
+            }
+
+            const t = new Test();
+            t.value = new Set([1, 2, 3]);
+            const json = Serialize(t, Test);
+            expect(json.value).toEqual([1, 2, 3]);
+        });
+        it("serializes an array of typed objects", function() {
+            class TestType {
+                @serializeAs(String) public strVal: string;
+
+                constructor(val: string) {
+                    this.strVal = val;
+                }
+            }
+
+            class Test {
+                @serializeAsSet(TestType) public value: Set<TestType>;
+            }
+
+            const t = new Test();
+            t.value = new Set([
+                new TestType("str0"),
+                new TestType("str1"),
+                new TestType("str2")
+            ]);
+            const json = Serialize(t, Test);
+            expect(json.value).toEqual([
+                { strVal: "str0" },
+                { strVal: "str1" },
+                { strVal: "str2" }
+            ]);
+        });
+
+        it("serializes nested arrays", function() {
+            class TestTypeL0 {
+                @serializeAs(String) public strVal: string;
+
+                constructor(val: string) {
+                    this.strVal = val;
+                }
+            }
+
+            class TestTypeL1 {
+                @serializeAsSet(TestTypeL0)
+                public l0List: Set<TestTypeL0>;
+
+                constructor(l0List: Set<TestTypeL0>) {
+                    this.l0List = l0List;
+                }
+            }
+
+            class Test {
+                @serializeAsSet(TestTypeL1)
+                public value: Set<TestTypeL1>;
+            }
+
+            const t = new Test();
+            t.value = new Set([
+                new TestTypeL1(new Set([
+                    new TestTypeL0("00"),
+                    new TestTypeL0("01")
+                ])),
+                new TestTypeL1(new Set([
+                    new TestTypeL0("10"),
+                    new TestTypeL0("11")
+                ])),
+                new TestTypeL1(new Set([
+                    new TestTypeL0("20"),
+                    new TestTypeL0("21")
+                ]))
+            ]);
+            const json = Serialize(t, Test);
+            expect(json.value).toEqual([
+                { l0List: [{ strVal: "00" }, { strVal: "01" }] },
+                { l0List: [{ strVal: "10" }, { strVal: "11" }] },
+                { l0List: [{ strVal: "20" }, { strVal: "21" }] }
+            ]);
+        });
+
+        it("serializes an array with a different key", function() {
+            class Test {
+                @serializeAsSet(Number, Set, "different")
+                public value: Set<number>;
+            }
+
+            const t = new Test();
+            t.value = new Set([1, 2, 3]);
+            const json = Serialize(t, Test);
+            expect(json.value).toBeUndefined();
+            expect(json.different).toEqual([1, 2, 3]);
+        });
     });
 
     describe("SerializeJSON", function() {
