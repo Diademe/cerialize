@@ -98,8 +98,8 @@ export function serializeAsMap(
         );
         metadata.serializedKey = keyName ? keyName : actualKeyName;
         metadata.serializedType = constructor ? constructor : Map;
-        metadata.serializedKeyMapType = keyType;
-        metadata.serializedValueMapType = valueType;
+        metadata.serializedKeyType = keyType;
+        metadata.serializedValueType = valueType;
         metadata.flags |= MetaDataFlag.SerializeMap;
         metadata.flags = setBitConditionally(
             metadata.flags,
@@ -197,8 +197,8 @@ export function deserializeAsMap(
         );
         metadata.deserializedKey = keyName ? keyName : actualKeyName;
         metadata.deserializedType = constructor ? constructor : Map;
-        metadata.deserializedKeyMapType = keyType;
-        metadata.deserializedValueMapType = valueType;
+        metadata.deserializedKeyType = keyType;
+        metadata.deserializedValueType = valueType;
         metadata.flags |= MetaDataFlag.DeserializeMap;
         metadata.flags = setBitConditionally(
             metadata.flags,
@@ -358,10 +358,10 @@ export function autoserializeAsMap(
         metadata.serializedKey = key;
         metadata.deserializedType = constructor ? constructor : Map;
         metadata.serializedType = constructor ? constructor : Map;
-        metadata.serializedKeyMapType = keyType;
-        metadata.serializedValueMapType = valueType;
-        metadata.deserializedKeyMapType = keyType;
-        metadata.deserializedValueMapType = valueType;
+        metadata.serializedKeyType = keyType;
+        metadata.serializedValueType = valueType;
+        metadata.deserializedKeyType = keyType;
+        metadata.deserializedValueType = valueType;
         metadata.flags |=
             MetaDataFlag.SerializeMap | MetaDataFlag.DeserializeMap;
         metadata.flags = setBitConditionally(

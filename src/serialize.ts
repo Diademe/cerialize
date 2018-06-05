@@ -238,8 +238,8 @@ export function Serialize<T>(
 
         if ((flags & MetaDataFlag.SerializeMap) !== 0) {
             const val = SerializeMap(source,
-                metadata.serializedKeyMapType,
-                metadata.serializedValueMapType,
+                metadata.serializedKeyType,
+                metadata.serializedValueType,
             );
             if (defaultValue(metadata, val)) {
                 continue;

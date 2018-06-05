@@ -324,8 +324,8 @@ function _Deserialize<T extends Indexable>(
         } else if ((flags & MetaDataFlag.DeserializeMap) !== 0) {
             target[keyName] = _DeserializeMap(
                 source,
-                metadata.deserializedKeyMapType,
-                metadata.deserializedValueMapType,
+                metadata.deserializedKeyType,
+                metadata.deserializedValueType,
                 metadata.deserializedType as MapConstructor,
                 target[keyName],
                 instantiationMethod

@@ -42,10 +42,10 @@ export class MetaData {
     public deserializedKey: string; // the target keyname for deserializing
     public serializedType: SerializableType<any>; // the type to use when serializing this property
     public deserializedType: SerializableType<any>; //  the type to use when deserializing this property
-    public serializedKeyMapType: SerializableType<any>; //  the type to use when deserializing the key of a map
-    public deserializedKeyMapType: SerializableType<any>; //  the type to use when serializing the key of a map
-    public serializedValueMapType: SerializableType<any>; //  the type to use when deserializing the value of a map
-    public deserializedValueMapType: SerializableType<any>; //  the type to use when serializing the value of a map
+    public serializedKeyType: SerializableType<any>; //  the type to use when deserializing the key of a map
+    public deserializedKeyType: SerializableType<any>; //  the type to use when serializing the key of a map
+    public serializedValueType: SerializableType<any>; //  the type to use when deserializing the value of a map
+    public deserializedValueType: SerializableType<any>; //  the type to use when serializing the value of a map
     public flags: MetaDataFlag;
     public bitMaskSerialize: number;
     public emitDefaultValue: boolean;
@@ -57,8 +57,8 @@ export class MetaData {
         this.deserializedKey = "";
         this.deserializedType = Function;
         this.serializedType = Function;
-        this.serializedKeyMapType = Function;
-        this.deserializedKeyMapType = Function;
+        this.serializedKeyType = Function;
+        this.deserializedKeyType = Function;
         this.flags = 0;
         this.bitMaskSerialize = Number.MAX_SAFE_INTEGER;
         this.emitDefaultValue = true;
@@ -98,10 +98,10 @@ export class MetaData {
         metadata.serializedKey = data.serializedKey;
         metadata.serializedType = data.serializedType;
         metadata.deserializedType = data.deserializedType;
-        metadata.serializedKeyMapType = data.serializedKeyMapType;
-        metadata.deserializedKeyMapType = data.deserializedKeyMapType;
-        metadata.serializedValueMapType = data.serializedValueMapType;
-        metadata.deserializedValueMapType = data.deserializedValueMapType;
+        metadata.serializedKeyType = data.serializedKeyType;
+        metadata.deserializedKeyType = data.deserializedKeyType;
+        metadata.serializedValueType = data.serializedValueType;
+        metadata.deserializedValueType = data.deserializedValueType;
         metadata.flags = data.flags;
         metadata.bitMaskSerialize = data.bitMaskSerialize;
         metadata.emitDefaultValue = data.emitDefaultValue;
