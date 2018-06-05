@@ -179,6 +179,50 @@ export function DeserializeArray<T>(
     return _DeserializeArray(data, type, target, instantiationMethod);
 }
 
+function _DeserializeSet<K, C extends Set<K>>(
+    data: JsonArray,
+    keyType: SerializableType<K>,
+    constructor: C,
+    target?: C,
+    instantiationMethod?: InstantiationMethod
+) {
+    if (!Array.isArray(data)) {
+        throw new Error(
+            "Expected input to be an array but received: " + typeof data
+        );
+    }
+    const tmp = { a: new (constructor as any)() };
+    if (referenceHandling(data, tmp)) {
+        return tmp.a;
+    }
+    target = tmp.a;
+
+    for (const d of data) {
+        target.add(_Deserialize(
+            d as any,
+            keyType,
+            null,
+            instantiationMethod
+        ));
+    }
+
+    return target;
+}
+
+export function DeserializeSet<T, C extends Set<T>>(
+    data: JsonArray,
+    keyType: SerializableType<T>,
+    constructor: C,
+    target?: C,
+    instantiationMethod?: InstantiationMethod
+) {
+    if (instantiationMethod === void 0) {
+        instantiationMethod = MetaData.deserializeInstantationMethod;
+    }
+
+    return _DeserializeSet(data, keyType, constructor, target, instantiationMethod);
+}
+
 function DeserializePrimitive(
     data: any,
     type: SerializablePrimitiveType,
@@ -333,6 +377,14 @@ function _Deserialize<T extends Indexable>(
         } else if ((flags & MetaDataFlag.DeserializeArray) !== 0) {
             target[keyName] = _DeserializeArray(
                 source,
+                metadata.deserializedType,
+                target[keyName],
+                instantiationMethod
+            );
+        } else if ((flags & MetaDataFlag.DeserializeSet) !== 0) {
+            target[keyName] = _DeserializeSet(
+                source,
+                metadata.deserializedKeyType,
                 metadata.deserializedType,
                 target[keyName],
                 instantiationMethod
