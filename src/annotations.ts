@@ -85,6 +85,30 @@ export function serializeAsObjectMap<T>(type: SerializableType<T>, keyName?: str
     };
 }
 
+export function serializeAsMap(
+    keyType: SerializableType<any>,
+    valueType: SerializableType<any>,
+    constructor?: SerializableType<any>,
+    keyName?: string
+) {
+    return function(target: IConstructable, actualKeyName: string): void {
+        const metadata = MetaData.getMetaData(
+            target.constructor,
+            actualKeyName
+        );
+        metadata.serializedKey = keyName ? keyName : actualKeyName;
+        metadata.serializedType = constructor ? constructor : Map;
+        metadata.serializedKeyMapType = keyType;
+        metadata.serializedValueMapType = valueType;
+        metadata.flags |= MetaDataFlag.SerializeMap;
+        metadata.flags = setBitConditionally(
+            metadata.flags,
+            MetaDataFlag.SerializePrimitive,
+            isPrimitiveType(valueType)
+        );
+    };
+}
+
 export function serializeAsJson(
     keyNameOrTransformKeys?: boolean | string,
     transformKeys = true
@@ -160,6 +184,30 @@ export function deserializeAsArray(
     };
 }
 
+export function deserializeAsMap(
+    keyType: SerializableType<any>,
+    valueType: SerializableType<any>,
+    constructor?: SerializableType<any>,
+    keyName?: string
+) {
+    return function(target: IConstructable, actualKeyName: string): void {
+        const metadata = MetaData.getMetaData(
+            target.constructor,
+            actualKeyName
+        );
+        metadata.deserializedKey = keyName ? keyName : actualKeyName;
+        metadata.deserializedType = constructor ? constructor : Map;
+        metadata.deserializedKeyMapType = keyType;
+        metadata.deserializedValueMapType = valueType;
+        metadata.flags |= MetaDataFlag.DeserializeMap;
+        metadata.flags = setBitConditionally(
+            metadata.flags,
+            MetaDataFlag.DeserializePrimitive,
+            isPrimitiveType(valueType)
+        );
+    };
+}
+
 export function deserializeAsObjectMap(
     type: SerializableType<any>,
     keyName?: string
@@ -171,7 +219,7 @@ export function deserializeAsObjectMap(
         );
         metadata.deserializedKey = keyName ? keyName : actualKeyName;
         metadata.deserializedType = type;
-        metadata.flags |= MetaDataFlag.DeserializeMap;
+        metadata.flags |= MetaDataFlag.DeserializeObjectMap;
         metadata.flags = setBitConditionally(
             metadata.flags,
             MetaDataFlag.DeserializePrimitive,
@@ -284,11 +332,42 @@ export function autoserializeAsObjectMap(
         metadata.deserializedType = type;
         metadata.serializedType = type;
         metadata.flags |=
-            MetaDataFlag.SerializeObjectMap | MetaDataFlag.DeserializeMap;
+            MetaDataFlag.SerializeObjectMap | MetaDataFlag.DeserializeObjectMap;
         metadata.flags = setBitConditionally(
             metadata.flags,
             MetaDataFlag.AutoPrimitive,
             isPrimitiveType(type)
+        );
+    };
+}
+
+export function autoserializeAsMap(
+    keyType: SerializableType<any>,
+    valueType: SerializableType<any>,
+    constructor?: SerializableType<any>,
+    keyName?: string
+) {
+    return function(target: IConstructable, actualKeyName: string): void {
+        const metadata = MetaData.getMetaDataMap(
+            keyType,
+            valueType,
+            actualKeyName
+        );
+        const key = keyName ? keyName : actualKeyName;
+        metadata.deserializedKey = key;
+        metadata.serializedKey = key;
+        metadata.deserializedType = constructor ? constructor : Map;
+        metadata.serializedType = constructor ? constructor : Map;
+        metadata.serializedKeyMapType = keyType;
+        metadata.serializedValueMapType = valueType;
+        metadata.deserializedKeyMapType = keyType;
+        metadata.deserializedValueMapType = valueType;
+        metadata.flags |=
+            MetaDataFlag.SerializeMap | MetaDataFlag.DeserializeMap;
+        metadata.flags = setBitConditionally(
+            metadata.flags,
+            MetaDataFlag.AutoPrimitive,
+            isPrimitiveType(keyType)
         );
     };
 }

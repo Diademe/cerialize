@@ -49,6 +49,45 @@ export function SerializeObjectMap<T>(
     return target;
 }
 
+export function SerializeMap<K, V>(
+    source: Map<K, V>,
+    keyType: SerializableType<K>,
+    valueType: SerializableType<V>,
+): Indexable<JsonType> {
+    if (source === null || source === void 0) {
+        return null;
+    }
+    const target: Indexable<JsonType> = {};
+    const keys = source.keys();
+
+    if (cycleBreaking(target, source)) {
+        return target;
+    }
+
+    if (TypeString.getRuntimeTyping()) {
+        target.$type = TypeString.getStringFromType(source.constructor);
+    }
+
+    for (const key of keys) {
+        const value = source.get(key);
+        if (value !== void 0) {
+            const keyTypeF = keyType as Function;
+            const isString = keyTypeF === String;
+            const targetKey =
+                isString ?
+                MetaData.serializeKeyTransform(key as any) :
+                key;
+            const targetValue = Serialize(
+                    value,
+                    valueType
+                );
+            target[targetKey as any] = targetValue;
+        }
+    }
+
+    return target;
+}
+
 export function SerializeArray<T>(
     source: T[],
     type: SerializableType<T>
@@ -197,7 +236,16 @@ export function Serialize<T>(
         const keyName = metadata.getSerializedKey();
         const flags = metadata.flags;
 
-        if ((flags & MetaDataFlag.SerializeObjectMap) !== 0) {
+        if ((flags & MetaDataFlag.SerializeMap) !== 0) {
+            const val = SerializeMap(source,
+                metadata.serializedKeyMapType,
+                metadata.serializedValueMapType,
+            );
+            if (defaultValue(metadata, val)) {
+                continue;
+            }
+            target[keyName] = val;
+        } else if ((flags & MetaDataFlag.SerializeObjectMap) !== 0) {
             const val = SerializeObjectMap(source, metadata.serializedType);
             if (defaultValue(metadata, val)) {
                 continue;

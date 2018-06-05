@@ -2,10 +2,13 @@
 // in a type tagged with a serialization annotation will contain an array of these
 // objects each describing one property
 
+import { PairMap } from "./pair_map";
 import { NoOp } from "./string_transforms";
 import { IConstructable, InstantiationMethod, SerializableType } from "./util";
 
 const TypeMap = new Map<any, MetaData[]>();
+
+const TypeMapMap = new PairMap<IConstructable, IConstructable, MetaData[]>();
 
 /** @internal */
 export const enum MetaDataFlag {
@@ -13,7 +16,7 @@ export const enum MetaDataFlag {
     SerializePrimitive = 1 << 2,
     DeserializeArray = 1 << 3,
     SerializeArray = 1 << 4,
-    DeserializeMap = 1 << 5,
+    DeserializeObjectMap = 1 << 5,
     SerializeObjectMap = 1 << 6,
     DeserializeJSON = 1 << 7,
     SerializeJSON = 1 << 8,
@@ -23,6 +26,8 @@ export const enum MetaDataFlag {
     SerializeUsing = 1 << 12,
     DeserializeObject = 1 << 13,
     SerializeObject = 1 << 14,
+    SerializeMap = 1 << 15,
+    DeserializeMap = 1 << 16,
 
     AutoPrimitive = SerializePrimitive | DeserializePrimitive,
     AutoUsing = SerializeUsing | DeserializeUsing,
@@ -36,7 +41,11 @@ export class MetaData {
     public serializedKey: string; // the target keyname for serializing
     public deserializedKey: string; // the target keyname for deserializing
     public serializedType: SerializableType<any>; // the type to use when serializing this property
-    public deserializedType: SerializableType<any>; //  sthe type to use when deserializing this property
+    public deserializedType: SerializableType<any>; //  the type to use when deserializing this property
+    public serializedKeyMapType: SerializableType<any>; //  the type to use when deserializing the key of a map
+    public deserializedKeyMapType: SerializableType<any>; //  the type to use when serializing the key of a map
+    public serializedValueMapType: SerializableType<any>; //  the type to use when deserializing the value of a map
+    public deserializedValueMapType: SerializableType<any>; //  the type to use when serializing the value of a map
     public flags: MetaDataFlag;
     public bitMaskSerialize: number;
     public emitDefaultValue: boolean;
@@ -48,6 +57,8 @@ export class MetaData {
         this.deserializedKey = "";
         this.deserializedType = Function;
         this.serializedType = Function;
+        this.serializedKeyMapType = Function;
+        this.deserializedKeyMapType = Function;
         this.flags = 0;
         this.bitMaskSerialize = Number.MAX_SAFE_INTEGER;
         this.emitDefaultValue = true;
@@ -87,6 +98,10 @@ export class MetaData {
         metadata.serializedKey = data.serializedKey;
         metadata.serializedType = data.serializedType;
         metadata.deserializedType = data.deserializedType;
+        metadata.serializedKeyMapType = data.serializedKeyMapType;
+        metadata.deserializedKeyMapType = data.deserializedKeyMapType;
+        metadata.serializedValueMapType = data.serializedValueMapType;
+        metadata.deserializedValueMapType = data.deserializedValueMapType;
         metadata.flags = data.flags;
         metadata.bitMaskSerialize = data.bitMaskSerialize;
         metadata.emitDefaultValue = data.emitDefaultValue;
@@ -102,6 +117,23 @@ export class MetaData {
         if (metaDataList === void 0) {
             metaDataList = [];
             TypeMap.set(target, metaDataList);
+        }
+
+        for (const metadata of metaDataList) {
+            if (metadata.keyName === keyName) {
+                return metadata;
+            }
+        }
+        metaDataList.push(new MetaData(keyName));
+        return metaDataList[metaDataList.length - 1];
+    }
+
+    public static getMetaDataMap(key: Function, value: Function, keyName: string): MetaData {
+        let metaDataList = TypeMapMap.get(key, value);
+
+        if (metaDataList === void 0) {
+            metaDataList = [];
+            TypeMapMap.set(key, value, metaDataList);
         }
 
         for (const metadata of metaDataList) {
@@ -134,8 +166,18 @@ export class MetaData {
         }
         return null;
     }
+    // TODO remove this function
+    public static getMetaDataForMap(keyType: IConstructable, valueType: IConstructable) {
+        if (keyType !== null && keyType !== void 0 &&
+            valueType !== null && valueType !== void 0) {
+            return TypeMapMap.get(keyType, valueType) || null;
+        }
+        return null;
+    }
 
     public static readonly TypeMap = TypeMap;
+
+    public static readonly TypeMapMap = TypeMapMap;
 
     public static serializeKeyTransform = NoOp;
 

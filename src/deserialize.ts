@@ -13,7 +13,7 @@ import {
     SerializableType
 } from "./util";
 
-function _DeserializeMap<T>(
+function _DeserializeObjectMap<T>(
     data: JsonObject,
     type: SerializableType<T>,
     target?: Indexable<T>,
@@ -55,7 +55,75 @@ function _DeserializeMap<T>(
     return target;
 }
 
-export function DeserializeMap<T>(
+function _DeserializeMap<K, V>(
+    data: JsonObject,
+    keyType: SerializableType<K>,
+    valueType: SerializableType<V>,
+    type: MapConstructor,
+    target?: Map<K, V>,
+    instantiationMethod?: InstantiationMethod
+): Map<K, V> {
+    if (typeof data !== "object") {
+        throw new Error(
+            "Expected input to be of type `object` but received: " + typeof data
+        );
+    }
+
+    if (target === null || target === void 0) {
+        target = new type<K, V>();
+    }
+
+    if (data === null || data === void 0) {
+        return null;
+    }
+
+    const tmp = { a: target as Map<K, V> };
+    if (referenceHandling(data, tmp)) {
+        return tmp.a;
+    }
+    target = tmp.a;
+
+    const keys = Object.keys(data);
+    for (const key of keys) {
+        const value = data[key];
+        if (value !== void 0) {
+            const keyTypeF = keyType as Function;
+            const isString = keyTypeF === String;
+            const keyName = (isString ?
+                MetaData.deserializeKeyTransform(key) :
+                _Deserialize<K>(
+                    JSON.parse(key),
+                    keyType,
+                    null,
+                    instantiationMethod
+                )) as K;
+            target.set(keyName, _Deserialize<V>(
+                data[key] as any,
+                valueType,
+                target.get(keyName),
+                instantiationMethod
+            ));
+        }
+    }
+
+    return target;
+}
+
+export function DeserializeMap<K, V>(
+    data: JsonObject,
+    keyType: SerializableType<K>,
+    valueType: SerializableType<V>,
+    target?: Map<K, V>,
+    instantiationMethod?: InstantiationMethod
+): Map<K, V> {
+    if (instantiationMethod === void 0) {
+        instantiationMethod = MetaData.deserializeInstantationMethod;
+    }
+
+    return _DeserializeMap(data, keyType, valueType, Map, null, instantiationMethod);
+}
+
+export function DeserializeObjectMap<T>(
     data: JsonObject,
     type: SerializableType<T>,
     target?: Indexable<T>,
@@ -65,7 +133,7 @@ export function DeserializeMap<T>(
         instantiationMethod = MetaData.deserializeInstantationMethod;
     }
 
-    return _DeserializeMap(data, type, target, instantiationMethod);
+    return _DeserializeObjectMap(data, type, target, instantiationMethod);
 }
 
 function _DeserializeArray<T>(
@@ -246,10 +314,19 @@ function _Deserialize<T extends Indexable>(
         const keyName = metadata.keyName;
         const flags = metadata.flags;
 
-        if ((flags & MetaDataFlag.DeserializeMap) !== 0) {
-            target[keyName] = _DeserializeMap(
+        if ((flags & MetaDataFlag.DeserializeObjectMap) !== 0) {
+            target[keyName] = _DeserializeObjectMap(
                 source,
                 metadata.deserializedType,
+                target[keyName],
+                instantiationMethod
+            );
+        } else if ((flags & MetaDataFlag.DeserializeMap) !== 0) {
+            target[keyName] = _DeserializeMap(
+                source,
+                metadata.deserializedKeyMapType,
+                metadata.deserializedValueMapType,
+                metadata.deserializedType as MapConstructor,
                 target[keyName],
                 instantiationMethod
             );
@@ -332,5 +409,5 @@ export function DeserializeMapRaw<T>(
     type: SerializableType<T>,
     target?: Indexable<T>
 ): Indexable<T> | null {
-    return _DeserializeMap(data, type, target, InstantiationMethod.None);
+    return _DeserializeObjectMap(data, type, target, InstantiationMethod.None);
 }
