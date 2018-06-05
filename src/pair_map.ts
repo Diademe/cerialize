@@ -10,7 +10,7 @@ export class PairMap<K1, K2, V> {
     }
 
     public get(key1: K1, key2: K2): V {
-        return this.m.get(key1).get(key2);
+        return this.m.get(key1) ? this.m.get(key1).get(key2) : undefined;
     }
 
     public clear(): void {
