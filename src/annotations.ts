@@ -418,9 +418,8 @@ export function autoserializeAsMap(
     keyName?: string
 ) {
     return function(target: IConstructable, actualKeyName: string): void {
-        const metadata = MetaData.getMetaDataMap(
-            keyType,
-            valueType,
+        const metadata = MetaData.getMetaData(
+            target.constructor,
             actualKeyName
         );
         const key = keyName ? keyName : actualKeyName;
