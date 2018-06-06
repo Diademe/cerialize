@@ -2,6 +2,7 @@ import {
     autoserializeAs,
     autoserializeAsArray,
     autoserializeAsJson,
+    autoserializeAsMap,
     autoserializeAsObjectMap,
     autoserializeUsing,
     defaultValue,
@@ -292,8 +293,8 @@ describe("Serializing", function() {
         it("serializes a custom Map of primitives 2", function() {
             class MyMap extends Map<string, number> {}
             class Test {
-                @serializeAsMap(String, Number)
-                public values: Map<string, number>;
+                @autoserializeAsMap(String, Number, MyMap)
+                public values: MyMap;
             }
 
             const t = new Test();
