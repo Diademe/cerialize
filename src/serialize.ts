@@ -153,11 +153,6 @@ export function SerializeJSON(source: any, transformKeys = true): JsonType {
         return null;
     }
 
-    const json: any = {};
-    if (cycleBreaking(json, source)) {
-        return json;
-    }
-
     if (Array.isArray(source)) {
         const array = new Array<any>(source.length);
         for (let i = 0; i < source.length; i++) {

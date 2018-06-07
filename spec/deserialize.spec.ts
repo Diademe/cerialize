@@ -1243,7 +1243,7 @@ describe("Deserializing", function() {
         it("Cycle length 3", function() {
 
             class Test {
-                @deserializeAsJson() public next: Test;
+                @deserializeAs(Test) public next: Test;
             }
             const json = {
                 $id: 1,
@@ -1267,7 +1267,7 @@ describe("Deserializing", function() {
         it("Cycle length 0", function() {
 
             class Test {
-                @deserializeAsJson() public next: Test;
+                @deserializeAs(Test) public next: Test;
             }
             const json = {
                 $id: 1,

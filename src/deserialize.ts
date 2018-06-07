@@ -250,11 +250,7 @@ export function DeserializeJSON<T extends JsonType>(
     transformKeys = true,
     target?: JsonType
 ): JsonType {
-    const tmp = { a: {} }; // hack to passe argument by ref
-    if (referenceHandling(data, tmp)) {
-        return tmp.a;
-    }
-    target = tmp.a;
+    target = {};
 
     if (Array.isArray(data)) {
         if (!Array.isArray(target)) {
