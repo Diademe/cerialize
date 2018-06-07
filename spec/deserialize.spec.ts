@@ -1229,9 +1229,9 @@ describe("Deserializing", function() {
                 @deserializeAs(Test) public value1: Test;
             }
             const json = {
-                $id: 1,
-                value0: { $id: 2, value: 1 },
-                value1: { $ref: 2 }
+                $id: "1",
+                value0: { $id: "2", value: 1 },
+                value1: { $ref: "2" }
             };
             SetRefCycleDetection(true);
             const instance = Deserialize(json, Test0);
@@ -1246,13 +1246,13 @@ describe("Deserializing", function() {
                 @deserializeAs(Test) public next: Test;
             }
             const json = {
-                $id: 1,
+                $id: "1",
                 next: {
-                    $id: 2,
+                    $id: "2",
                     next: {
-                        $id: 3,
+                        $id: "3",
                         next: {
-                            $ref: 1
+                            $ref: "1"
                         }
                     }
                 }
@@ -1270,9 +1270,9 @@ describe("Deserializing", function() {
                 @deserializeAs(Test) public next: Test;
             }
             const json = {
-                $id: 1,
+                $id: "1",
                 next: {
-                    $ref: 1
+                    $ref: "1"
                 }
             };
             SetRefCycleDetection(true);

@@ -1217,13 +1217,13 @@ describe("Serializing", function() {
             RefClean();
             SetRefCycleDetection(false);
             expect(json).toEqual({
-                $id: 1,
+                $id: "1",
                 next: {
-                    $id: 2,
+                    $id: "2",
                     next: {
-                        $id: 3,
+                        $id: "3",
                         next: {
-                            $ref: 1
+                            $ref: "1"
                         }
                     }
                 }
@@ -1242,9 +1242,9 @@ describe("Serializing", function() {
             RefClean();
             SetRefCycleDetection(false);
             expect(json).toEqual({
-                $id: 1,
+                $id: "1",
                 next: {
-                    $ref: 1
+                    $ref: "1"
                 }
             });
         });

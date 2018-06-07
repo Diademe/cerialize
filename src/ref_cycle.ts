@@ -10,9 +10,9 @@ class Cycle {
         this.ref2obj = new Map<number, any>();
         this.obj2ref = new Map<any, number>();
     }
-    public setObject(obj: any): number {
+    public setObject(obj: any): string {
         this.obj2ref.set(obj, this.refIndex);
-        return this.refIndex++;
+        return (this.refIndex++).toString();
     }
     public clean() {
         // allow garbage collection of the objects
@@ -27,13 +27,14 @@ export function referenceHandling(json: any, tmp: any) {
         return false;
     }
     if (json.hasOwnProperty("$ref")) {
-        if (!cycle.ref2obj.has(json.$ref)) {
+        const ref = parseInt(json.$ref, 10);
+        if (!cycle.ref2obj.has(ref)) {
             throw new Error("Reference found befor its definiton");
         }
-        tmp.a = cycle.ref2obj.get(json.$ref);
+        tmp.a = cycle.ref2obj.get(ref);
         return true;
     } else if (json.hasOwnProperty("$id")) {
-        cycle.ref2obj.set(json.$id, tmp.a);
+        cycle.ref2obj.set(parseInt(json.$id, 10), tmp.a);
     }
     return false;
 }
@@ -43,7 +44,7 @@ export function cycleBreaking(json: any, instance: any) {
         return false;
     }
     if (cycle.obj2ref.has(instance)) {
-        const id = cycle.obj2ref.get(instance);
+        const id = cycle.obj2ref.get(instance).toString();
         json.$ref = id;
         return true;
     } else {
