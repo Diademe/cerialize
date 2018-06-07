@@ -168,9 +168,6 @@ export function SerializeJSON(source: any, transformKeys = true): JsonType {
             return source.toString();
         } else {
             const retn: Indexable<JsonType> = {};
-            if (cycleBreaking(retn, source)) {
-                return retn;
-            }
             const keys = Object.keys(source);
             for (const key of keys) {
                 const value = source[key];
