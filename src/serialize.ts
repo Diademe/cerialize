@@ -95,10 +95,6 @@ export function SerializeArray<T>(
     if (source === null || source === void 0) {
         return null;
     }
-    const json: any = {};
-    if (cycleBreaking(json, source)) {
-        return json;
-    }
     const retn = new Array<JsonType>(source.length);
     for (let i = 0; i < source.length; i++) {
         retn[i] = Serialize(source[i], type);
