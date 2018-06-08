@@ -152,11 +152,9 @@ function _DeserializeArray<T>(
             "Expected input to be an array but received: " + typeof data
         );
     }
-    const tmp = { a: [] as T[] };
-    if (referenceHandling(data, tmp)) {
-        return tmp.a;
+    if (!Array.isArray(target)) {
+        target = [] as T[];
     }
-    target = tmp.a;
 
     target.length = data.length;
     for (let i = 0; i < data.length; i++) {
@@ -196,11 +194,10 @@ function _DeserializeSet<K, C extends Set<K>>(
             "Expected input to be an array but received: " + typeof data
         );
     }
-    const tmp = { a: new (constructor as any)() };
-    if (referenceHandling(data, tmp)) {
-        return tmp.a;
+
+    if (!(target instanceof Set)){
+        target = new (constructor as any)();
     }
-    target = tmp.a;
 
     for (const d of data) {
         target.add(_Deserialize(
