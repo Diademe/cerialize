@@ -13,6 +13,11 @@ import {
     SerializableType
 } from "./util";
 
+const keywords = ["$id", "$type", "$ref"];
+function notAKeyword(y: string) {
+    return keywords.find((x) => x === y) === undefined;
+}
+
 function _DeserializeObjectMap<T>(
     data: JsonObject,
     type: SerializableType<T>,
@@ -39,7 +44,7 @@ function _DeserializeObjectMap<T>(
     }
     target = tmp.a;
 
-    const keys = Object.keys(data);
+    const keys = Object.keys(data).filter(notAKeyword);
     for (const key of keys) {
         const value = data[key];
         if (value !== void 0) {
@@ -83,7 +88,7 @@ function _DeserializeMap<K, V>(
     }
     target = tmp.a;
 
-    const keys = Object.keys(data);
+    const keys = Object.keys(data).filter(notAKeyword);
     for (const key of keys) {
         const value = data[key];
         if (value !== void 0) {
