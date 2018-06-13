@@ -2,6 +2,7 @@ import { MetaData, MetaDataFlag } from "./meta_data";
 import { cycleBreaking } from "./ref_cycle";
 import { TypeString } from "./runtime_typing";
 import {
+    ASerializableType,
     Indexable,
     isPrimitiveType,
     JsonObject,
@@ -20,7 +21,7 @@ export function SelectiveSerialization(
 
 export function SerializeObjectMap<T>(
     source: T,
-    type: SerializableType<T>
+    type: ASerializableType<T>
 ): Indexable<JsonType> {
     if (source === null || source === void 0) {
         return null;
@@ -32,7 +33,7 @@ export function SerializeObjectMap<T>(
         return target;
     }
 
-    if (TypeString.getRuntimeTyping() && !isPrimitiveType(type)) {
+    if (TypeString.getRuntimeTyping() && !isPrimitiveType(type())) {
         target.$type = TypeString.getStringFromType(source.constructor);
     }
 
@@ -51,8 +52,8 @@ export function SerializeObjectMap<T>(
 
 export function SerializeMap<K, V>(
     source: Map<K, V>,
-    keyType: SerializableType<K>,
-    valueType: SerializableType<V>,
+    keyType: ASerializableType<K>,
+    valueType: ASerializableType<V>,
 ): Indexable<JsonType> {
     if (source === null || source === void 0) {
         return null;
@@ -71,7 +72,7 @@ export function SerializeMap<K, V>(
     for (const key of keys) {
         const value = source.get(key);
         if (value !== void 0) {
-            const keyTypeF = keyType as Function;
+            const keyTypeF = keyType() as Function;
             const isString = keyTypeF === String;
             const targetKey =
                 isString ?
@@ -90,7 +91,7 @@ export function SerializeMap<K, V>(
 
 export function SerializeArray<T>(
     source: T[],
-    type: SerializableType<T>
+    type: ASerializableType<T>
 ): JsonType[] {
     if (source === null || source === void 0) {
         return null;
@@ -104,28 +105,28 @@ export function SerializeArray<T>(
 
 export function SerializeSet<T>(
     source: T[],
-    type: SerializableType<T>
+    type: ASerializableType<T>
 ): JsonType[] {
     return SerializeArray(Array.from(source.values()), type);
 }
 
 export function SerializePrimitive<T>(
     source: SerializablePrimitiveType,
-    type: SerializablePrimitiveType
+    type: () => SerializablePrimitiveType
 ): JsonType {
     if (source === null || source === void 0) {
         return null;
     }
 
-    if (type === String) {
+    if (type() === String) {
         return source.toString();
     }
 
-    if (type === Boolean) {
+    if (type() === Boolean) {
         return Boolean(source);
     }
 
-    if (type === Number) {
+    if (type() === Number) {
         const value = Number(source);
         if (isNaN(value)) {
             return null;
@@ -133,11 +134,11 @@ export function SerializePrimitive<T>(
         return value;
     }
 
-    if (type === Date) {
+    if (type() === Date) {
         return source.toString();
     }
 
-    if (type === RegExp) {
+    if (type() === RegExp) {
         return source.toString();
     }
 
@@ -185,7 +186,7 @@ export function SerializeJSON(source: any, transformKeys = true): JsonType {
 
 export function Serialize<T>(
     instance: T,
-    type: SerializableType<T>
+    type: ASerializableType<T>
 ): JsonObject | null {
     if (instance === void 0 || instance === null) {
         return null;
@@ -193,16 +194,16 @@ export function Serialize<T>(
 
     const target: Indexable<JsonType> = {};
 
-    if (TypeString.getRuntimeTyping() && !isPrimitiveType(type)) {
+    if (TypeString.getRuntimeTyping() && !isPrimitiveType(type())) {
         target.$type = TypeString.getStringFromType(instance.constructor);
-        type = instance.constructor as SerializableType<T>;
+        type = () => (instance.constructor as SerializableType<T>);
     }
 
-    const metadataList = MetaData.getMetaDataForType(type);
+    const metadataList = MetaData.getMetaDataForType(type());
 
     // todo -- maybe move this to a Generic deserialize
     if (metadataList === null) {
-        if (isPrimitiveType(type)) {
+        if (isPrimitiveType(type())) {
             return SerializePrimitive(instance as any, type as any) as any;
         } else {
             return target;
@@ -261,7 +262,7 @@ export function Serialize<T>(
         } else if ((flags & MetaDataFlag.SerializePrimitive) !== 0) {
             const val = SerializePrimitive(
                 source,
-                metadata.serializedType as SerializablePrimitiveType
+                metadata.serializedType as () => SerializablePrimitiveType
             );
             if (defaultValue(metadata, val)) {
                 continue;
@@ -291,8 +292,8 @@ export function Serialize<T>(
         }
     }
 
-    if (typeof type.onSerialized === "function") {
-        const value = type.onSerialized(target, instance);
+    if (typeof type().onSerialized === "function") {
+        const value = type().onSerialized(target, instance);
         if (value !== void 0) {
             return value as JsonObject;
         }
@@ -305,11 +306,11 @@ function defaultValue(metadata: MetaData, val: any) {
     if (metadata.emitDefaultValue === false) {
         if (val === null){
             return true;
-        } else if (metadata.defaultValue !== null) {
-            return val === metadata.defaultValue;
+        } else if (metadata.defaultValue() !== null) {
+            return val === metadata.defaultValue();
         } else {
             // tslint:disable-next-line:triple-equals
-            return new metadata.serializedType() == val;
+            return new (metadata.serializedType())() == val;
         }
     }
     return false;

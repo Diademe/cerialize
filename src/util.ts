@@ -51,6 +51,7 @@ export interface SerializableType<T> {
         instantiationMethod?: InstantiationMethod
     ) => T | void;
 }
+export type ASerializableType<T> = () => SerializableType<T>;
 
 /** @internal */
 export function getTarget<T>(

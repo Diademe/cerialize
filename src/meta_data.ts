@@ -4,7 +4,7 @@
 
 import { PairMap } from "./pair_map";
 import { NoOp } from "./string_transforms";
-import { IConstructable, InstantiationMethod, SerializableType } from "./util";
+import { ASerializableType, IConstructable, InstantiationMethod } from "./util";
 
 const TypeMap = new Map<any, MetaData[]>();
 
@@ -42,29 +42,29 @@ export class MetaData {
     public keyName: string; // the key name of the property this meta data describes
     public serializedKey: string; // the target keyname for serializing
     public deserializedKey: string; // the target keyname for deserializing
-    public serializedType: SerializableType<any>; // the type to use when serializing this property
-    public deserializedType: SerializableType<any>; //  the type to use when deserializing this property
-    public serializedKeyType: SerializableType<any>; //  the type to use when deserializing the key of a map
-    public deserializedKeyType: SerializableType<any>; //  the type to use when serializing the key of a map
-    public serializedValueType: SerializableType<any>; //  the type to use when deserializing the value of a map
-    public deserializedValueType: SerializableType<any>; //  the type to use when serializing the value of a map
+    public serializedType: ASerializableType<any>; // the type to use when serializing this property
+    public deserializedType: ASerializableType<any>; //  the type to use when deserializing this property
+    public serializedKeyType: ASerializableType<any>; //  the type to use when deserializing the key of a map
+    public deserializedKeyType: ASerializableType<any>; //  the type to use when serializing the key of a map
+    public serializedValueType: ASerializableType<any>; //  the type to use when deserializing the value of a map
+    public deserializedValueType: ASerializableType<any>; //  the type to use when serializing the value of a map
     public flags: MetaDataFlag;
     public bitMaskSerialize: number;
     public emitDefaultValue: boolean;
-    public defaultValue: IConstructable;
+    public defaultValue: () => IConstructable;
 
     constructor(keyName: string) {
         this.keyName = keyName;
         this.serializedKey = "";
         this.deserializedKey = "";
-        this.deserializedType = Function;
-        this.serializedType = Function;
-        this.serializedKeyType = Function;
-        this.deserializedKeyType = Function;
+        this.deserializedType = () => Function;
+        this.serializedType = () => Function;
+        this.serializedKeyType = () => Function;
+        this.deserializedKeyType = () => Function;
         this.flags = 0;
         this.bitMaskSerialize = Number.MAX_SAFE_INTEGER;
         this.emitDefaultValue = true;
-        this.defaultValue = null;
+        this.defaultValue = () => null;
     }
 
     public getSerializedKey(): string {
