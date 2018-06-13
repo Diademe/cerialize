@@ -44,7 +44,7 @@ describe("Serializing", function() {
             }
 
             const x = new Test();
-            const json = Serialize(x, Test);
+            const json = Serialize(x, () => Test);
             expect(json).toEqual({});
         });
     });
@@ -60,16 +60,16 @@ describe("Serializing", function() {
             describe(blockName, function() {
                 it("serializes basic primitives", function() {
                     class Test {
-                        @serializeAs(String) public value0: string;
-                        @serializeAs(Boolean) public value1: boolean;
-                        @serializeAs(Number) public value2: number;
+                        @serializeAs(() => String) public value0: string;
+                        @serializeAs(() => Boolean) public value1: boolean;
+                        @serializeAs(() => Number) public value2: number;
                     }
 
                     const s = new Test();
                     s.value0 = "strvalue";
                     s.value1 = true;
                     s.value2 = 100;
-                    const json = Serialize(s, Test);
+                    const json = Serialize(s, () => Test);
                     expect(json.value0).toBe("strvalue");
                     expect(json.value1).toBe(true);
                     expect(json.value2).toBe(100);
@@ -77,13 +77,13 @@ describe("Serializing", function() {
 
                 it("serializes a Date", function() {
                     class Test {
-                        @serializeAs(Date) public value0: Date;
+                        @serializeAs(() => Date) public value0: Date;
                     }
 
                     const d = new Date();
                     const s = new Test();
                     s.value0 = d;
-                    const json = Serialize(s, Test);
+                    const json = Serialize(s, () => Test);
                     expect(json).toEqual({
                         value0: d.toString()
                     });
@@ -91,12 +91,12 @@ describe("Serializing", function() {
 
                 it("serializes a RegExp", function() {
                     class Test {
-                        @serializeAs(RegExp) public value0: RegExp;
+                        @serializeAs(() => RegExp) public value0: RegExp;
                     }
 
                     const s = new Test();
                     s.value0 = /[123]/g;
-                    const json = Serialize(s, Test);
+                    const json = Serialize(s, () => Test);
                     expect(json).toEqual({
                         value0: "/[123]/g"
                     });
@@ -104,16 +104,16 @@ describe("Serializing", function() {
 
                 it("serializes non matching primitive type", function() {
                     class Test {
-                        @serializeAs(Number) public value0: string;
-                        @serializeAs(String) public value1: boolean;
-                        @serializeAs(Boolean) public value2: number;
+                        @serializeAs(() => Number) public value0: string;
+                        @serializeAs(() => String) public value1: boolean;
+                        @serializeAs(() => Boolean) public value2: number;
                     }
 
                     const s = new Test();
                     s.value0 = "strvalue";
                     s.value1 = true;
                     s.value2 = 100;
-                    const json = Serialize(s, Test);
+                    const json = Serialize(s, () => Test);
                     expect(json.value0).toBe(null);
                     expect(json.value1).toBe("true");
                     expect(json.value2).toBe(true);
@@ -121,18 +121,18 @@ describe("Serializing", function() {
 
                 it("serializes with different keys", function() {
                     class Test {
-                        @serializeAs(String, "v0")
+                        @serializeAs(() => String, "v0")
                         public value0: string;
-                        @serializeAs(Boolean, "v1")
+                        @serializeAs(() => Boolean, "v1")
                         public value1: boolean;
-                        @serializeAs(Number) public value2: number;
+                        @serializeAs(() => Number) public value2: number;
                     }
 
                     const s = new Test();
                     s.value0 = "strvalue";
                     s.value1 = true;
                     s.value2 = 100;
-                    const json = Serialize(s, Test);
+                    const json = Serialize(s, () => Test);
                     expect(json.v0).toBe("strvalue");
                     expect(json.v1).toBe(true);
                     expect(json.value2).toBe(100);
@@ -140,16 +140,16 @@ describe("Serializing", function() {
 
                 it("skips undefined keys", function() {
                     class Test {
-                        @serializeAs(String) public value0: string;
-                        @serializeAs(Boolean) public value1: boolean;
-                        @serializeAs(Number) public value2: number;
+                        @serializeAs(() => String) public value0: string;
+                        @serializeAs(() => Boolean) public value1: boolean;
+                        @serializeAs(() => Number) public value2: number;
                     }
 
                     const s = new Test();
                     s.value0 = void 0;
                     s.value1 = true;
                     s.value2 = 100;
-                    const json = Serialize(s, Test);
+                    const json = Serialize(s, () => Test);
                     expect(json.value0).not.toBeDefined();
                     expect(json.value1).toBe(true);
                     expect(json.value2).toBe(100);
@@ -157,16 +157,16 @@ describe("Serializing", function() {
 
                 it("does not skip null keys", function() {
                     class Test {
-                        @serializeAs(String) public value0: string;
-                        @serializeAs(Boolean) public value1: boolean;
-                        @serializeAs(Number) public value2: number;
+                        @serializeAs(() => String) public value0: string;
+                        @serializeAs(() => Boolean) public value1: boolean;
+                        @serializeAs(() => Number) public value2: number;
                     }
 
                     const s = new Test();
                     s.value0 = null;
                     s.value1 = true;
                     s.value2 = 100;
-                    const json = Serialize(s, Test);
+                    const json = Serialize(s, () => Test);
                     expect(json.value0).toBeNull();
                     expect(json.value1).toBe(true);
                     expect(json.value2).toBe(100);
@@ -174,13 +174,13 @@ describe("Serializing", function() {
 
                 it("serializes nested types", function() {
                     class Test {
-                        @serializeAs(String) public value0: string;
-                        @serializeAs(Boolean) public value1: boolean;
-                        @serializeAs(Number) public value2: number;
+                        @serializeAs(() => String) public value0: string;
+                        @serializeAs(() => Boolean) public value1: boolean;
+                        @serializeAs(() => Number) public value2: number;
                     }
 
                     class Test0 {
-                        @serializeAs(Test) public test: Test;
+                        @serializeAs(() => Test) public test: Test;
                     }
 
                     const x = new Test0();
@@ -189,7 +189,7 @@ describe("Serializing", function() {
                     s.value0 = null;
                     s.value1 = true;
                     s.value2 = 100;
-                    const json = Serialize(x, Test0);
+                    const json = Serialize(x, () => Test0);
                     expect(json.test).toEqual({
                         value0: null,
                         value1: true,
@@ -199,17 +199,17 @@ describe("Serializing", function() {
 
                 it("serializes doubly nested types", function() {
                     class Test {
-                        @serializeAs(String) public value0: string;
-                        @serializeAs(Boolean) public value1: boolean;
-                        @serializeAs(Number) public value2: number;
+                        @serializeAs(() => String) public value0: string;
+                        @serializeAs(() => Boolean) public value1: boolean;
+                        @serializeAs(() => Number) public value2: number;
                     }
 
                     class Test0 {
-                        @serializeAs(Test) public test: Test;
+                        @serializeAs(() => Test) public test: Test;
                     }
 
                     class Test1 {
-                        @serializeAs(Test0) public test: Test0;
+                        @serializeAs(() => Test0) public test: Test0;
                     }
 
                     const z = new Test1();
@@ -220,7 +220,7 @@ describe("Serializing", function() {
                     s.value0 = null;
                     s.value1 = true;
                     s.value2 = 100;
-                    const json = Serialize(z, Test1);
+                    const json = Serialize(z, () => Test1);
                     expect(json.test).toEqual({
                         test: {
                             value0: null,
@@ -251,7 +251,7 @@ describe("Serializing", function() {
     describe("SerializeAsMap", function() {
         it("serializes a map of primitives", function() {
             class Test {
-                @serializeAsMap(String, Number)
+                @serializeAsMap(() => String, () => Number)
                 public values: Map<string, number>;
             }
 
@@ -261,7 +261,7 @@ describe("Serializing", function() {
                 ["v1", 2],
                 ["v2", 3]
             ]);
-            const json = Serialize(t, Test);
+            const json = Serialize(t, () => Test);
             expect(json.values).toEqual({
                 v0: 1,
                 v1: 2,
@@ -270,9 +270,8 @@ describe("Serializing", function() {
         });
 
         it("serializes a custom Map of primitives 1", function() {
-            class MyMap<K, T> extends Map<K, T> {}
             class Test {
-                @serializeAsMap(String, Number)
+                @serializeAsMap(() => String, () => Number)
                 public values: Map<string, number>;
             }
 
@@ -282,7 +281,7 @@ describe("Serializing", function() {
                 ["v1", 2],
                 ["v2", 3]
             ]);
-            const json = Serialize(t, Test);
+            const json = Serialize(t, () => Test);
             expect(json.values).toEqual({
                 v0: 1,
                 v1: 2,
@@ -293,7 +292,7 @@ describe("Serializing", function() {
         it("serializes a custom Map of primitives 2", function() {
             class MyMap extends Map<string, number> {}
             class Test {
-                @autoserializeAsMap(String, Number, MyMap)
+                @autoserializeAsMap(() => String, () => Number, () => MyMap)
                 public values: MyMap;
             }
 
@@ -303,7 +302,7 @@ describe("Serializing", function() {
                 ["v1", 2],
                 ["v2", 3]
             ]);
-            const json = Serialize(t, Test);
+            const json = Serialize(t, () => Test);
             expect(json.values).toEqual({
                 v0: 1,
                 v1: 2,
@@ -313,7 +312,7 @@ describe("Serializing", function() {
 
         it("serializes a map of typed objects", function() {
             class TestType {
-                @serializeAs(Number) public value: number;
+                @serializeAs(() => Number) public value: number;
 
                 constructor(arg: number) {
                     this.value = arg;
@@ -321,7 +320,7 @@ describe("Serializing", function() {
             }
 
             class Test {
-                @serializeAsMap(String, TestType)
+                @serializeAsMap(() => String, () => TestType)
                 public values: Map<string, TestType>;
             }
 
@@ -331,7 +330,7 @@ describe("Serializing", function() {
                 ["v1", new TestType(1)],
                 ["v2", new TestType(2)]
             ]);
-            const json = Serialize(t, Test);
+            const json = Serialize(t, () => Test);
             expect(json.values).toEqual({
                 v0: { value: 0 },
                 v1: { value: 1 },
@@ -341,7 +340,7 @@ describe("Serializing", function() {
 
         it("serializes a map with a different key name", function() {
             class TestType {
-                @serializeAs(Number) public value: number;
+                @serializeAs(() => Number) public value: number;
 
                 constructor(arg: number) {
                     this.value = arg;
@@ -349,7 +348,7 @@ describe("Serializing", function() {
             }
 
             class Test {
-                @serializeAsMap(String, TestType, Map, "different")
+                @serializeAsMap(() => String, () => TestType, () => Map, "different")
                 public values: Map<string, TestType>;
             }
 
@@ -359,7 +358,7 @@ describe("Serializing", function() {
                 ["v1", new TestType(1)],
                 ["v2", new TestType(2)]
             ]);
-            const json = Serialize(t, Test);
+            const json = Serialize(t, () => Test);
             expect(json.values).not.toBeDefined();
             expect(json.different).toEqual({
                 v0: { value: 0 },
@@ -370,7 +369,7 @@ describe("Serializing", function() {
 
         it("serializes nested maps", function() {
             class TestType {
-                @serializeAsMap(String, Number)
+                @serializeAsMap(() => String, () => Number)
                 public value: Map<string, number>;
 
                 constructor(arg: Map<string, number>) {
@@ -379,7 +378,7 @@ describe("Serializing", function() {
             }
 
             class Test {
-                @serializeAsMap(String, TestType)
+                @serializeAsMap(() => String, () => TestType)
                 public values: Map<String, TestType>;
             }
 
@@ -389,7 +388,7 @@ describe("Serializing", function() {
                 ["v1", new TestType(new Map([["v10", 2], ["v11", 2] ]))],
                 ["v2", new TestType(new Map([["v20", 3], ["v21", 2] ]))]
                 ]);
-            const json = Serialize(t, Test);
+            const json = Serialize(t, () => Test);
             expect(json.values).toEqual({
                 v0: { value: { v00: 1, v01: 2 } },
                 v1: { value: { v10: 2, v11: 2 } },
@@ -399,7 +398,7 @@ describe("Serializing", function() {
 
         it("skips undefined keys", function() {
             class Test {
-                @serializeAsMap(String, Number) public values: Map<string, number>;
+                @serializeAsMap(() => String, () => Number) public values: Map<string, number>;
             }
 
             const t = new Test();
@@ -408,7 +407,7 @@ describe("Serializing", function() {
                 ["v1", 1],
                 ["v2", 2]
             ]);
-            const json = Serialize(t, Test);
+            const json = Serialize(t, () => Test);
             expect(json).toEqual({
                 values: {
                     v1: 1,
@@ -429,7 +428,7 @@ describe("Serializing", function() {
             describe(blockName, function() {
                 it("serializes a map of primitives", function() {
                     class Test {
-                        @serializeAsObjectMap(Number)
+                        @serializeAsObjectMap(() => Number)
                         public values: Indexable<number>;
                     }
 
@@ -439,7 +438,7 @@ describe("Serializing", function() {
                         v1: 2,
                         v2: 3
                     };
-                    const json = Serialize(t, Test);
+                    const json = Serialize(t, () => Test);
                     expect(json.values).toEqual({
                         v0: 1,
                         v1: 2,
@@ -449,7 +448,7 @@ describe("Serializing", function() {
 
                 it("serializes a map of typed objects", function() {
                     class TestType {
-                        @serializeAs(Number) public value: number;
+                        @serializeAs(() => Number) public value: number;
 
                         constructor(arg: number) {
                             this.value = arg;
@@ -457,7 +456,7 @@ describe("Serializing", function() {
                     }
 
                     class Test {
-                        @serializeAsObjectMap(TestType)
+                        @serializeAsObjectMap(() => TestType)
                         public values: Indexable<TestType>;
                     }
 
@@ -467,7 +466,7 @@ describe("Serializing", function() {
                         v1: new TestType(1),
                         v2: new TestType(2)
                     };
-                    const json = Serialize(t, Test);
+                    const json = Serialize(t, () => Test);
                     expect(json.values).toEqual({
                         v0: { value: 0 },
                         v1: { value: 1 },
@@ -477,7 +476,7 @@ describe("Serializing", function() {
 
                 it("serializes a map with a different key name", function() {
                     class TestType {
-                        @serializeAs(Number) public value: number;
+                        @serializeAs(() => Number) public value: number;
 
                         constructor(arg: number) {
                             this.value = arg;
@@ -485,7 +484,7 @@ describe("Serializing", function() {
                     }
 
                     class Test {
-                        @serializeAsObjectMap(TestType, "different")
+                        @serializeAsObjectMap(() => TestType, "different")
                         public values: Indexable<TestType>;
                     }
 
@@ -495,7 +494,7 @@ describe("Serializing", function() {
                         v1: new TestType(1),
                         v2: new TestType(2)
                     };
-                    const json = Serialize(t, Test);
+                    const json = Serialize(t, () => Test);
                     expect(json.values).not.toBeDefined();
                     expect(json.different).toEqual({
                         v0: { value: 0 },
@@ -506,7 +505,7 @@ describe("Serializing", function() {
 
                 it("serializes nested maps", function() {
                     class TestType {
-                        @serializeAsObjectMap(Number)
+                        @serializeAsObjectMap(() => Number)
                         public value: Indexable<number>;
 
                         constructor(arg: Indexable<number>) {
@@ -515,7 +514,7 @@ describe("Serializing", function() {
                     }
 
                     class Test {
-                        @serializeAsObjectMap(TestType)
+                        @serializeAsObjectMap(() => TestType)
                         public values: Indexable<TestType>;
                     }
 
@@ -525,7 +524,7 @@ describe("Serializing", function() {
                         v1: new TestType({ v10: 2, v11: 2 }),
                         v2: new TestType({ v20: 3, v21: 2 })
                     };
-                    const json = Serialize(t, Test);
+                    const json = Serialize(t, () => Test);
                     expect(json.values).toEqual({
                         v0: { value: { v00: 1, v01: 2 } },
                         v1: { value: { v10: 2, v11: 2 } },
@@ -536,7 +535,7 @@ describe("Serializing", function() {
 
             it("skips undefined keys", function() {
                 class Test {
-                    @serializeAsObjectMap(Number) public values: Indexable<number>;
+                    @serializeAsObjectMap(() => Number) public values: Indexable<number>;
                 }
 
                 const t = new Test();
@@ -545,7 +544,7 @@ describe("Serializing", function() {
                     v1: 1,
                     v2: 2
                 };
-                const json = Serialize(t, Test);
+                const json = Serialize(t, () => Test);
                 expect(json).toEqual({
                     values: {
                         v1: 1,
@@ -582,18 +581,18 @@ describe("Serializing", function() {
             describe(blockName, function() {
                 it("serializes an array of primitives", function() {
                     class Test {
-                        @serializeAsArray(Number) public value: number[];
+                        @serializeAsArray(() => Number) public value: number[];
                     }
 
                     const t = new Test();
                     t.value = [1, 2, 3];
-                    const json = Serialize(t, Test);
+                    const json = Serialize(t, () => Test);
                     expect(json.value).toEqual([1, 2, 3]);
                 });
 
                 it("serializes an array of typed objects", function() {
                     class TestType {
-                        @serializeAs(String) public strVal: string;
+                        @serializeAs(() => String) public strVal: string;
 
                         constructor(val: string) {
                             this.strVal = val;
@@ -601,7 +600,7 @@ describe("Serializing", function() {
                     }
 
                     class Test {
-                        @serializeAsArray(TestType) public value: TestType[];
+                        @serializeAsArray(() => TestType) public value: TestType[];
                     }
 
                     const t = new Test();
@@ -610,7 +609,7 @@ describe("Serializing", function() {
                         new TestType("str1"),
                         new TestType("str2")
                     ];
-                    const json = Serialize(t, Test);
+                    const json = Serialize(t, () => Test);
                     expect(json.value).toEqual([
                         { strVal: "str0" },
                         { strVal: "str1" },
@@ -620,7 +619,7 @@ describe("Serializing", function() {
 
                 it("serializes nested arrays", function() {
                     class TestTypeL0 {
-                        @serializeAs(String) public strVal: string;
+                        @serializeAs(() => String) public strVal: string;
 
                         constructor(val: string) {
                             this.strVal = val;
@@ -628,7 +627,7 @@ describe("Serializing", function() {
                     }
 
                     class TestTypeL1 {
-                        @serializeAsArray(TestTypeL0)
+                        @serializeAsArray(() => TestTypeL0)
                         public l0List: TestTypeL0[];
 
                         constructor(l0List: TestTypeL0[]) {
@@ -637,7 +636,7 @@ describe("Serializing", function() {
                     }
 
                     class Test {
-                        @serializeAsArray(TestTypeL1)
+                        @serializeAsArray(() => TestTypeL1)
                         public value: TestTypeL1[];
                     }
 
@@ -656,7 +655,7 @@ describe("Serializing", function() {
                             new TestTypeL0("21")
                         ])
                     ];
-                    const json = Serialize(t, Test);
+                    const json = Serialize(t, () => Test);
                     expect(json.value).toEqual([
                         { l0List: [{ strVal: "00" }, { strVal: "01" }] },
                         { l0List: [{ strVal: "10" }, { strVal: "11" }] },
@@ -666,13 +665,13 @@ describe("Serializing", function() {
 
                 it("serializes an array with a different key", function() {
                     class Test {
-                        @serializeAsArray(Number, "different")
+                        @serializeAsArray(() => Number, "different")
                         public value: number[];
                     }
 
                     const t = new Test();
                     t.value = [1, 2, 3];
-                    const json = Serialize(t, Test);
+                    const json = Serialize(t, () => Test);
                     expect(json.value).toBeUndefined();
                     expect(json.different).toEqual([1, 2, 3]);
                 });
@@ -699,28 +698,28 @@ describe("Serializing", function() {
         it("serializes a Set of primitives", function() {
             class MySet<T> extends Set<T> {}
             class Test {
-                @serializeAsSet(Number, MySet) public value: MySet<number>;
+                @serializeAsSet(() => Number, () => MySet) public value: MySet<number>;
             }
 
             const t = new Test();
             t.value = new MySet([1, 2, 3]);
-            const json = Serialize(t, Test);
+            const json = Serialize(t, () => Test);
             expect(json.value).toEqual([1, 2, 3]);
         });
 
         it("serializes a Set of primitives", function() {
             class Test {
-                @serializeAsSet(Number) public value: Set<number>;
+                @serializeAsSet(() => Number) public value: Set<number>;
             }
 
             const t = new Test();
             t.value = new Set([1, 2, 3]);
-            const json = Serialize(t, Test);
+            const json = Serialize(t, () => Test);
             expect(json.value).toEqual([1, 2, 3]);
         });
         it("serializes an array of typed objects", function() {
             class TestType {
-                @serializeAs(String) public strVal: string;
+                @serializeAs(() => String) public strVal: string;
 
                 constructor(val: string) {
                     this.strVal = val;
@@ -728,7 +727,7 @@ describe("Serializing", function() {
             }
 
             class Test {
-                @serializeAsSet(TestType) public value: Set<TestType>;
+                @serializeAsSet(() => TestType) public value: Set<TestType>;
             }
 
             const t = new Test();
@@ -737,7 +736,7 @@ describe("Serializing", function() {
                 new TestType("str1"),
                 new TestType("str2")
             ]);
-            const json = Serialize(t, Test);
+            const json = Serialize(t, () => Test);
             expect(json.value).toEqual([
                 { strVal: "str0" },
                 { strVal: "str1" },
@@ -747,7 +746,7 @@ describe("Serializing", function() {
 
         it("serializes nested arrays", function() {
             class TestTypeL0 {
-                @serializeAs(String) public strVal: string;
+                @serializeAs(() => String) public strVal: string;
 
                 constructor(val: string) {
                     this.strVal = val;
@@ -755,7 +754,7 @@ describe("Serializing", function() {
             }
 
             class TestTypeL1 {
-                @serializeAsSet(TestTypeL0)
+                @serializeAsSet(() => TestTypeL0)
                 public l0List: Set<TestTypeL0>;
 
                 constructor(l0List: Set<TestTypeL0>) {
@@ -764,7 +763,7 @@ describe("Serializing", function() {
             }
 
             class Test {
-                @serializeAsSet(TestTypeL1)
+                @serializeAsSet(() => TestTypeL1)
                 public value: Set<TestTypeL1>;
             }
 
@@ -783,7 +782,7 @@ describe("Serializing", function() {
                     new TestTypeL0("21")
                 ]))
             ]);
-            const json = Serialize(t, Test);
+            const json = Serialize(t, () => Test);
             expect(json.value).toEqual([
                 { l0List: [{ strVal: "00" }, { strVal: "01" }] },
                 { l0List: [{ strVal: "10" }, { strVal: "11" }] },
@@ -793,13 +792,13 @@ describe("Serializing", function() {
 
         it("serializes an array with a different key", function() {
             class Test {
-                @serializeAsSet(Number, Set, "different")
+                @serializeAsSet(() => Number, () => Set, "different")
                 public value: Set<number>;
             }
 
             const t = new Test();
             t.value = new Set([1, 2, 3]);
-            const json = Serialize(t, Test);
+            const json = Serialize(t, () => Test);
             expect(json.value).toBeUndefined();
             expect(json.different).toEqual([1, 2, 3]);
         });
@@ -825,7 +824,7 @@ describe("Serializing", function() {
                     s.value0 = "strvalue";
                     s.value1 = true;
                     s.value2 = 100;
-                    const json = Serialize(s, Test);
+                    const json = Serialize(s, () => Test);
                     expect(json.value0).toBe("strvalue");
                     expect(json.value1).toBe(true);
                     expect(json.value2).toBe(100);
@@ -842,7 +841,7 @@ describe("Serializing", function() {
                     s.value0 = ["strvalue", "00"];
                     s.value1 = [false, true];
                     s.value2 = 100;
-                    const json = Serialize(s, Test);
+                    const json = Serialize(s, () => Test);
                     expect(json.value0).toEqual(["strvalue", "00"]);
                     expect(json.value1).toEqual([false, true]);
                     expect(json.value2).toBe(100);
@@ -855,7 +854,7 @@ describe("Serializing", function() {
 
                     const s = new Test();
                     s.value = { v0: 1, v1: void 0, v2: 2 };
-                    const json = Serialize(s, Test);
+                    const json = Serialize(s, () => Test);
                     expect(json).toEqual({
                         value: {
                             v0: 1,
@@ -885,7 +884,7 @@ describe("Serializing", function() {
                     l1.value0 = "strvalue2";
                     l1.value1 = true;
                     l1.value2 = 101;
-                    const json = Serialize(s, Test);
+                    const json = Serialize(s, () => Test);
                     expect(json).toEqual({
                         values: [
                             {
@@ -919,7 +918,7 @@ describe("Serializing", function() {
                     l0.value0 = "strvalue";
                     l0.value1 = true;
                     l0.value2 = 100;
-                    const json = Serialize(s, Test);
+                    const json = Serialize(s, () => Test);
                     expect(json).toEqual({
                         value0: {
                             value0: "strvalue",
@@ -950,7 +949,7 @@ describe("Serializing", function() {
                     l1.value0 = "strvalue2";
                     l1.value1 = true;
                     l1.value2 = 101;
-                    const json = Serialize(s, Test);
+                    const json = Serialize(s, () => Test);
                     expect(json).toEqual({
                         values: {
                             key0: {
@@ -988,7 +987,7 @@ describe("Serializing", function() {
                     l1.value0 = "strvalue2";
                     l1.value1 = true;
                     l1.value2 = 101;
-                    const json = Serialize(s, Test);
+                    const json = Serialize(s, () => Test);
                     expect(json).toEqual({
                         values: [
                             {
@@ -1012,7 +1011,7 @@ describe("Serializing", function() {
 
                     const s = new Test();
                     s.value0 = () => {};
-                    const json = Serialize(s, Test);
+                    const json = Serialize(s, () => Test);
                     expect(json).toEqual({
                         value0: null
                     });
@@ -1025,7 +1024,7 @@ describe("Serializing", function() {
 
                     const s = new Test();
                     s.value0 = "strvalue";
-                    const json = Serialize(s, Test);
+                    const json = Serialize(s, () => Test);
                     expect(json).toEqual({
                         different: "strvalue"
                     });
@@ -1033,7 +1032,7 @@ describe("Serializing", function() {
 
                 it("ignores nested serialization annotations", function() {
                     class Sub {
-                        @serializeAs(Number) public n: string = "100";
+                        @serializeAs(() => Number) public n: string = "100";
                     }
 
                     class Test {
@@ -1042,7 +1041,7 @@ describe("Serializing", function() {
 
                     const s = new Test();
                     s.value0 = new Sub();
-                    const json = Serialize(s, Test);
+                    const json = Serialize(s, () => Test);
                     expect(json).toEqual({
                         value0: { n: "100" }
                     });
@@ -1063,7 +1062,7 @@ describe("Serializing", function() {
                     s.value0 = "strvalue";
                     s.value1 = true;
                     s.value2 = 100;
-                    const json = Serialize(s, Test);
+                    const json = Serialize(s, () => Test);
                     SetSerializeKeyTransform(null);
                     expect(json).toEqual({
                         VALUE0: "strvalue",
@@ -1090,7 +1089,7 @@ describe("Serializing", function() {
                     s.value0 = "strvalue";
                     s.value1 = true;
                     s.value2 = 100;
-                    const json = Serialize(s, Test);
+                    const json = Serialize(s, () => Test);
                     SetSerializeKeyTransform(null);
                     expect(json).toEqual({
                         VALUE0: "strvalue",
@@ -1114,7 +1113,7 @@ describe("Serializing", function() {
                     }
 
                     const s = new Test();
-                    const json = Serialize(s, Test);
+                    const json = Serialize(s, () => Test);
                     SetSerializeKeyTransform(null);
                     expect(json).toEqual({
                         VALUE0: { v0: "yes", v1: "no" },
@@ -1155,7 +1154,7 @@ describe("Serializing", function() {
             }
 
             const s = new Test();
-            const json = Serialize(s, Test);
+            const json = Serialize(s, () => Test);
             expect(json).toEqual({
                 value: "yes",
                 value1: "yes"
@@ -1166,7 +1165,7 @@ describe("Serializing", function() {
     describe("onSerialized", function() {
         it("invokes the handler if provided", function() {
             class Test {
-                @serializeAs(Number) public value: number = 1;
+                @serializeAs(() => Number) public value: number = 1;
 
                 public static onSerialized(
                     json: JsonObject,
@@ -1178,7 +1177,7 @@ describe("Serializing", function() {
             }
 
             const s = new Test();
-            const json = Serialize(s, Test);
+            const json = Serialize(s, () => Test);
             expect(json).toEqual({
                 newvalue: "yes",
                 value: 1
@@ -1187,7 +1186,7 @@ describe("Serializing", function() {
 
         it("accepts the return value of onSerialized if provided", function() {
             class Test {
-                @serializeAs(Number) public value: number = 1;
+                @serializeAs(() => Number) public value: number = 1;
 
                 public static onSerialized(json: JsonObject, instance: Test) {
                     return { v: "hello" };
@@ -1195,7 +1194,7 @@ describe("Serializing", function() {
             }
 
             const s = new Test();
-            const json = Serialize(s, Test);
+            const json = Serialize(s, () => Test);
             expect(json).toEqual({
                 v: "hello"
             });
@@ -1205,7 +1204,7 @@ describe("Serializing", function() {
     describe("ReferanceCycle", function() {
         it("Cycle length 3", function() {
             class Test {
-                @serializeAs(Test) public next: Test;
+                @serializeAs(() => Test) public next: Test;
             }
 
             const s = new Test();
@@ -1213,7 +1212,7 @@ describe("Serializing", function() {
             s.next.next = new Test();
             s.next.next.next = s;
             SetRefCycleDetection(true);
-            const json = Serialize(s, Test);
+            const json = Serialize(s, () => Test);
             RefClean();
             SetRefCycleDetection(false);
             expect(json).toEqual({
@@ -1232,13 +1231,13 @@ describe("Serializing", function() {
 
         it("Cycle length 0", function() {
             class Test {
-                @serializeAs(Test) public next: Test;
+                @serializeAs(() => Test) public next: Test;
             }
 
             const s = new Test();
             s.next = s;
             SetRefCycleDetection(true);
-            const json = Serialize(s, Test);
+            const json = Serialize(s, () => Test);
             RefClean();
             SetRefCycleDetection(false);
             expect(json).toEqual({
@@ -1254,31 +1253,31 @@ describe("Serializing", function() {
         it("Bitmask", function() {
             class Test {
                 @serializeBitMask(1)
-                @serializeAs(Number)
+                @serializeAs(() => Number)
                 public v1: number = 1;
                 @serializeBitMask(3)
-                @serializeAs(Number)
+                @serializeAs(() => Number)
                 public v2: number = 2;
-                @serializeAs(Number)
+                @serializeAs(() => Number)
                 @serializeBitMask(2)
                 public v3: number = 3;
             }
 
             const s = new Test();
             SelectiveSerialization(1);
-            const json1 = Serialize(s, Test);
+            const json1 = Serialize(s, () => Test);
             expect(json1).toEqual({
                 v1: 1,
                 v2: 2
             });
             SelectiveSerialization(2);
-            const json2 = Serialize(s, Test);
+            const json2 = Serialize(s, () => Test);
             expect(json2).toEqual({
                 v2: 2,
                 v3: 3
             });
             SelectiveSerialization(3);
-            const json3 = Serialize(s, Test);
+            const json3 = Serialize(s, () => Test);
             expect(json3).toEqual({
                 v1: 1,
                 v2: 2,
@@ -1292,16 +1291,16 @@ describe("Serializing", function() {
 
         it("Array", function() {
             class Test0 {
-                @serializeAs(Number) public valueA: number = 0;
+                @serializeAs(() => Number) public valueA: number = 0;
             }
             class Test1 extends Test0 {
-                @serializeAs(Number) public valueB: number = 1;
+                @serializeAs(() => Number) public valueB: number = 1;
             }
             class Test2 extends Test1 {
-                @serializeAs(Number) public valueC: number = 2;
+                @serializeAs(() => Number) public valueC: number = 2;
             }
             class Test3 extends Test1 {
-                @serializeAs(Number) public valueD: number = 3;
+                @serializeAs(() => Number) public valueD: number = 3;
             }
 
             const s = Array<Test0>();
@@ -1311,7 +1310,7 @@ describe("Serializing", function() {
             RuntimeTypingSetTypeString(Test1, "my Test1 type");
             RuntimeTypingSetTypeString(Test2, "my Test2 type");
             RuntimeTypingSetTypeString(Test3, "my Test3 type");
-            const json = SerializeArray(s, Test0);
+            const json = SerializeArray(s, () => Test0);
             RuntimeTypingSetEnable(false);
             RuntimeTypingResetDictionnary();
             expect(json).toEqual([
@@ -1324,16 +1323,16 @@ describe("Serializing", function() {
 
         it("Object", function() {
             class Test0 {
-                @serializeAs(Boolean) public valueA: boolean = true;
+                @serializeAs(() => Boolean) public valueA: boolean = true;
             }
             class Test1 {
-                @serializeAs(Boolean) public valueB: boolean = true;
+                @serializeAs(() => Boolean) public valueB: boolean = true;
             }
-            @inheritSerialization(Test1)
+            @inheritSerialization(() => Test1)
             class Test2 extends Test1 {}
             class Test3 {
-                @serializeAs(Object) public m1: Test0;
-                @serializeAs(Test2) public m2: Test1;
+                @serializeAs(() => Object) public m1: Test0;
+                @serializeAs(() => Test2) public m2: Test1;
             }
 
             const s = new Test3();
@@ -1344,7 +1343,7 @@ describe("Serializing", function() {
             RuntimeTypingSetTypeString(Test1, "my Test1 type");
             RuntimeTypingSetTypeString(Test2, "my Test2 type");
             RuntimeTypingSetTypeString(Test3, "my Test3 type");
-            const json = Serialize(s, Test3);
+            const json = Serialize(s, () => Test3);
             RuntimeTypingSetEnable(false);
             RuntimeTypingResetDictionnary();
             expect(json).toEqual({
@@ -1362,14 +1361,14 @@ describe("Serializing", function() {
                 constructor(n: number) {
                     this.bp = n;
                 }
-                @serializeAs(Number, "bprime")
+                @serializeAs(() => Number, "bprime")
                 public get b() {
                     return this.bp + 1;
                 }
             }
 
             const d = new Drapeau(2);
-            const json = Serialize(d, Drapeau);
+            const json = Serialize(d, () => Drapeau);
             expect(json).toEqual({ bprime: 3 });
         });
     });
@@ -1377,33 +1376,33 @@ describe("Serializing", function() {
     describe("Emit Default", function() {
         it("Boolean", function() {
             class Test {
-                @serializeAs(Boolean)
+                @serializeAs(() => Boolean)
                 @emitDefaultValue(false)
                 public valueFalse: boolean = false;
 
                 @emitDefaultValue(false)
-                @serializeAs(Boolean)
+                @serializeAs(() => Boolean)
                 public valueTrue: boolean = true;
             }
 
             const t = new Test();
-            const json = Serialize(t, Test);
+            const json = Serialize(t, () => Test);
             expect(json).toEqual({ valueTrue: true });
         });
 
         it("Number", function() {
             class Test {
                 @emitDefaultValue(false)
-                @serializeAs(Number)
+                @serializeAs(() => Number)
                 public valueDefault: number = 0;
 
                 @emitDefaultValue(false)
-                @serializeAs(Number)
+                @serializeAs(() => Number)
                 public valueNotDefault: number = 1;
             }
 
             const t = new Test();
-            const json = Serialize(t, Test);
+            const json = Serialize(t, () => Test);
             expect(json).toEqual({ valueNotDefault: 1 });
         });
     });
@@ -1412,44 +1411,44 @@ describe("Serializing", function() {
         it("Boolean", function() {
             class Test {
                 @emitDefaultValue(false)
-                @serializeAs(Boolean)
+                @serializeAs(() => Boolean)
                 public valueDefault: boolean = false;
 
                 @emitDefaultValue(false)
-                @serializeAs(Boolean)
-                @defaultValue(true)
+                @serializeAs(() => Boolean)
+                @defaultValue(() => true)
                 public valueFalse: boolean = false;
 
-                @serializeAs(Boolean)
-                @defaultValue(true)
+                @serializeAs(() => Boolean)
+                @defaultValue(() => true)
                 @emitDefaultValue(false)
                 public valueTrue: boolean = true;
             }
 
             const t = new Test();
-            const json = Serialize(t, Test);
+            const json = Serialize(t, () => Test);
             expect(json).toEqual({ valueFalse: false });
         });
 
         it("Number", function() {
             class Test {
                 @emitDefaultValue(false)
-                @serializeAs(Number)
+                @serializeAs(() => Number)
                 public valueDefault: number = 0;
 
                 @emitDefaultValue(false)
-                @serializeAs(Number)
-                @defaultValue(2)
+                @serializeAs(() => Number)
+                @defaultValue(() => 2)
                 public valueNotDefault1: number = 1;
 
                 @emitDefaultValue(false)
-                @serializeAs(Number)
-                @defaultValue(2)
+                @serializeAs(() => Number)
+                @defaultValue(() => 2)
                 public valueNotDefault2: number = 2;
             }
 
             const t = new Test();
-            const json = Serialize(t, Test);
+            const json = Serialize(t, () => Test);
             expect(json).toEqual({ valueNotDefault1: 1 });
         });
     });
