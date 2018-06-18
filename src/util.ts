@@ -43,7 +43,6 @@ export interface Indexable<T = any | null> {
 
 export interface SerializableType<T> {
     new (...args: any[]): T;
-
     onSerialized?: (data: JsonObject, instance: T) => JsonObject | void;
     onDeserialized?: (
         data: JsonObject,
@@ -98,4 +97,27 @@ export function setBitConditionally(
     } else {
         return value & ~bits;
     }
+}
+
+export function parseNumber(key: any, value: any) {
+    switch (value) {
+        case "NaN":
+            return Number.NaN;
+        case "Infinity":
+            return Number.POSITIVE_INFINITY;
+        case "-Infinity":
+            return Number.NEGATIVE_INFINITY;
+        default:
+            return value;
+    }
+}
+
+export function stringifyNumber(key: string, value: any) {
+    if (Number.isNaN(value)) {
+        return "NaN";
+    }
+    else if (!Number.isFinite(value)) {
+        return value < 0 ? "-Infinity" : "Infinity";
+    }
+    return value;
 }

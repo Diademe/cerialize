@@ -11,7 +11,7 @@ export * from "./serialize";
 export * from "./deserialize";
 export * from "./annotations";
 export * from "./string_transforms";
-export { InstantiationMethod } from "./util";
+export { InstantiationMethod, parseNumber, stringifyNumber } from "./util";
 export { RefClean } from "./ref_cycle";
 
 export function SetSerializeKeyTransform(fn: (str: string) => string): void {
