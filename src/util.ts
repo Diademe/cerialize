@@ -116,7 +116,7 @@ export function stringifyNumber(key: string, value: any) {
     if (Number.isNaN(value)) {
         return "NaN";
     }
-    else if (!Number.isFinite(value)) {
+    else if (!isFinite(value)) {
         return value < 0 ? "-Infinity" : "Infinity";
     }
     return value;
