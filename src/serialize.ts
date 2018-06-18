@@ -127,11 +127,8 @@ export function SerializePrimitive<T>(
     }
 
     if (type() === Number) {
-        const value = Number(source);
-        if (isNaN(value)) {
-            return null;
-        }
-        return value;
+        return isNaN(source as any) && !Number.isNaN(source as any) ?
+            null : Number(source);
     }
 
     if (type() === Date) {
