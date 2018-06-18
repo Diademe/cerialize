@@ -168,14 +168,6 @@ export class MetaData {
         }
         return null;
     }
-    // TODO remove this function
-    public static getMetaDataForMap(keyType: IConstructable, valueType: IConstructable) {
-        if (keyType !== null && keyType !== void 0 &&
-            valueType !== null && valueType !== void 0) {
-            return TypeMapMap.get(keyType, valueType) || null;
-        }
-        return null;
-    }
 
     public static readonly TypeMap = TypeMap;
 
