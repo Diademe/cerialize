@@ -114,7 +114,7 @@ export function parseNumber(key: any, value: any) {
 
 export function stringifyNumber(key: string, value: any) {
     if (typeof value === "number") {
-        if (Number.isNaN(value)) {
+        if (Number.isNaN(value) || isNaN(value)) {
             return "NaN";
         }
         else if (!isFinite(value)) {
