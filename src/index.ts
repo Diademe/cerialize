@@ -25,7 +25,7 @@ export function SetDeserializeKeyTransform(fn: (str: string) => string): void {
 export function SetDefaultInstantiationMethod(
     instantiationMethod: InstantiationMethod
 ): void {
-    MetaData.deserializeInstantationMethod =
+    MetaData.deserializeInstantiationMethod =
         instantiationMethod === null
             ? InstantiationMethod.New
             : instantiationMethod;

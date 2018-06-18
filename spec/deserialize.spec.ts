@@ -55,10 +55,10 @@ function expectTarget(target: any, instance: any, shouldMakeTarget: boolean) {
     expect(instance === target).toBe(shouldMakeTarget);
 }
 
-function createTarget(shouldMakeTarget: boolean, shouldinstantiationMethod: InstantiationMethod, type: any) {
+function createTarget(shouldMakeTarget: boolean, shouldInstantiationMethod: InstantiationMethod, type: any) {
     if (!shouldMakeTarget) { return null; }
 
-    switch (shouldinstantiationMethod) {
+    switch (shouldInstantiationMethod) {
         case InstantiationMethod.New:
             return new type();
 

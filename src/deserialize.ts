@@ -123,7 +123,7 @@ export function DeserializeMap<K, V>(
     instantiationMethod?: InstantiationMethod
 ): Map<K, V> {
     if (instantiationMethod === void 0) {
-        instantiationMethod = MetaData.deserializeInstantationMethod;
+        instantiationMethod = MetaData.deserializeInstantiationMethod;
     }
 
     return _DeserializeMap(data, keyType, valueType, () => Map, null, instantiationMethod);
@@ -136,7 +136,7 @@ export function DeserializeObjectMap<T>(
     instantiationMethod?: InstantiationMethod
 ): Indexable<T> {
     if (instantiationMethod === void 0) {
-        instantiationMethod = MetaData.deserializeInstantationMethod;
+        instantiationMethod = MetaData.deserializeInstantiationMethod;
     }
 
     return _DeserializeObjectMap(data, type, target, instantiationMethod);
@@ -177,7 +177,7 @@ export function DeserializeArray<T>(
     instantiationMethod?: InstantiationMethod
 ) {
     if (instantiationMethod === void 0) {
-        instantiationMethod = MetaData.deserializeInstantationMethod;
+        instantiationMethod = MetaData.deserializeInstantiationMethod;
     }
 
     return _DeserializeArray(data, type, target, instantiationMethod);
@@ -220,7 +220,7 @@ export function DeserializeSet<T, C extends Set<T>>(
     instantiationMethod?: InstantiationMethod
 ) {
     if (instantiationMethod === void 0) {
-        instantiationMethod = MetaData.deserializeInstantationMethod;
+        instantiationMethod = MetaData.deserializeInstantiationMethod;
     }
 
     return _DeserializeSet(data, keyType, constructor, target, instantiationMethod);
@@ -433,7 +433,7 @@ export function Deserialize<T extends Indexable>(
     instantiationMethod?: InstantiationMethod
 ): T | null {
     if (instantiationMethod === void 0) {
-        instantiationMethod = MetaData.deserializeInstantationMethod;
+        instantiationMethod = MetaData.deserializeInstantiationMethod;
     }
 
     return _Deserialize(data, type, target, instantiationMethod);

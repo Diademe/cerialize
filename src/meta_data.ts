@@ -177,7 +177,7 @@ export class MetaData {
 
     public static deserializeKeyTransform = NoOp;
 
-    public static deserializeInstantationMethod = InstantiationMethod.New;
+    public static deserializeInstantiationMethod = InstantiationMethod.New;
 
     public static refCycleDetection = false;
 }
