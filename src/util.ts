@@ -113,11 +113,13 @@ export function parseNumber(key: any, value: any) {
 }
 
 export function stringifyNumber(key: string, value: any) {
-    if (Number.isNaN(value)) {
-        return "NaN";
-    }
-    else if (!isFinite(value)) {
-        return value < 0 ? "-Infinity" : "Infinity";
+    if (typeof value === "number") {
+        if (Number.isNaN(value)) {
+            return "NaN";
+        }
+        else if (!isFinite(value)) {
+            return value < 0 ? "-Infinity" : "Infinity";
+        }
     }
     return value;
 }
