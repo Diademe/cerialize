@@ -31,7 +31,7 @@ export function SetDefaultInstantiationMethod(
             : instantiationMethod;
 }
 
-// if true it deales with referances and cycle referances
+// if true it deals with references and cycle references
 export function SetRefCycleDetection(b: boolean) {
     MetaData.refCycleDetection = b;
 }

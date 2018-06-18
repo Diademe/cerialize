@@ -464,7 +464,7 @@ describe("Deserializing", function() {
 
                 });
 
-                it("throws an exeption if input is not a map type", function() {
+                it("throws an exception if input is not a map type", function() {
                     class Test {
                         @deserializeAsObjectMap(Number) public values: Indexable<number>;
                     }
@@ -635,7 +635,7 @@ describe("Deserializing", function() {
             expect(instance.value.has(3)).toBe(true);
         });
 
-        it("deserializes a custome Set of primitives", function() {
+        it("deserializes a custom Set of primitives", function() {
             class MySet<T> extends Set<T> {}
             class Test {
                 @deserializeAsSet(() => Number, () => MySet) public value: MySet<number>;
@@ -1284,7 +1284,7 @@ describe("Deserializing", function() {
 
     });
 
-    describe("RuntimeTyping serialisation", function() {
+    describe("RuntimeTyping serialization", function() {
 
         it("Array", function() {
             class Test0 {
@@ -1316,7 +1316,7 @@ describe("Deserializing", function() {
                 { $type: "my Test2 type", valueC: 2 },
                 { $type: "my Test3 type", valueD: 3 }
             ], () => Test0);
-            RuntimeTypingResetDictionnary();
+            RuntimeTypingResetDictionary();
             RuntimeTypingSetEnable(false);
             expect(json[0] instanceof Test0).toBeTruthy();
             expect(json[1] instanceof Test1).toBeTruthy();
@@ -1356,7 +1356,7 @@ describe("Deserializing", function() {
                 m1: { $type: "my Test0 type", valueA: true },
                 m2: { $type: "my Test2 type", valueB: true }
             }, () => Test3);
-            RuntimeTypingResetDictionnary();
+            RuntimeTypingResetDictionary();
             RuntimeTypingSetEnable(false);
             expect(json instanceof Test3).toBeTruthy();
             expect(json.m1 instanceof Test0).toBeTruthy();
@@ -1395,7 +1395,7 @@ describe("Deserializing", function() {
                 m1: { $type: "my Test0 type", valueA: true },
                 m2: { $type: "my Test2 type", valueB: true }
             }, () => Test3, null, InstantiationMethod.ObjectCreate);
-            RuntimeTypingResetDictionnary();
+            RuntimeTypingResetDictionary();
             RuntimeTypingSetEnable(false);
             expect(json instanceof Test3).toBeTruthy();
             expect(json.m1 instanceof Test0).toBeTruthy();
@@ -1407,12 +1407,12 @@ describe("Deserializing", function() {
     describe("Accessor", function() {
 
         it("accessor get & set", function() {
-            class Drapeau {
+            class Flag {
                 private bp: number;
                 constructor(n: number) {
                     this.bp = n;
                 }
-                @deserializeAs(() => Number, "bprime")
+                @deserializeAs(() => Number, "bPrime")
                 public get b() {
                     return this.bp + 1;
                 }
@@ -1421,8 +1421,8 @@ describe("Deserializing", function() {
                 }
             }
 
-            const d = new Drapeau(2);
-            const json = Deserialize({ bprime : 3 }, () => Drapeau);
+            const d = new Flag(2);
+            const json = Deserialize({ bPrime : 3 }, () => Flag);
             expect(json.b).toEqual(2);
 
         });

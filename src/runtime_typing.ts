@@ -1,6 +1,6 @@
 import { IConstructable } from "./util";
 export { TypeString };
-// throw an exeption if dic doesn't have key
+// throw an exception if dic doesn't have key
 function lousyGet(dic: any, key: any) {
     const res = dic.get(key);
     if (res === undefined) {

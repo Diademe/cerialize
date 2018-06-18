@@ -474,7 +474,7 @@ export function autoserializeAsJson(
 export function inheritSerialization(parentType: () => IConstructable) {
     return function(childType: Function) {
         if (parentType() === undefined){
-            throw new Error("@inheritSerialization called with undefind argument");
+            throw new Error("@inheritSerialization called with undefined argument");
         }
         MetaData.inheritMetaData(parentType(), childType);
     };

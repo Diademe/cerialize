@@ -1356,20 +1356,20 @@ describe("Serializing", function() {
 
     describe("Accessor", function() {
         it("accessor get & set", function() {
-            class Drapeau {
+            class Flag {
                 public bp: number;
                 constructor(n: number) {
                     this.bp = n;
                 }
-                @serializeAs(() => Number, "bprime")
+                @serializeAs(() => Number, "bPrime")
                 public get b() {
                     return this.bp + 1;
                 }
             }
 
-            const d = new Drapeau(2);
-            const json = Serialize(d, () => Drapeau);
-            expect(json).toEqual({ bprime: 3 });
+            const d = new Flag(2);
+            const json = Serialize(d, () => Flag);
+            expect(json).toEqual({ bPrime: 3 });
         });
     });
 
