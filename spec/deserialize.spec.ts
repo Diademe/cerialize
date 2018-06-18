@@ -22,7 +22,7 @@ import {
     SetRefCycleDetection
 } from "../src/index";
 import {
-    RuntimeTypingResetDictionnary,
+    RuntimeTypingResetDictionary,
     RuntimeTypingSetEnable,
     RuntimeTypingSetTypeString,
     TypeString

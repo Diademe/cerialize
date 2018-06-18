@@ -4,7 +4,7 @@ export { TypeString };
 function lousyGet(dic: any, key: any) {
     const res = dic.get(key);
     if (res === undefined) {
-        throw new Error(`The dictionnary doesn't have the key ${key}`);
+        throw new Error(`The dictionary doesn't have the key ${key}`);
     } else {
         return res;
     }
@@ -36,7 +36,7 @@ export class TypeStringDictionary {
     public hasTypeFromString(s: string): boolean {
         return this.string2type.has(s);
     }
-    public resetDictionnary(): void {
+    public resetDictionary(): void {
         this.init();
     }
     private runtimeTyping: boolean = false;
@@ -49,8 +49,8 @@ export class TypeStringDictionary {
 }
 const TypeString: TypeStringDictionary = new TypeStringDictionary();
 
-export function RuntimeTypingResetDictionnary() {
-    TypeString.resetDictionnary();
+export function RuntimeTypingResetDictionary() {
+    TypeString.resetDictionary();
 }
 
 export function RuntimeTypingSetTypeString(t: any, s: string): void {

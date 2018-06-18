@@ -3,7 +3,7 @@ import { NoOp } from "./string_transforms";
 import { InstantiationMethod } from "./util";
 
 export {
-    RuntimeTypingResetDictionnary,
+    RuntimeTypingResetDictionary,
     RuntimeTypingSetTypeString,
     RuntimeTypingSetEnable
 } from "./runtime_typing";
