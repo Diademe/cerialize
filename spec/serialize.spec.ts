@@ -1201,7 +1201,7 @@ describe("Serializing", function() {
         });
     });
 
-    describe("ReferanceCycle", function() {
+    describe("ReferenceCycle", function() {
         it("Cycle length 3", function() {
             class Test {
                 @serializeAs(() => Test) public next: Test;
@@ -1249,7 +1249,7 @@ describe("Serializing", function() {
         });
     });
 
-    describe("Selective serialisation", function() {
+    describe("Selective serialization", function() {
         it("Bitmask", function() {
             class Test {
                 @serializeBitMask(1)
@@ -1287,7 +1287,7 @@ describe("Serializing", function() {
         });
     });
 
-    describe("RuntimeTyping serialisation", function() {
+    describe("RuntimeTyping serialization", function() {
 
         it("Array", function() {
             class Test0 {
