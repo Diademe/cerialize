@@ -14,6 +14,10 @@ describe("Number", function() {
         it("-Infinity", function() {
             expect(JSON.parse('"-Infinity"', parseNumber)).toEqual(Number.NEGATIVE_INFINITY);
         });
+
+        it("other", function() {
+            expect(JSON.parse(JSON.stringify({v: 15}), parseNumber)).toEqual({v: 15});
+        });
     });
 
     describe("stringify", function() {
@@ -27,6 +31,10 @@ describe("Number", function() {
 
         it("-Infinity", function() {
             expect(JSON.stringify(Number.NEGATIVE_INFINITY, stringifyNumber)).toEqual('"-Infinity"');
+        });
+
+        it("other", function() {
+            expect(JSON.stringify({v: 15}, stringifyNumber)).toEqual("{\"v\":15}");
         });
     });
 });
