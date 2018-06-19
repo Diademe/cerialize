@@ -14,6 +14,7 @@ import {
     deserializeAsSet,
     deserializeUsing,
     inheritSerialization,
+    onDeserialized,
     SetDefaultInstantiationMethod,
     SetDeserializeKeyTransform
 } from "../src";
@@ -1107,8 +1108,9 @@ describe("Deserializing", function() {
                 @deserializeAs(() => Number) public value: number = 1;
                 public something: string;
 
-                public static onDeserialized(json: JsonObject, instance: Test) {
-                    instance.something = "here";
+                @onDeserialized
+                public someVoidFunction(): void {
+                    this.something = "here";
                 }
 
             }
@@ -1125,24 +1127,27 @@ describe("Deserializing", function() {
         it("accepts the return value of onDeserialized if provided", function() {
 
             class Test {
-
                 @deserializeAs(() => Number) public value: number = 1;
                 public something: string;
 
-                public static onDeserialized(json: JsonObject, instance: Test) {
-                    const retn = new Test();
-                    retn.value = 300;
-                    retn.something = "here";
-                    return retn;
+                @onDeserialized
+                public someVoidFunction(): void {
+                    this.value = 300;
                 }
 
             }
 
+            class TestChild extends Test{
+                @onDeserialized
+                public someVoidFunction(): void {
+                    this.value += 200;
+                }
+            }
+
             const json = { value: 100 };
-            const instance = Deserialize(json, () => Test, null, InstantiationMethod.New);
+            const instance = Deserialize(json, () => TestChild, null, InstantiationMethod.New);
             expect(instance).toEqual({
-                something: "here",
-                value: 300
+                value: 201
             });
         });
 
