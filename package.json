@@ -8,7 +8,9 @@
     "annotations",
     "decoration",
     "newtonsoft",
-    "decorators"
+    "decorators",
+    "cycle",
+    "cyclic"
   ],
   "author": "Matt Weichselbaum & Diadème Ingenierie",
   "license": "MIT",
