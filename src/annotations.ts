@@ -490,6 +490,14 @@ export function emitDefaultValue(emitDefaultValue: boolean) {
     };
 }
 
+export function onDeserialized(target: IConstructable, actualKeyName: string): void {
+        const metadata = MetaData.getMetaData(
+            target.constructor,
+            actualKeyName
+        );
+        metadata.flags = MetaDataFlag.onDeserialized;
+}
+
 export function defaultValue(instance: () => IConstructable) {
     return function(target: IConstructable, actualKeyName: string): void {
         const metadata = MetaData.getMetaData(

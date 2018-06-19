@@ -342,8 +342,13 @@ function _Deserialize<T extends Indexable>(
         return tmp.a;
     }
     target = tmp.a;
-
+    let onDeserialized = "";
     for (const metadata of metadataList) {
+        if (metadata.flags === MetaDataFlag.onDeserialized){
+            onDeserialized = metadata.keyName;
+            continue;
+        }
+
         if (metadata.deserializedKey === null) {
             continue;
         }
@@ -416,11 +421,8 @@ function _Deserialize<T extends Indexable>(
         }
     }
 
-    if (typeof type().onDeserialized === "function") {
-        const value = type().onDeserialized(data, target, instantiationMethod);
-        if (value !== void 0) {
-            return value as any;
-        }
+    if (onDeserialized){
+        target[onDeserialized]();
     }
 
     return target as T;

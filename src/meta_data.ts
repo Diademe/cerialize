@@ -30,6 +30,7 @@ export const enum MetaDataFlag {
     DeserializeMap = 1 << 16,
     SerializeSet = 1 << 17,
     DeserializeSet = 1 << 18,
+    onDeserialized = 1 << 19,
 
     AutoPrimitive = SerializePrimitive | DeserializePrimitive,
     AutoUsing = SerializeUsing | DeserializeUsing,
