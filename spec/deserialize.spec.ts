@@ -3,6 +3,7 @@ import {
     autoserializeAsJson,
     autoserializeAsObjectMap,
     autoserializeUsing,
+    defaultValue,
     Deserialize,
     DeserializeArray,
     deserializeAs,
@@ -11,6 +12,7 @@ import {
     deserializeAsObjectMap,
     deserializeAsSet,
     deserializeUsing,
+    emitDefaultValue,
     inheritSerialization,
     onDeserialized,
     SetDefaultInstantiationMethod,
@@ -1428,6 +1430,60 @@ describe("Deserializing", function() {
 
         });
 
+    });
+
+    describe("Default Value", function() {
+        it("Boolean", function() {
+            class Test {
+                @emitDefaultValue(false)
+                @autoserializeAs(() => Boolean)
+                public valueDefault: boolean;
+
+                @emitDefaultValue(false)
+                @autoserializeAs(() => Boolean)
+                @defaultValue(true)
+                public valueFalse: boolean;
+
+                @autoserializeAs(() => Boolean)
+                @defaultValue(true)
+                @emitDefaultValue(false)
+                public valueTrue: boolean;
+            }
+
+            const t = {
+                valueFalse: false
+            };
+            const json = Deserialize(t, () => Test);
+            expect(json.valueDefault).toBeFalsy();
+            expect(json.valueFalse).toBeFalsy();
+            expect(json.valueTrue).toBeTruthy();
+        });
+
+        it("Number", function() {
+            class Test {
+                @emitDefaultValue(false)
+                @autoserializeAs(() => Number)
+                public valueDefault: number;
+
+                @emitDefaultValue(false)
+                @autoserializeAs(() => Number)
+                @defaultValue(2)
+                public valueNotDefault1: number;
+
+                @emitDefaultValue(false)
+                @autoserializeAs(() => Number)
+                @defaultValue(2)
+                public valueNotDefault2: number;
+            }
+
+            const t = {
+                valueNotDefault2: 1
+            };
+            const json = Deserialize(t, () => Test);
+            expect(json.valueDefault).toEqual(0);
+            expect(json.valueNotDefault1).toEqual(2);
+            expect(json.valueNotDefault2).toEqual(1);
+        });
     });
 
 });

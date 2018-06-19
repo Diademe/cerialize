@@ -1414,11 +1414,11 @@ describe("Serializing", function() {
 
                 @emitDefaultValue(false)
                 @serializeAs(() => Boolean)
-                @defaultValue(() => true)
+                @defaultValue(true)
                 public valueFalse: boolean = false;
 
                 @serializeAs(() => Boolean)
-                @defaultValue(() => true)
+                @defaultValue(true)
                 @emitDefaultValue(false)
                 public valueTrue: boolean = true;
             }
@@ -1436,12 +1436,12 @@ describe("Serializing", function() {
 
                 @emitDefaultValue(false)
                 @serializeAs(() => Number)
-                @defaultValue(() => 2)
+                @defaultValue(2)
                 public valueNotDefault1: number = 1;
 
                 @emitDefaultValue(false)
                 @serializeAs(() => Number)
-                @defaultValue(() => 2)
+                @defaultValue(2)
                 public valueNotDefault2: number = 2;
             }
 

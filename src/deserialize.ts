@@ -353,13 +353,18 @@ function _Deserialize<T extends Indexable>(
         }
 
         const source: any = data[metadata.getDeserializedKey()];
+        const keyName = metadata.keyName;
+        const flags = metadata.flags;
+
+        if (source === undefined && metadata.emitDefaultValue === false){
+            target[keyName] = metadata.defaultValue === undefined ?
+            (metadata.deserializedType() as any)() : metadata.defaultValue;
+            continue;
+        }
 
         if (source === void 0) {
             continue;
         }
-
-        const keyName = metadata.keyName;
-        const flags = metadata.flags;
 
         if ((flags & MetaDataFlag.DeserializeObjectMap) !== 0) {
             target[keyName] = _DeserializeObjectMap(

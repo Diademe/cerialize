@@ -1,3 +1,8 @@
+export type primitive =
+    | null
+    | string
+    | number
+    | boolean;
 export type JsonType =
     | null
     | string
@@ -84,6 +89,23 @@ export function isPrimitiveType(type: Function): boolean {
         type === Date ||
         type === RegExp
     );
+}
+
+/** @internal */
+export function DefaultPrimitiveValue(value: any): any{
+    if (value instanceof String) {
+        return String();
+    }
+    if (value instanceof Boolean) {
+        return Boolean();
+    }
+    if (value instanceof Number) {
+        return Number();
+    }
+    if (value instanceof Date) {
+        return Date();
+    }
+    return null;
 }
 
 /** @internal */

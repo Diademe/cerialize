@@ -303,8 +303,8 @@ function defaultValue(metadata: MetaData, val: any) {
     if (metadata.emitDefaultValue === false) {
         if (val === null){
             return true;
-        } else if (metadata.defaultValue() !== null) {
-            return val === metadata.defaultValue();
+        } else if (metadata.defaultValue !== undefined) {
+            return val === metadata.defaultValue;
         } else {
             // tslint:disable-next-line:triple-equals
             return new (metadata.serializedType())() == val;

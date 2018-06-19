@@ -4,6 +4,7 @@ import {
     IConstructable,
     ISerializer,
     isPrimitiveType,
+    primitive,
     SerializeFn,
     setBitConditionally
 } from "./util";
@@ -497,7 +498,7 @@ export function onDeserialized(target: IConstructable, actualKeyName: string): v
         metadata.flags = MetaDataFlag.onDeserialized;
 }
 
-export function defaultValue(instance: () => IConstructable) {
+export function defaultValue(instance: primitive) {
     return function(target: IConstructable, actualKeyName: string): void {
         const metadata = MetaData.getMetaData(
             target.constructor,

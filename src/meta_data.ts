@@ -4,7 +4,7 @@
 
 import { PairMap } from "./pair_map";
 import { NoOp } from "./string_transforms";
-import { ASerializableType, IConstructable, InstantiationMethod } from "./util";
+import { ASerializableType, IConstructable, InstantiationMethod, primitive } from "./util";
 
 const TypeMap = new Map<any, MetaData[]>();
 
@@ -52,7 +52,7 @@ export class MetaData {
     public flags: MetaDataFlag;
     public bitMaskSerialize: number;
     public emitDefaultValue: boolean;
-    public defaultValue: () => IConstructable;
+    public defaultValue: primitive;
 
     constructor(keyName: string) {
         this.keyName = keyName;
@@ -65,7 +65,7 @@ export class MetaData {
         this.flags = 0;
         this.bitMaskSerialize = Number.MAX_SAFE_INTEGER;
         this.emitDefaultValue = true;
-        this.defaultValue = () => null;
+        this.defaultValue = undefined;
     }
 
     public getSerializedKey(): string {
