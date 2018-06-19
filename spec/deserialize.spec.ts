@@ -1,13 +1,11 @@
 import {
     autoserializeAs,
-    autoserializeAsArray,
     autoserializeAsJson,
     autoserializeAsObjectMap,
     autoserializeUsing,
     Deserialize,
     DeserializeArray,
     deserializeAs,
-    deserializeAsArray,
     deserializeAsJson,
     deserializeAsMap,
     deserializeAsObjectMap,
@@ -26,12 +24,10 @@ import {
     RuntimeTypingResetDictionary,
     RuntimeTypingSetEnable,
     RuntimeTypingSetTypeString,
-    TypeString
 } from "../src/runtime_typing";
 import {
     Indexable,
     InstantiationMethod,
-    JsonObject
 } from "../src/util";
 
 function expectInstance(

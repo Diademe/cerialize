@@ -4,7 +4,6 @@ import {
     IConstructable,
     ISerializer,
     isPrimitiveType,
-    SerializableType,
     SerializeFn,
     setBitConditionally
 } from "./util";

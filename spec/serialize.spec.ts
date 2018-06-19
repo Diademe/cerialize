@@ -26,13 +26,11 @@ import {
     RuntimeTypingResetDictionary,
     RuntimeTypingSetEnable,
     RuntimeTypingSetTypeString,
-    TypeString
 } from "../src/runtime_typing";
 import {
     SelectiveSerialization,
     Serialize,
     SerializeArray,
-    SerializeJSON
 } from "../src/serialize";
 import { Indexable, JsonObject } from "../src/util";
 

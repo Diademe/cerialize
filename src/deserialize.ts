@@ -321,7 +321,6 @@ function _Deserialize<T extends Indexable>(
             if (isPrimitiveType(type())) {
                 return DeserializePrimitive(data, type as any, target as any);
             }
-            const tmp1 = { a: {} as T };
             switch (instantiationMethod) {
                 case InstantiationMethod.New:
                     return new (type())();
