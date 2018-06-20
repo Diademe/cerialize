@@ -92,7 +92,7 @@ export function isPrimitiveType(type: Function): boolean {
 }
 
 /** @internal */
-export function DefaultPrimitiveValue(value: any): any{
+export function DefaultPrimitiveValue(value: any) {
     if (value instanceof String) {
         return String();
     }
@@ -106,6 +106,18 @@ export function DefaultPrimitiveValue(value: any): any{
         return Date();
     }
     return null;
+}
+
+/** @internal */
+export function DowncastPrimitive(value: SerializablePrimitiveType): primitive {
+    if (value instanceof String
+        || value instanceof Boolean
+        || value instanceof Number
+        || value instanceof RegExp
+        || value instanceof Date) {
+        return value.valueOf() as primitive;
+    }
+    throw new Error("DowncastPrimitive failed on " + value);
 }
 
 /** @internal */

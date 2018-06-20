@@ -1,6 +1,8 @@
 import {
     autoserializeAs,
+    autoserializeAsArray,
     autoserializeAsJson,
+    autoserializeAsMap,
     autoserializeAsObjectMap,
     autoserializeUsing,
     defaultValue,
@@ -1454,8 +1456,8 @@ describe("Deserializing", function() {
                 valueFalse: false
             };
             const json = Deserialize(t, () => Test);
-            expect(json.valueDefault).toBeFalsy();
-            expect(json.valueFalse).toBeFalsy();
+            expect(json.valueDefault).toBe(false);
+            expect(json.valueFalse).toBe(false);
             expect(json.valueTrue).toBeTruthy();
         });
 
@@ -1483,6 +1485,30 @@ describe("Deserializing", function() {
             expect(json.valueDefault).toEqual(0);
             expect(json.valueNotDefault1).toEqual(2);
             expect(json.valueNotDefault2).toEqual(1);
+        });
+
+        it("Map", function() {
+            class Test {
+                @emitDefaultValue(false)
+                @autoserializeAsMap(() => String, () => Number)
+                public value: Map<string, number>;
+            }
+
+            const t = {};
+            const json = Deserialize(t, () => Test);
+            expect(json.value).toBeNull();
+        });
+
+        it("Array", function() {
+            class Test {
+                @emitDefaultValue(false)
+                @autoserializeAsArray(() => String)
+                public value: string[];
+            }
+
+            const t = {};
+            const json = Deserialize(t, () => Test);
+            expect(json.value).toBeNull();
         });
     });
 

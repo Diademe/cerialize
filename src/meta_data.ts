@@ -26,8 +26,8 @@ export const enum MetaDataFlag {
     SerializeUsing = 1 << 12,
     DeserializeObject = 1 << 13,
     SerializeObject = 1 << 14,
-    SerializeMap = 1 << 15,
-    DeserializeMap = 1 << 16,
+    DeserializeMap = 1 << 15,
+    SerializeMap = 1 << 16,
     SerializeSet = 1 << 17,
     DeserializeSet = 1 << 18,
     onDeserialized = 1 << 19,
@@ -35,7 +35,17 @@ export const enum MetaDataFlag {
     AutoPrimitive = SerializePrimitive | DeserializePrimitive,
     AutoUsing = SerializeUsing | DeserializeUsing,
     AutoJSONTransformKeys = DeserializeJSONTransformKeys |
-        SerializeJSONTransformKeys
+        SerializeJSONTransformKeys,
+    Collection =
+          DeserializeArray
+        | SerializeArray
+        | DeserializeObjectMap
+        | SerializeObjectMap
+        | DeserializeMap
+        | SerializeMap
+        | SerializeSet
+        | DeserializeSet,
+    PlainObject = DeserializeObject | SerializeObject
 }
 
 /** @internal */

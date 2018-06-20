@@ -83,7 +83,7 @@ describe("Serializing", function() {
                     s.value0 = d;
                     const json = Serialize(s, () => Test);
                     expect(json).toEqual({
-                        value0: d.toString()
+                        value0: d.valueOf()
                     });
                 });
 
@@ -112,7 +112,7 @@ describe("Serializing", function() {
                     s.value1 = true;
                     s.value2 = 100;
                     const json = Serialize(s, () => Test);
-                    expect(json.value0).toBe(null);
+                    expect(json.value0).toBe(NaN);
                     expect(json.value1).toBe("true");
                     expect(json.value2).toBe(true);
                 });
@@ -1415,7 +1415,7 @@ describe("Serializing", function() {
                 @emitDefaultValue(false)
                 @serializeAs(() => Boolean)
                 @defaultValue(true)
-                public valueFalse: boolean = false;
+                public valueFalse: Boolean = false;
 
                 @serializeAs(() => Boolean)
                 @defaultValue(true)
@@ -1424,6 +1424,8 @@ describe("Serializing", function() {
             }
 
             const t = new Test();
+            // tslint:disable-next-line:no-construct
+            t.valueFalse = new Boolean(false);
             const json = Serialize(t, () => Test);
             expect(json).toEqual({ valueFalse: false });
         });

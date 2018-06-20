@@ -357,8 +357,18 @@ function _Deserialize<T extends Indexable>(
         const flags = metadata.flags;
 
         if (source === undefined && metadata.emitDefaultValue === false){
-            target[keyName] = metadata.defaultValue === undefined ?
-            (metadata.deserializedType() as any)() : metadata.defaultValue;
+            // if target[keyName] is a collection or a non primitive object
+            if (
+                ((flags & MetaDataFlag.Collection)) ||
+                ((flags & MetaDataFlag.PlainObject) && !(flags & MetaDataFlag.AutoPrimitive))
+            ){
+                target[keyName] = null;
+            }
+            // if target[keyName] is a primitive
+            else {
+                target[keyName] = metadata.defaultValue === undefined ?
+                (metadata.deserializedType() as any)() : metadata.defaultValue;
+            }
             continue;
         }
 

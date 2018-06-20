@@ -3,10 +3,12 @@ import { cycleBreaking } from "./ref_cycle";
 import { TypeString } from "./runtime_typing";
 import {
     ASerializableType,
+    DowncastPrimitive,
     Indexable,
     isPrimitiveType,
     JsonObject,
     JsonType,
+    primitive,
     SerializablePrimitiveType,
     SerializableType
 } from "./util";
@@ -118,28 +120,32 @@ export function SerializePrimitive<T>(
         return null;
     }
 
+    const primitiveSource: primitive =
+        source instanceof Object ? DowncastPrimitive(source) : source as primitive;
+
     if (type() === String) {
-        return source.toString();
+        return String(primitiveSource);
     }
 
     if (type() === Boolean) {
-        return Boolean(source);
+        return Boolean(primitiveSource);
     }
 
     if (type() === Number) {
-        return isNaN(source as any) && !Number.isNaN(source as any) ?
-            null : Number(source);
+        const val = Number(primitiveSource);
+        return isNaN(val as any) && !Number.isNaN(val as any) ?
+            null : val;
     }
 
     if (type() === Date) {
-        return source.toString();
+        return primitiveSource.valueOf();
     }
 
     if (type() === RegExp) {
-        return source.toString();
+        return primitiveSource.toString();
     }
 
-    return source.toString();
+    return primitiveSource.toString();
 }
 
 export function SerializeJSON(source: any, transformKeys = true): JsonType {
@@ -304,10 +310,13 @@ function defaultValue(metadata: MetaData, val: any) {
         if (val === null){
             return true;
         } else if (metadata.defaultValue !== undefined) {
+            if (val instanceof Object){
+                val = val.valueOf();
+            }
             return val === metadata.defaultValue;
         } else {
             // tslint:disable-next-line:triple-equals
-            return new (metadata.serializedType())() == val;
+            return new (metadata.serializedType())().valueOf() === val;
         }
     }
     return false;
