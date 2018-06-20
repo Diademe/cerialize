@@ -105,8 +105,9 @@ Once you have annotated your class types, you can use the `Serialize*` and `Dese
         // when deserializing our planet log we need to convert the timezone 
         // of the timeVisited value from galactic to local time  
         // (This could also be done via @deserializeUsing(Time.toLocalTime))
-        static onDeserialized(instance : PlanetLog, json : JsonObject, instantiationMethod : boolean) {
-            instance.timeVisited = Time.toLocalTime(instance.timeVisited);
+        @onDeserialized
+        static someFunction() {
+            this.timeVisited = Time.toLocalTime(this.timeVisited);
         }
 
     }
@@ -382,7 +383,7 @@ A callback can be provided for when a class is serialized. To define the callbac
 ```
 
 ## onDeserialized Callback
-A callback can be provided for when a class is deserialized. To define the callback, add a static method `onDeserialized<T>(instance : T, json : JsonObject, instantiationMethod = InstantiationMethod.New)` to the class that needs custom post processing. You can either return a new value from this function, or modify the `json` parameter. The `instantiationMethod` parameter signifies whether the initial call to deserialize this object should create instances of the types (when true) or just plain objects (when false)
+A callback can be provided for when a class is deserialized. Just add `@onDeserialized` on a function and it will be called on the instance after its class have been deserialized. You can add only one `@onDeserialized` callback to a class. The callback are inherited, but you have to call the callback of a parent yourself if the callback is overridden.
 
 ```typescript 
     class CrewMember {
@@ -390,9 +391,10 @@ A callback can be provided for when a class is deserialized. To define the callb
         @autoserializeAs(() => String) firstName;
         @autoserializeAs(() => String) lastName;
 
-        static onDeserialized(instance : CrewMember, json : JsonObject, instantiationMethod : InstantiationMethod) {
-            instance.firstName = json.firstName.toLowerCase();
-            instance.lastName = json.lastName.toLowerCase();
+        @onDeserialized
+        static callBack() {
+            this.firstName = this.firstName.toLowerCase();
+            this.lastName = this.lastName.toLowerCase();
         }
     }
 ```
@@ -514,7 +516,6 @@ if this decorator has false in it's argument, the variable will not be serialize
 |:-------:|:-------------:|
 | number  |       0       |
 | string  |       ""      |
-| object  |      null     |
 | boolean |     false     |
 
 ### defaultValue
@@ -522,24 +523,28 @@ This decorator permits to change the default value. It only work with primitive 
 ```typescript
     class Test {
         @emitDefaultValue(false)
-        @serializeAs(() => Number)
-        public valueDefault: number = 0;
+        @serializeAs(() => Boolean)
+        public valueDefault: boolean = false;
 
         @emitDefaultValue(false)
-        @serializeAs(() => Number)
-        @defaultValue(2)
-        public valueNotDefault1: number = 1;
+        @serializeAs(() => Boolean)
+        @defaultValue(true)
+        public valueFalse: boolean = false;
 
+        @serializeAs(() => Boolean)
+        @defaultValue(true)
         @emitDefaultValue(false)
-        @serializeAs(() => Number)
-        @defaultValue(2)
-        public valueNotDefault2: number = 2;
+        public valueTrue: boolean = true;
     }
+
     const t = new Test();
     const json = Serialize(t, () => Test);
-    /* { valueNotDefault1: 1 } */
-
+    /* { valueNotDefault2: 1 } */
 ```
+
+### Note
+During deserialization, if a member decorated with `@emitDefaultValue(false)` is not in the parsed json, it will be initialized by the valueNotDefault2: 1
+
 
 ## Reference and circular reference
 Without this option, the following happens :
@@ -640,6 +645,7 @@ Other decorators
 * serializeBitMask
 * emitDefaultValue
 * defaultValue
+* onDeserialized
 
 ### Setting Accessor
 * SetRefCycleDetection
@@ -653,7 +659,6 @@ Other decorators
 * SelectiveSerialization
 
 ### Callback
-* onDeserialized
 * onSerialized
 
 ### Good to know
