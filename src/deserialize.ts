@@ -62,12 +62,12 @@ function _DeserializeObjectMap<T>(
     return target;
 }
 
-function _DeserializeMap<K, V>(
+function _DeserializeMap<K, V, C extends Map<K, V>>(
     data: JsonObject,
     keyType: ASerializableType<K>,
     valueType: ASerializableType<V>,
-    type: () => MapConstructor,
-    target?: Map<K, V>,
+    constructor: () => C,
+    target?: C,
     instantiationMethod?: InstantiationMethod
 ): Map<K, V> {
     if (typeof data !== "object") {
@@ -77,14 +77,14 @@ function _DeserializeMap<K, V>(
     }
 
     if (target === null || target === void 0) {
-        target = new (type())<K, V>();
+        target = new (constructor() as any)();
     }
 
     if (data === null || data === void 0) {
         return null;
     }
 
-    const tmp = { a: target as Map<K, V> };
+    const tmp = { a: target as C };
     if (referenceHandling(data, tmp)) {
         return tmp.a;
     }
@@ -127,7 +127,7 @@ export function DeserializeMap<K, V>(
         instantiationMethod = MetaData.deserializeInstantiationMethod;
     }
 
-    return _DeserializeMap(data, keyType, valueType, () => Map, null, instantiationMethod);
+    return _DeserializeMap(data, keyType, valueType, () => Map as any, null, instantiationMethod);
 }
 
 export function DeserializeObjectMap<T>(
@@ -189,7 +189,7 @@ export function DeserializeArray<T, C extends T[]>(
 function _DeserializeSet<K, C extends Set<K>>(
     data: JsonArray,
     keyType: ASerializableType<K>,
-    constructor: () => C,
+    constructor: () => IConstructable,
     target?: C,
     instantiationMethod?: InstantiationMethod
 ) {
@@ -218,7 +218,7 @@ function _DeserializeSet<K, C extends Set<K>>(
 export function DeserializeSet<T, C extends Set<T>>(
     data: JsonArray,
     keyType: ASerializableType<T>,
-    constructor: () => C,
+    constructor: () => IConstructable = () => Set,
     target?: C,
     instantiationMethod?: InstantiationMethod
 ) {
