@@ -4,6 +4,7 @@ import {
     autoserializeAsJson,
     autoserializeAsMap,
     autoserializeAsObjectMap,
+    autoserializeAsSet,
     autoserializeUsing,
     defaultValue,
     Deserialize,
@@ -1509,6 +1510,76 @@ describe("Deserializing", function() {
             const t = {};
             const json = Deserialize(t, () => Test);
             expect(json.value).toBeNull();
+        });
+
+        it("Object", function() {
+            class Test {
+                @autoserializeAsArray(() => String)
+                public value0: string[];
+                @autoserializeAs(() => String)
+                public value1: string;
+            }
+
+            const test = new Test();
+            test.value0 = new Array<string>();
+            test.value0.push("v1", "v2");
+            test.value1  = "Babar";
+
+            const t = {};
+            const json = Deserialize(t, () => Test, test);
+            expect(json).toEqual({value0: ["v1", "v2"], value1: "Babar"});
+        });
+    });
+
+    describe("extends", function() {
+        it("Array", function() {
+            class Tableau extends Array { }
+            class Test {
+                constructor(...args: any[]){
+                    this.a = new Tableau(...args);
+                }
+                @autoserializeAsArray(() => Number, () => Tableau, "bPrime")
+                public a: Tableau;
+            }
+
+            const json = Deserialize({ bPrime: [1, 2, 3]}, () => Test);
+            expect(json.a).toEqual([1, 2, 3]);
+            expect(json.a instanceof Tableau).toBeTruthy();
+        });
+
+        it("Set", function() {
+            class Ensemble extends Set<number> { }
+            class Test {
+                constructor(){
+                    this.a = new Ensemble();
+                }
+                @autoserializeAsSet(() => Number)
+                public a: Set<number>;
+            }
+
+            const json = Deserialize({ a: [1, 2, 3]}, () => Test);
+            expect(json.a.has(1)).toBeTruthy();
+            expect(json.a.has(2)).toBeTruthy();
+            expect(json.a.has(3)).toBeTruthy();
+            expect(json.a.size).toEqual(3);
+            expect(json.a instanceof Ensemble).toBeTruthy();
+        });
+
+        it("Map", function() {
+            class Dictionnaire extends Map<number, number> { }
+            class Test {
+                constructor(){
+                    this.a = new Dictionnaire();
+                }
+                @autoserializeAsMap(() => Number, () => Number, () => Dictionnaire)
+                public a: Dictionnaire;
+            }
+
+            const json = Deserialize({ a: {1: 1, 2: 2, 3: 3}}, () => Test);
+            expect(json.a.get(1)).toEqual(1);
+            expect(json.a.get(2)).toEqual(2);
+            expect(json.a.get(3)).toEqual(3);
+            expect(json.a instanceof Dictionnaire).toBeTruthy();
         });
     });
 
