@@ -4,6 +4,7 @@ import { TypeString } from "./runtime_typing";
 import {
     ASerializableType,
     getTarget,
+    IConstructable,
     Indexable,
     InstantiationMethod,
     isPrimitiveType,
@@ -142,10 +143,11 @@ export function DeserializeObjectMap<T>(
     return _DeserializeObjectMap(data, type, target, instantiationMethod);
 }
 
-function _DeserializeArray<T>(
+function _DeserializeArray<T, C extends T[]>(
     data: JsonArray,
     type: ASerializableType<T>,
-    target?: T[],
+    constructor: () => IConstructable,
+    target?: C,
     instantiationMethod?: InstantiationMethod
 ) {
     if (!Array.isArray(data)) {
@@ -154,7 +156,7 @@ function _DeserializeArray<T>(
         );
     }
     if (!Array.isArray(target)) {
-        target = [] as T[];
+        target = new (constructor() as any)();
     }
 
     target.length = data.length;
@@ -170,17 +172,18 @@ function _DeserializeArray<T>(
     return target;
 }
 
-export function DeserializeArray<T>(
+export function DeserializeArray<T, C extends T[]>(
     data: JsonArray,
     type: ASerializableType<T>,
-    target?: T[],
+    constructor: () => IConstructable = () => Array,
+    target?: C,
     instantiationMethod?: InstantiationMethod
 ) {
     if (instantiationMethod === void 0) {
         instantiationMethod = MetaData.deserializeInstantiationMethod;
     }
 
-    return _DeserializeArray(data, type, target, instantiationMethod);
+    return _DeserializeArray(data, type, constructor, target, instantiationMethod);
 }
 
 function _DeserializeSet<K, C extends Set<K>>(
@@ -395,6 +398,7 @@ function _Deserialize<T extends Indexable>(
         } else if ((flags & MetaDataFlag.DeserializeArray) !== 0) {
             target[keyName] = _DeserializeArray(
                 source,
+                metadata.deserializedKeyType,
                 metadata.deserializedType,
                 target[keyName],
                 instantiationMethod
@@ -468,7 +472,7 @@ export function DeserializeArrayRaw<T>(
     type: ASerializableType<T>,
     target?: T[]
 ): T[] | null {
-    return _DeserializeArray(data, type, target, InstantiationMethod.None);
+    return _DeserializeArray(data, type, () => Array, target, InstantiationMethod.None);
 }
 
 export function DeserializeMapRaw<T>(

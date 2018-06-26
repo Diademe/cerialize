@@ -663,7 +663,7 @@ describe("Serializing", function() {
 
                 it("serializes an array with a different key", function() {
                     class Test {
-                        @serializeAsArray(() => Number, "different")
+                        @serializeAsArray(() => Number, () => Array, "different")
                         public value: number[];
                     }
 

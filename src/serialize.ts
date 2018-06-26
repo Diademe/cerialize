@@ -257,7 +257,7 @@ export function Serialize<T>(
             }
             target[keyName] = val;
         } else if ((flags & MetaDataFlag.SerializeArray) !== 0) {
-            const val = SerializeArray(source, metadata.serializedType);
+            const val = SerializeArray(source, metadata.serializedKeyType);
             if (defaultValue(metadata, val)) {
                 continue;
             }
