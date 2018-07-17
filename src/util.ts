@@ -56,7 +56,7 @@ export interface SerializableType<T> {
     ) => T | void;
 }
 export type ASerializableType<T> = () => SerializableType<T>;
-
+export type Type<T> = ASerializableType<T> | SerializablePrimitiveType;
 /** @internal */
 export function getTarget<T>(
     type: SerializableType<T>,

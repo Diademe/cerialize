@@ -5,8 +5,10 @@ import {
     ISerializer,
     isPrimitiveType,
     primitive,
+    SerializablePrimitiveType,
     SerializeFn,
-    setBitConditionally
+    setBitConditionally,
+    Type
 } from "./util";
 
 // set a bitmask B. during compilation, if B & x, then the member will be serialized
@@ -32,25 +34,27 @@ export function serializeUsing(serializer: SerializeFn, keyName?: string) {
     };
 }
 
-export function serializeAs(type: ASerializableType<any>, keyName?: string) {
+export function serializeAs<T>(type: Type<T>, keyName?: string) {
     return function(target: IConstructable, actualKeyName: string): void {
         const metadata = MetaData.getMetaData(
             target.constructor,
             actualKeyName
         );
+        const isPrimitive = isPrimitiveType(type);
+        const functionType = isPrimitive ? () => (type as SerializablePrimitiveType) : type as ASerializableType<T>;
         metadata.serializedKey = keyName ? keyName : actualKeyName;
-        metadata.serializedType = type;
+        metadata.serializedType = functionType;
         metadata.flags |= MetaDataFlag.SerializeObject;
         metadata.flags = setBitConditionally(
             metadata.flags,
             MetaDataFlag.SerializePrimitive,
-            isPrimitiveType(type())
+            isPrimitive
         );
     };
 }
 
 export function serializeAsArray<T>(
-    type: ASerializableType<T>,
+    type: Type<T>,
     constructor?: () => IConstructable,
     keyName?: string
 ) {
@@ -59,37 +63,41 @@ export function serializeAsArray<T>(
             target.constructor,
             actualKeyName
         );
+        const isPrimitive = isPrimitiveType(type);
+        const functionType = isPrimitive ? () => (type as SerializablePrimitiveType) : type as ASerializableType<T>;
         metadata.serializedKey = keyName ? keyName : actualKeyName;
-        metadata.serializedKeyType = type;
+        metadata.serializedKeyType = functionType;
         metadata.serializedType = constructor as any || (() => Array);
         metadata.flags |= MetaDataFlag.SerializeArray;
         metadata.flags = setBitConditionally(
             metadata.flags,
             MetaDataFlag.SerializePrimitive,
-            isPrimitiveType(type())
+            isPrimitive
         );
     };
 }
 
-export function serializeAsObjectMap<T>(type: ASerializableType<T>, keyName?: string) {
+export function serializeAsObjectMap<T>(type: Type<T>, keyName?: string) {
     return function(target: any, actualKeyName: string): any {
         const metadata = MetaData.getMetaData(
             target.constructor,
             actualKeyName
         );
+        const isPrimitive = isPrimitiveType(type);
+        const functionType = isPrimitive ? () => (type as SerializablePrimitiveType) : type as ASerializableType<T>;
         metadata.serializedKey = keyName ? keyName : actualKeyName;
-        metadata.serializedType = type;
+        metadata.serializedType = functionType;
         metadata.flags |= MetaDataFlag.SerializeObjectMap;
         metadata.flags = setBitConditionally(
             metadata.flags,
             MetaDataFlag.SerializePrimitive,
-            isPrimitiveType(type())
+            isPrimitive
         );
     };
 }
 
 export function serializeAsSet<T>(
-    type: ASerializableType<T>,
+    type: Type<T>,
     constructor?: () => IConstructable,
     keyName?: string) {
     return function(target: any, actualKeyName: string): any {
@@ -97,21 +105,23 @@ export function serializeAsSet<T>(
             target.constructor,
             actualKeyName
         );
+        const isPrimitive = isPrimitiveType(type);
+        const functionType = isPrimitive ? () => (type as SerializablePrimitiveType) : type as ASerializableType<T>;
         metadata.serializedKey = keyName ? keyName : actualKeyName;
-        metadata.serializedKeyType = type;
+        metadata.serializedKeyType = functionType;
         metadata.serializedType = constructor as any || (() => Set);
         metadata.flags |= MetaDataFlag.SerializeSet;
         metadata.flags = setBitConditionally(
             metadata.flags,
             MetaDataFlag.SerializePrimitive,
-            isPrimitiveType(type())
+            isPrimitive
         );
     };
 }
 
-export function serializeAsMap(
-    keyType: ASerializableType<any>,
-    valueType: ASerializableType<any>,
+export function serializeAsMap<K, V>(
+    keyType: Type<K>,
+    valueType: Type<V>,
     constructor?: () => IConstructable,
     keyName?: string
 ) {
@@ -120,15 +130,20 @@ export function serializeAsMap(
             target.constructor,
             actualKeyName
         );
+        const isPrimitive = isPrimitiveType(valueType);
+        const functionKeyType = isPrimitiveType(keyType) ?
+            () => (keyType as SerializablePrimitiveType) : keyType as ASerializableType<K>;
+        const functionValueType = isPrimitive ?
+            () => (valueType as SerializablePrimitiveType) : valueType as ASerializableType<V>;
         metadata.serializedKey = keyName ? keyName : actualKeyName;
         metadata.serializedType = constructor ? constructor as any : () => Map;
-        metadata.serializedKeyType = keyType;
-        metadata.serializedValueType = valueType;
+        metadata.serializedKeyType = functionKeyType;
+        metadata.serializedValueType = functionValueType;
         metadata.flags |= MetaDataFlag.SerializeMap;
         metadata.flags = setBitConditionally(
             metadata.flags,
             MetaDataFlag.SerializePrimitive,
-            isPrimitiveType(valueType())
+            isPrimitive
         );
     };
 }
@@ -171,25 +186,27 @@ export function deserializeUsing(serializer: SerializeFn, keyName?: string) {
     };
 }
 
-export function deserializeAs(type: ASerializableType<any>, keyName?: string) {
+export function deserializeAs<T>(type: Type<T>, keyName?: string) {
     return function(target: IConstructable, actualKeyName: string): void {
         const metadata = MetaData.getMetaData(
             target.constructor,
             actualKeyName
         );
+        const isPrimitive = isPrimitiveType(type);
+        const functionType = isPrimitive ? () => (type as SerializablePrimitiveType) : type as ASerializableType<T>;
         metadata.deserializedKey = keyName ? keyName : actualKeyName;
-        metadata.deserializedType = type;
+        metadata.deserializedType = functionType;
         metadata.flags |= MetaDataFlag.DeserializeObject;
         metadata.flags = setBitConditionally(
             metadata.flags,
             MetaDataFlag.DeserializePrimitive,
-            isPrimitiveType(type())
+            isPrimitive
         );
     };
 }
 
-export function deserializeAsArray(
-    type: ASerializableType<any>,
+export function deserializeAsArray<T>(
+    type: Type<T>,
     constructor?: () => IConstructable,
     keyName?: string
 ) {
@@ -198,20 +215,22 @@ export function deserializeAsArray(
             target.constructor,
             actualKeyName
         );
+        const isPrimitive = isPrimitiveType(type);
+        const functionType = isPrimitive ? () => (type as SerializablePrimitiveType) : type as ASerializableType<T>;
         metadata.deserializedKey = keyName ? keyName : actualKeyName;
-        metadata.deserializedKeyType = type;
+        metadata.deserializedKeyType = functionType;
         metadata.deserializedType = constructor as any || (() => Array);
         metadata.flags |= MetaDataFlag.DeserializeArray;
         metadata.flags = setBitConditionally(
             metadata.flags,
             MetaDataFlag.DeserializePrimitive,
-            isPrimitiveType(type())
+            isPrimitive
         );
     };
 }
 
-export function deserializeAsSet(
-    type: ASerializableType<any>,
+export function deserializeAsSet<T>(
+    type: Type<T>,
     constructor?: () => IConstructable,
     keyName?: string
 ) {
@@ -220,21 +239,23 @@ export function deserializeAsSet(
             target.constructor,
             actualKeyName
         );
+        const isPrimitive = isPrimitiveType(type);
+        const functionType = isPrimitive ? () => (type as SerializablePrimitiveType) : type as ASerializableType<T>;
         metadata.deserializedKey = keyName ? keyName : actualKeyName;
-        metadata.deserializedKeyType = type;
+        metadata.deserializedKeyType = functionType;
         metadata.deserializedType = constructor as any || (() => Set);
         metadata.flags |= MetaDataFlag.DeserializeSet;
         metadata.flags = setBitConditionally(
             metadata.flags,
             MetaDataFlag.DeserializePrimitive,
-            isPrimitiveType(type())
+            isPrimitive
         );
     };
 }
 
-export function deserializeAsMap(
-    keyType: ASerializableType<any>,
-    valueType: ASerializableType<any>,
+export function deserializeAsMap<K, V>(
+    keyType: Type<K>,
+    valueType: Type<V>,
     constructor?: () => IConstructable,
     keyName?: string
 ) {
@@ -243,21 +264,27 @@ export function deserializeAsMap(
             target.constructor,
             actualKeyName
         );
+        const isPrimitive = isPrimitiveType(valueType);
+        const functionKeyType = isPrimitiveType(keyType) ?
+            () => (keyType as SerializablePrimitiveType) : keyType as ASerializableType<K>;
+        const functionValueType = isPrimitive ?
+            () => (valueType as SerializablePrimitiveType) : valueType as ASerializableType<V>;
+
         metadata.deserializedKey = keyName ? keyName : actualKeyName;
         metadata.deserializedType = constructor ? constructor as any : () => Map;
-        metadata.deserializedKeyType = keyType;
-        metadata.deserializedValueType = valueType;
+        metadata.deserializedKeyType = functionKeyType;
+        metadata.deserializedValueType = functionValueType;
         metadata.flags |= MetaDataFlag.DeserializeMap;
         metadata.flags = setBitConditionally(
             metadata.flags,
             MetaDataFlag.DeserializePrimitive,
-            isPrimitiveType(valueType())
+            isPrimitive
         );
     };
 }
 
-export function deserializeAsObjectMap(
-    type: ASerializableType<any>,
+export function deserializeAsObjectMap<T>(
+    type: Type<T>,
     keyName?: string
 ) {
     return function(target: IConstructable, actualKeyName: string): void {
@@ -265,13 +292,15 @@ export function deserializeAsObjectMap(
             target.constructor,
             actualKeyName
         );
+        const isPrimitive = isPrimitiveType(type);
+        const functionType = isPrimitive ? () => (type as SerializablePrimitiveType) : type as ASerializableType<T>;
         metadata.deserializedKey = keyName ? keyName : actualKeyName;
-        metadata.deserializedType = type;
+        metadata.deserializedType = functionType;
         metadata.flags |= MetaDataFlag.DeserializeObjectMap;
         metadata.flags = setBitConditionally(
             metadata.flags,
             MetaDataFlag.DeserializePrimitive,
-            isPrimitiveType(type())
+            isPrimitive
         );
     };
 }
@@ -320,29 +349,31 @@ export function autoserializeUsing(
     };
 }
 
-export function autoserializeAs(type: ASerializableType<any>, keyName?: string) {
+export function autoserializeAs<T>(type: Type<T>, keyName?: string) {
     return function(target: IConstructable, actualKeyName: string): void {
         const metadata = MetaData.getMetaData(
             target.constructor,
             actualKeyName
         );
+        const isPrimitive = isPrimitiveType(type);
+        const functionType = isPrimitive ? () => (type as SerializablePrimitiveType) : type as ASerializableType<T>;
         const key = keyName ? keyName : actualKeyName;
         metadata.deserializedKey = key;
         metadata.serializedKey = key;
-        metadata.deserializedType = type;
-        metadata.serializedType = type;
+        metadata.deserializedType = functionType;
+        metadata.serializedType = functionType;
         metadata.flags |=
             MetaDataFlag.SerializeObject | MetaDataFlag.DeserializeObject;
         metadata.flags = setBitConditionally(
             metadata.flags,
             MetaDataFlag.AutoPrimitive,
-            isPrimitiveType(type())
+            isPrimitive
         );
     };
 }
 
-export function autoserializeAsArray(
-    type: ASerializableType<any>,
+export function autoserializeAsArray<T>(
+    type: Type<T>,
     constructor?: () => IConstructable,
     keyName?: string
 ) {
@@ -351,11 +382,13 @@ export function autoserializeAsArray(
             target.constructor,
             actualKeyName
         );
+        const isPrimitive = isPrimitiveType(type);
+        const functionType = isPrimitive ? () => (type as SerializablePrimitiveType) : type as ASerializableType<T>;
         const key = keyName ? keyName : actualKeyName;
         metadata.deserializedKey = key;
         metadata.serializedKey = key;
-        metadata.deserializedKeyType = type;
-        metadata.serializedKeyType = type;
+        metadata.deserializedKeyType = functionType;
+        metadata.serializedKeyType = functionType;
         metadata.deserializedType = constructor as any || (() => Array);
         metadata.serializedType = constructor as any || (() => Array);
         metadata.flags |=
@@ -363,13 +396,13 @@ export function autoserializeAsArray(
         metadata.flags = setBitConditionally(
             metadata.flags,
             MetaDataFlag.AutoPrimitive,
-            isPrimitiveType(type())
+            isPrimitive
         );
     };
 }
 
-export function autoserializeAsSet(
-    type: ASerializableType<any>,
+export function autoserializeAsSet<T>(
+    type: Type<T>,
     constructor?: () => IConstructable,
     keyName?: string
 ) {
@@ -378,11 +411,13 @@ export function autoserializeAsSet(
             target.constructor,
             actualKeyName
         );
+        const isPrimitive = isPrimitiveType(type);
+        const functionType = isPrimitive ? () => (type as SerializablePrimitiveType) : type as ASerializableType<T>;
         const key = keyName ? keyName : actualKeyName;
         metadata.deserializedKey = key;
         metadata.serializedKey = key;
-        metadata.deserializedKeyType = type;
-        metadata.serializedKeyType = type;
+        metadata.deserializedKeyType = functionType;
+        metadata.serializedKeyType = functionType;
         metadata.deserializedType = constructor as any || (() => Set);
         metadata.serializedType = constructor as any || (() => Set);
         metadata.flags |=
@@ -390,13 +425,13 @@ export function autoserializeAsSet(
         metadata.flags = setBitConditionally(
             metadata.flags,
             MetaDataFlag.AutoPrimitive,
-            isPrimitiveType(type())
+            isPrimitive
         );
     };
 }
 
-export function autoserializeAsObjectMap(
-    type: ASerializableType<any>,
+export function autoserializeAsObjectMap<T>(
+    type: Type<T>,
     keyName?: string
 ) {
     return function(target: IConstructable, actualKeyName: string): void {
@@ -404,47 +439,60 @@ export function autoserializeAsObjectMap(
             target.constructor,
             actualKeyName
         );
+        const isPrimitive = isPrimitiveType(type);
+        const functionType = isPrimitive ? () => (type as SerializablePrimitiveType) : type as ASerializableType<T>;
         const key = keyName ? keyName : actualKeyName;
         metadata.deserializedKey = key;
         metadata.serializedKey = key;
-        metadata.deserializedType = type;
-        metadata.serializedType = type;
+        metadata.deserializedType = functionType;
+        metadata.serializedType = functionType;
         metadata.flags |=
             MetaDataFlag.SerializeObjectMap | MetaDataFlag.DeserializeObjectMap;
         metadata.flags = setBitConditionally(
             metadata.flags,
             MetaDataFlag.AutoPrimitive,
-            isPrimitiveType(type())
+            isPrimitive
         );
     };
 }
 
-export function autoserializeAsMap(
-    keyType: ASerializableType<any>,
-    valueType: ASerializableType<any>,
+export function autoserializeAsMap<K, V>(
+    keyType: Type<K>,
+    valueType: Type<V>,
     constructor?: () => IConstructable,
     keyName?: string
 ) {
+    if (!(typeof keyType === "function") || !(typeof valueType === "function")){
+        throw Error("optimization removed:\nkeyType: " +
+        (keyType as Function).toString() +
+        "\nvalueType: " + (valueType as Function).toString());
+    }
     return function(target: IConstructable, actualKeyName: string): void {
         const metadata = MetaData.getMetaData(
             target.constructor,
             actualKeyName
         );
+        const isPrimitive = isPrimitiveType(valueType);
+        const functionKeyType = isPrimitiveType(keyType) ?
+            () => (keyType as SerializablePrimitiveType) : keyType as ASerializableType<K>;
+        const functionValueType = isPrimitive ?
+            () => (valueType as SerializablePrimitiveType) : valueType as ASerializableType<V>;
+
         const key = keyName ? keyName : actualKeyName;
         metadata.deserializedKey = key;
         metadata.serializedKey = key;
         metadata.deserializedType = constructor ? constructor as any : () => Map;
         metadata.serializedType = constructor ? constructor as any : () => Map;
-        metadata.serializedKeyType = keyType;
-        metadata.serializedValueType = valueType;
-        metadata.deserializedKeyType = keyType;
-        metadata.deserializedValueType = valueType;
+        metadata.serializedKeyType = functionKeyType;
+        metadata.serializedValueType = functionValueType;
+        metadata.deserializedKeyType = functionKeyType;
+        metadata.deserializedValueType = functionValueType;
         metadata.flags |=
             MetaDataFlag.SerializeMap | MetaDataFlag.DeserializeMap;
         metadata.flags = setBitConditionally(
             metadata.flags,
             MetaDataFlag.AutoPrimitive,
-            isPrimitiveType(keyType())
+            isPrimitive
         );
     };
 }
