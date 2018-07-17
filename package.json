@@ -20,7 +20,7 @@
   "types": "./dist/index.d.ts",
   "scripts": {
     "build": "tsc --project src/tsconfig.json",
-    "test": "jest",
+    "test": "jest --colors",
     "postinstall": "npm run build",
     "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
     "tslint": "tslint --config ./tslint.json -p src/tsconfig.json -p spec/tsconfig.json"
