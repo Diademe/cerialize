@@ -71,13 +71,13 @@ Once you have annotated your class types, you can use the `Serialize*` and `Dese
         localId :number;
 
         //serialize and deserialize the crew name as a string
-        @autoserializeAs(() => String) name : string;
+        @autoserializeAs(String) name : string;
 
         //serialize the onDuty property as a boolean, don't deserialize it
-        @serializeAs(() => Boolean) onDuty : boolean;
+        @serializeAs(Boolean) onDuty : boolean;
 
         //deserialize the happiness rating as a number, don't serialize it
-        @deserializeAs(() => Number) happinessRating : number;
+        @deserializeAs(Number) happinessRating : number;
 
         //we only want to write our credit value, never deserialize it
         //we want to transform the value into a representation our server
@@ -93,7 +93,7 @@ Once you have annotated your class types, you can use the `Serialize*` and `Dese
         timeVisited : Date;
 
         // serialize and deserialize description as a string
-        @autoserializeAs(() => String) description : string;
+        @autoserializeAs(String) description : string;
 
         // when serializing our planet log we need to convert the timezone 
         // of the timeVisited value from local time to galactic time
@@ -116,8 +116,8 @@ Once you have annotated your class types, you can use the `Serialize*` and `Dese
 
         // when writing our fuel value to the server, we have a number but the server expects a string
         // when reading our fuel value from the server, we receive a string but we want a number
-        @serializeAs(() => String) 
-        @deserializeAs(() => Number) 
+        @serializeAs(String) 
+        @deserializeAs(Number) 
         remainingFuel : number;
         
         // keys can be customized by providing a second argument to any of the annotations
@@ -372,8 +372,8 @@ A callback can be provided for when a class is serialized. To define the callbac
 ```typescript 
     class CrewMember {
 
-        @autoserializeAs(() => String) firstName;
-        @autoserializeAs(() => String) lastName;
+        @autoserializeAs(String) firstName;
+        @autoserializeAs(String) lastName;
 
         static onSerialized(instance : CrewMember, json : JsonObject) {
             json["employeeId"] = instance.lastName.toUpperCase() + ", " + instance.firstName.toUpperCase();
@@ -388,8 +388,8 @@ A callback can be provided for when a class is deserialized. Just add `@onDeseri
 ```typescript 
     class CrewMember {
 
-        @autoserializeAs(() => String) firstName;
-        @autoserializeAs(() => String) lastName;
+        @autoserializeAs(String) firstName;
+        @autoserializeAs(String) lastName;
 
         @onDeserialized
         static callBack() {
@@ -432,7 +432,7 @@ When using `SetDeserializeKeyTransform(fn : (str : string) => string)` you need 
     });
 
     class Test {
-        @deserializeAs(() => String) value : string;
+        @deserializeAs(String) value : string;
     }
 
     const json = {
@@ -496,7 +496,7 @@ Unfortunately, I didn't found a way to add Runtime Typing for Map (or object use
 class MyDico1 extends Map<string, Number>{
 }
 class Test0 {
-    @serializeAsObjectMap(() => Number) public dico1: MyDico1;
+    @serializeAsObjectMap(Number) public dico1: MyDico1;
 }
 const s = new Test0();
 s.dico1 = new MyDico1([["1", 2], ["2", 3]]);
@@ -523,15 +523,15 @@ This decorator permits to change the default value. It only work with primitive 
 ```typescript
     class Test {
         @emitDefaultValue(false)
-        @serializeAs(() => Boolean)
+        @serializeAs(Boolean)
         public valueDefault: boolean = false;
 
         @emitDefaultValue(false)
-        @serializeAs(() => Boolean)
+        @serializeAs(Boolean)
         @defaultValue(true)
         public valueFalse: boolean = false;
 
-        @serializeAs(() => Boolean)
+        @serializeAs(Boolean)
         @defaultValue(true)
         @emitDefaultValue(false)
         public valueTrue: boolean = true;
@@ -550,7 +550,7 @@ During deserialization, if a member decorated with `@emitDefaultValue(false)` is
 Without this option, the following happens :
 ```typescript
     class Test {
-        @autoserializeAs(() => Number) public value: number = 10;
+        @autoserializeAs(Number) public value: number = 10;
     }
 
     class Test0 {
@@ -604,12 +604,12 @@ You can serialize only some member and take this decision at runtime using bitma
 {
     class Test {
         @serializeBitMask(1)
-        @serializeAs(() => Number)
+        @serializeAs(Number)
         public v1: number = 1;
         @serializeBitMask(3)
-        @serializeAs(() => Number)
+        @serializeAs(Number)
         public v2: number = 2;
-        @serializeAs(() => Number)
+        @serializeAs(Number)
         @serializeBitMask(2)
         public v3: number = 3;
     }
@@ -671,3 +671,6 @@ Other decorators
 * You don't need to call `RuntimeTypingSetEnable(false)` after a serialization if you want to use it again.
 * `@serializeAsArray` expect a non array type (ie if it's an array of `Boolean`, you should give `Boolean` as parameter). Same goes for `@serializeAsObjectMap`.
 * `@serializeAsMap` works on [`Map` object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map).
+export function SerializableTypeFactory() {
+    return SerializableType;
+}
