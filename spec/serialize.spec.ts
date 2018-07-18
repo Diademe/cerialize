@@ -58,9 +58,9 @@ describe("Serializing", function() {
             describe(blockName, function() {
                 it("serializes basic primitives", function() {
                     class Test {
-                        @serializeAs(String) public value0: string;
-                        @serializeAs(Boolean) public value1: boolean;
-                        @serializeAs(Number) public value2: number;
+                        @serializeAs(() => String) public value0: string;
+                        @serializeAs(() => Boolean) public value1: boolean;
+                        @serializeAs(() => Number) public value2: number;
                     }
 
                     const s = new Test();
@@ -75,7 +75,7 @@ describe("Serializing", function() {
 
                 it("serializes a Date", function() {
                     class Test {
-                        @serializeAs(Date) public value0: Date;
+                        @serializeAs(() => Date) public value0: Date;
                     }
 
                     const d = new Date();
@@ -89,7 +89,7 @@ describe("Serializing", function() {
 
                 it("serializes a RegExp", function() {
                     class Test {
-                        @serializeAs(RegExp) public value0: RegExp;
+                        @serializeAs(() => RegExp) public value0: RegExp;
                     }
 
                     const s = new Test();
@@ -102,9 +102,9 @@ describe("Serializing", function() {
 
                 it("serializes non matching primitive type", function() {
                     class Test {
-                        @serializeAs(Number) public value0: string;
-                        @serializeAs(String) public value1: boolean;
-                        @serializeAs(Boolean) public value2: number;
+                        @serializeAs(() => Number) public value0: string;
+                        @serializeAs(() => String) public value1: boolean;
+                        @serializeAs(() => Boolean) public value2: number;
                     }
 
                     const s = new Test();
@@ -119,11 +119,11 @@ describe("Serializing", function() {
 
                 it("serializes with different keys", function() {
                     class Test {
-                        @serializeAs(String, "v0")
+                        @serializeAs(() => String, "v0")
                         public value0: string;
-                        @serializeAs(Boolean, "v1")
+                        @serializeAs(() => Boolean, "v1")
                         public value1: boolean;
-                        @serializeAs(Number) public value2: number;
+                        @serializeAs(() => Number) public value2: number;
                     }
 
                     const s = new Test();
@@ -138,9 +138,9 @@ describe("Serializing", function() {
 
                 it("skips undefined keys", function() {
                     class Test {
-                        @serializeAs(String) public value0: string;
-                        @serializeAs(Boolean) public value1: boolean;
-                        @serializeAs(Number) public value2: number;
+                        @serializeAs(() => String) public value0: string;
+                        @serializeAs(() => Boolean) public value1: boolean;
+                        @serializeAs(() => Number) public value2: number;
                     }
 
                     const s = new Test();
@@ -155,9 +155,9 @@ describe("Serializing", function() {
 
                 it("does not skip null keys", function() {
                     class Test {
-                        @serializeAs(String) public value0: string;
-                        @serializeAs(Boolean) public value1: boolean;
-                        @serializeAs(Number) public value2: number;
+                        @serializeAs(() => String) public value0: string;
+                        @serializeAs(() => Boolean) public value1: boolean;
+                        @serializeAs(() => Number) public value2: number;
                     }
 
                     const s = new Test();
@@ -172,9 +172,9 @@ describe("Serializing", function() {
 
                 it("serializes nested types", function() {
                     class Test {
-                        @serializeAs(String) public value0: string;
-                        @serializeAs(Boolean) public value1: boolean;
-                        @serializeAs(Number) public value2: number;
+                        @serializeAs(() => String) public value0: string;
+                        @serializeAs(() => Boolean) public value1: boolean;
+                        @serializeAs(() => Number) public value2: number;
                     }
 
                     class Test0 {
@@ -197,9 +197,9 @@ describe("Serializing", function() {
 
                 it("serializes doubly nested types", function() {
                     class Test {
-                        @serializeAs(String) public value0: string;
-                        @serializeAs(Boolean) public value1: boolean;
-                        @serializeAs(Number) public value2: number;
+                        @serializeAs(() => String) public value0: string;
+                        @serializeAs(() => Boolean) public value1: boolean;
+                        @serializeAs(() => Number) public value2: number;
                     }
 
                     class Test0 {
@@ -249,7 +249,7 @@ describe("Serializing", function() {
     describe("SerializeAsMap", function() {
         it("serializes a map of primitives", function() {
             class Test {
-                @serializeAsMap(String, Number)
+                @serializeAsMap(() => String, () => Number)
                 public values: Map<string, number>;
             }
 
@@ -269,7 +269,7 @@ describe("Serializing", function() {
 
         it("serializes a custom Map of primitives 1", function() {
             class Test {
-                @serializeAsMap(String, Number)
+                @serializeAsMap(() => String, () => Number)
                 public values: Map<string, number>;
             }
 
@@ -290,7 +290,7 @@ describe("Serializing", function() {
         it("serializes a custom Map of primitives 2", function() {
             class MyMap extends Map<string, number> {}
             class Test {
-                @autoserializeAsMap(String, Number, () => MyMap)
+                @autoserializeAsMap(() => String, () => Number, () => MyMap)
                 public values: MyMap;
             }
 
@@ -310,7 +310,7 @@ describe("Serializing", function() {
 
         it("serializes a map of typed objects", function() {
             class TestType {
-                @serializeAs(Number) public value: number;
+                @serializeAs(() => Number) public value: number;
 
                 constructor(arg: number) {
                     this.value = arg;
@@ -318,7 +318,7 @@ describe("Serializing", function() {
             }
 
             class Test {
-                @serializeAsMap(String, () => TestType)
+                @serializeAsMap(() => String, () => TestType)
                 public values: Map<string, TestType>;
             }
 
@@ -338,7 +338,7 @@ describe("Serializing", function() {
 
         it("serializes a map with a different key name", function() {
             class TestType {
-                @serializeAs(Number) public value: number;
+                @serializeAs(() => Number) public value: number;
 
                 constructor(arg: number) {
                     this.value = arg;
@@ -346,7 +346,7 @@ describe("Serializing", function() {
             }
 
             class Test {
-                @serializeAsMap(String, () => TestType, () => Map, "different")
+                @serializeAsMap(() => String, () => TestType, () => Map, "different")
                 public values: Map<string, TestType>;
             }
 
@@ -367,7 +367,7 @@ describe("Serializing", function() {
 
         it("serializes nested maps", function() {
             class TestType {
-                @serializeAsMap(String, Number)
+                @serializeAsMap(() => String, () => Number)
                 public value: Map<string, number>;
 
                 constructor(arg: Map<string, number>) {
@@ -376,7 +376,7 @@ describe("Serializing", function() {
             }
 
             class Test {
-                @serializeAsMap(String, () => TestType)
+                @serializeAsMap(() => String, () => TestType)
                 public values: Map<String, TestType>;
             }
 
@@ -396,7 +396,7 @@ describe("Serializing", function() {
 
         it("skips undefined keys", function() {
             class Test {
-                @serializeAsMap(String, Number) public values: Map<string, number>;
+                @serializeAsMap(() => String, () => Number) public values: Map<string, number>;
             }
 
             const t = new Test();
@@ -426,7 +426,7 @@ describe("Serializing", function() {
             describe(blockName, function() {
                 it("serializes a map of primitives", function() {
                     class Test {
-                        @serializeAsObjectMap(Number)
+                        @serializeAsObjectMap(() => Number)
                         public values: Indexable<number>;
                     }
 
@@ -446,7 +446,7 @@ describe("Serializing", function() {
 
                 it("serializes a map of typed objects", function() {
                     class TestType {
-                        @serializeAs(Number) public value: number;
+                        @serializeAs(() => Number) public value: number;
 
                         constructor(arg: number) {
                             this.value = arg;
@@ -474,7 +474,7 @@ describe("Serializing", function() {
 
                 it("serializes a map with a different key name", function() {
                     class TestType {
-                        @serializeAs(Number) public value: number;
+                        @serializeAs(() => Number) public value: number;
 
                         constructor(arg: number) {
                             this.value = arg;
@@ -503,7 +503,7 @@ describe("Serializing", function() {
 
                 it("serializes nested maps", function() {
                     class TestType {
-                        @serializeAsObjectMap(Number)
+                        @serializeAsObjectMap(() => Number)
                         public value: Indexable<number>;
 
                         constructor(arg: Indexable<number>) {
@@ -533,7 +533,7 @@ describe("Serializing", function() {
 
             it("skips undefined keys", function() {
                 class Test {
-                    @serializeAsObjectMap(Number) public values: Indexable<number>;
+                    @serializeAsObjectMap(() => Number) public values: Indexable<number>;
                 }
 
                 const t = new Test();
@@ -579,7 +579,7 @@ describe("Serializing", function() {
             describe(blockName, function() {
                 it("serializes an array of primitives", function() {
                     class Test {
-                        @serializeAsArray(Number) public value: number[];
+                        @serializeAsArray(() => Number) public value: number[];
                     }
 
                     const t = new Test();
@@ -590,7 +590,7 @@ describe("Serializing", function() {
 
                 it("serializes an array of typed objects", function() {
                     class TestType {
-                        @serializeAs(String) public strVal: string;
+                        @serializeAs(() => String) public strVal: string;
 
                         constructor(val: string) {
                             this.strVal = val;
@@ -617,7 +617,7 @@ describe("Serializing", function() {
 
                 it("serializes nested arrays", function() {
                     class TestTypeL0 {
-                        @serializeAs(String) public strVal: string;
+                        @serializeAs(() => String) public strVal: string;
 
                         constructor(val: string) {
                             this.strVal = val;
@@ -663,7 +663,7 @@ describe("Serializing", function() {
 
                 it("serializes an array with a different key", function() {
                     class Test {
-                        @serializeAsArray(Number, () => Array, "different")
+                        @serializeAsArray(() => Number, () => Array, "different")
                         public value: number[];
                     }
 
@@ -696,7 +696,7 @@ describe("Serializing", function() {
         it("serializes a Set of primitives", function() {
             class MySet<T> extends Set<T> {}
             class Test {
-                @serializeAsSet(Number, () => MySet) public value: MySet<number>;
+                @serializeAsSet(() => Number, () => MySet) public value: MySet<number>;
             }
 
             const t = new Test();
@@ -707,7 +707,7 @@ describe("Serializing", function() {
 
         it("serializes a Set of primitives", function() {
             class Test {
-                @serializeAsSet(Number) public value: Set<number>;
+                @serializeAsSet(() => Number) public value: Set<number>;
             }
 
             const t = new Test();
@@ -717,7 +717,7 @@ describe("Serializing", function() {
         });
         it("serializes an array of typed objects", function() {
             class TestType {
-                @serializeAs(String) public strVal: string;
+                @serializeAs(() => String) public strVal: string;
 
                 constructor(val: string) {
                     this.strVal = val;
@@ -744,7 +744,7 @@ describe("Serializing", function() {
 
         it("serializes nested arrays", function() {
             class TestTypeL0 {
-                @serializeAs(String) public strVal: string;
+                @serializeAs(() => String) public strVal: string;
 
                 constructor(val: string) {
                     this.strVal = val;
@@ -790,7 +790,7 @@ describe("Serializing", function() {
 
         it("serializes an array with a different key", function() {
             class Test {
-                @serializeAsSet(Number, () => Set, "different")
+                @serializeAsSet(() => Number, () => Set, "different")
                 public value: Set<number>;
             }
 
@@ -1030,7 +1030,7 @@ describe("Serializing", function() {
 
                 it("ignores nested serialization annotations", function() {
                     class Sub {
-                        @serializeAs(Number) public n: string = "100";
+                        @serializeAs(() => Number) public n: string = "100";
                     }
 
                     class Test {
@@ -1163,7 +1163,7 @@ describe("Serializing", function() {
     describe("onSerialized", function() {
         it("invokes the handler if provided", function() {
             class Test {
-                @serializeAs(Number) public value: number = 1;
+                @serializeAs(() => Number) public value: number = 1;
 
                 public static onSerialized(
                     json: JsonObject,
@@ -1184,7 +1184,7 @@ describe("Serializing", function() {
 
         it("accepts the return value of onSerialized if provided", function() {
             class Test {
-                @serializeAs(Number) public value: number = 1;
+                @serializeAs(() => Number) public value: number = 1;
 
                 public static onSerialized(json: JsonObject, instance: Test) {
                     return { v: "hello" };
@@ -1251,12 +1251,12 @@ describe("Serializing", function() {
         it("Bitmask", function() {
             class Test {
                 @serializeBitMask(1)
-                @serializeAs(Number)
+                @serializeAs(() => Number)
                 public v1: number = 1;
                 @serializeBitMask(3)
-                @serializeAs(Number)
+                @serializeAs(() => Number)
                 public v2: number = 2;
-                @serializeAs(Number)
+                @serializeAs(() => Number)
                 @serializeBitMask(2)
                 public v3: number = 3;
             }
@@ -1289,16 +1289,16 @@ describe("Serializing", function() {
 
         it("Array", function() {
             class Test0 {
-                @serializeAs(Number) public valueA: number = 0;
+                @serializeAs(() => Number) public valueA: number = 0;
             }
             class Test1 extends Test0 {
-                @serializeAs(Number) public valueB: number = 1;
+                @serializeAs(() => Number) public valueB: number = 1;
             }
             class Test2 extends Test1 {
-                @serializeAs(Number) public valueC: number = 2;
+                @serializeAs(() => Number) public valueC: number = 2;
             }
             class Test3 extends Test1 {
-                @serializeAs(Number) public valueD: number = 3;
+                @serializeAs(() => Number) public valueD: number = 3;
             }
 
             const s = Array<Test0>();
@@ -1321,10 +1321,10 @@ describe("Serializing", function() {
 
         it("Object", function() {
             class Test0 {
-                @serializeAs(Boolean) public valueA: boolean = true;
+                @serializeAs(() => Boolean) public valueA: boolean = true;
             }
             class Test1 {
-                @serializeAs(Boolean) public valueB: boolean = true;
+                @serializeAs(() => Boolean) public valueB: boolean = true;
             }
             @inheritSerialization(() => Test1)
             class Test2 extends Test1 {}
@@ -1359,7 +1359,7 @@ describe("Serializing", function() {
                 constructor(n: number) {
                     this.bp = n;
                 }
-                @serializeAs(Number, "bPrime")
+                @serializeAs(() => Number, "bPrime")
                 public get b() {
                     return this.bp + 1;
                 }
@@ -1374,12 +1374,12 @@ describe("Serializing", function() {
     describe("Emit Default", function() {
         it("Boolean", function() {
             class Test {
-                @serializeAs(Boolean)
+                @serializeAs(() => Boolean)
                 @emitDefaultValue(false)
                 public valueFalse: boolean = false;
 
                 @emitDefaultValue(false)
-                @serializeAs(Boolean)
+                @serializeAs(() => Boolean)
                 public valueTrue: boolean = true;
             }
 
@@ -1391,11 +1391,11 @@ describe("Serializing", function() {
         it("Number", function() {
             class Test {
                 @emitDefaultValue(false)
-                @serializeAs(Number)
+                @serializeAs(() => Number)
                 public valueDefault: number = 0;
 
                 @emitDefaultValue(false)
-                @serializeAs(Number)
+                @serializeAs(() => Number)
                 public valueNotDefault: number = 1;
             }
 
@@ -1409,15 +1409,15 @@ describe("Serializing", function() {
         it("Boolean", function() {
             class Test {
                 @emitDefaultValue(false)
-                @serializeAs(Boolean)
+                @serializeAs(() => Boolean)
                 public valueDefault: boolean = false;
 
                 @emitDefaultValue(false)
-                @serializeAs(Boolean)
+                @serializeAs(() => Boolean)
                 @defaultValue(true)
                 public valueFalse: Boolean = false;
 
-                @serializeAs(Boolean)
+                @serializeAs(() => Boolean)
                 @defaultValue(true)
                 @emitDefaultValue(false)
                 public valueTrue: boolean = true;
@@ -1433,16 +1433,16 @@ describe("Serializing", function() {
         it("Number", function() {
             class Test {
                 @emitDefaultValue(false)
-                @serializeAs(Number)
+                @serializeAs(() => Number)
                 public valueDefault: number = 0;
 
                 @emitDefaultValue(false)
-                @serializeAs(Number)
+                @serializeAs(() => Number)
                 @defaultValue(2)
                 public valueNotDefault1: number = 1;
 
                 @emitDefaultValue(false)
-                @serializeAs(Number)
+                @serializeAs(() => Number)
                 @defaultValue(2)
                 public valueNotDefault2: number = 2;
             }
