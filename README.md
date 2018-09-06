@@ -2,7 +2,7 @@
 
 Easy serialization through ES7/Typescript annotations
 
-This is a library to make serializing and deserializing complex JS objects a breeze. It works by applying meta data annotations (as described in ES7 proposal and experimental Typescript feature) to fields in a user defined class. It also aims to be compatible with [Newtonsoft](https://www.newtonsoft.com/) a C# library for serialization.
+This is a library to make serializing and deserializing complex JS objects a breeze. It works by applying meta data annotations (as described in ES7 proposal and experimental Typescript feature) to fields in a user defined class. It also aims to be compatible with [Newtonsoft](https://www.newtonsoft.com/) (a C# library for serialization).
 
 ## Concepts
 This library works by processing annotations on class types. Annotations are provided for reading (deserializing) and writing (serializing) values to and from json.
@@ -147,7 +147,9 @@ Most annotations take a class constructor. For primitives, use `String`, `Number
 
 If you want the same behavior for a property when serializing and deserializing, you can either tag that property with a `@serialize*` and `@deserialize*` or you can use `@autoserializeXXX` which will do this in a single annotation and behave exactly the same as `@serialize*` and `@deserialize*`. The only difference in behavior is that `@autoserializeUsing()` takes an argument of type `SerializeAndDeserializeFns` instead of a single function argument like it's siblings do.
 
-`@serializeAsMap` will convert a [Map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map) to an map object (ie an object with keys and values). Due to syntax of javascript, keys can only be int or string. `@deserializeAsMap` will correctly deserialize into a Map.
+`@serializeAsMap` will convert an es6 [Map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map) to an map object (ie an object with keys and values). Due to the syntax of JSON, keys can only be int or string. `@deserializeAsMap` will correctly deserialize into a Map.
+
+
 ##### Serialization
 - `@serializeAs(type : () => ClassConstructor, customKey? : string)`
 - `@serializeAsObjectMap(type : () => ClassConstructor, customKey? : string)`
@@ -197,7 +199,7 @@ Depending on how your data is structured there are a few options for serializati
         const ships : Array<Starship>;
         const json = SerializeArray(ships, () => Starship);
     ```
-- `SerializeMap<T>(target: Indexable<T>, () => ClassConstructor<T>) => JsonObject` 
+- `SerializeAsObjectMap<T>(type: ASerializableType<T>, keyName?: string) => JsonObject` 
     ```typescript
         /* takes an indexable object ie `<T>{ [idx: string] : T }` and for each key serializes
          the object using the provided class type. */
@@ -207,6 +209,23 @@ Depending on how your data is structured there are a few options for serializati
         };
         const json = SerializeObjectMap(ships, () => Starship);
     ```
+- `SerializeMap<T>(keyType: ASerializableType<any>, valueType: ASerializableType<any>, constructor?: () => IConstructable, keyName?: string) => JsonObject` 
+    ```typescript
+        /* takes an es6 Map and for each (key, value) pair serializes the pair with the provided key and value type. */
+        const ships : Map<string, Starship> = new Map([
+                ["ship1", new Starship()],
+                ["ship2", new Starship()]
+            ]);
+        const json = SerializeMap(ships, () => String, () => Starship);
+    ```
+- `SerializeSet<T>( source: T[], type: ASerializableType<T> ) => JsonType[]`
+    ```typescript
+        /* takes an es6 Set and for each element serializes
+         the object using the provided class type. */
+        const stars : new Set([1, 2, 3])
+        const json = SerializeSet(stars, () => Number);
+    ```
+
 - `SerializeJson(target : any) => JsonType` 
     ```typescript
      /* takes any value and serializes it as json, no structure is assumed 
@@ -215,6 +234,14 @@ Depending on how your data is structured there are a few options for serializati
         const value = {}; /* anything that isn't a function */
         const json = SerializeJson(value);
     ```
+
+If a function has a `constructor` parameter, it can be used to declare a constructor that inherit of the base constructor. For instance:
+```typescript
+class MySet<T> extends Set<T> {}
+class Test {
+    @serializeAsSet(() => Number, () => MySet) public value: MySet<number>;
+}
+```
 
 ## Deserializing From JSON
 
@@ -270,7 +297,7 @@ The default InstantiationMethod can be changed with `SetDefaultInstantiationMeth
         const existingInstance = new Starship();        
         const instance = Deserialize(json, () => Starship); // make a new instance
         
-        Deserialize(json, Starship, existing); // re-use our existing instance
+        Deserialize(json, () => Starship, existing); // re-use our existing instance
     ```
 - `DeserializeArray<T>(json : JsonArray, () => ClassConstructor<T>, target? : Array<T>) : Array<T>`
     ```typescript
@@ -285,7 +312,26 @@ The default InstantiationMethod can be changed with `SetDefaultInstantiationMeth
         const array = DeserializeArray(json, () => Starship); // make a new array of instances
         
         /* re-use our existing array, if possible use existing instances in array, otherwise create new ones */
-        DeserializeArray(json, Starship, existingArray); 
+        DeserializeArray(json, () => Starship, existingArray); 
+    ```
+- `DeserializeObjectMap<T>(json : JsonObject, () => ClassConstructor<T>, target? : Indexable<T>) : Indexable<T>`
+    ```typescript
+        const json = {
+            ship0: {/* some values from server */},
+            ship1: {/* some values from server */},
+            ship2: {/* some values from server */}
+        };
+        const existingMap = {
+            ship0: new Starship(), 
+            ship3: new Starship()
+        };
+        
+        const map = DeserializeObjectMap(json, () => Starship); // make a new map of instances
+        
+        /* re-use our existing map, in the case of key collision, 
+           write new property values into existing instance
+           otherwise create new ones */
+        DeserializeObjectMap(json, () => Starship, existingMap); 
     ```
 - `DeserializeMap<T>(json : JsonObject, () => ClassConstructor<T>, target? : Indexable<T>) : Indexable<T>`
     ```typescript
@@ -299,12 +345,12 @@ The default InstantiationMethod can be changed with `SetDefaultInstantiationMeth
             ship3: new Starship()
         };
         
-        const map = DeserializeMap(json, () => Starship); // make a new map of instances
+        const map = DeserializeMap(json, () => String, () => Starship); // make a new map of instances
         
         /* re-use our existing map, in the case of key collision, 
            write new property values into existing instance
            otherwise create new ones */
-        DeserializeMap(json, Starship, existingMap); 
+        DeserializeMap(json, () => String, () => Starship, existingMap); 
     ```
 - `DeserializeJson(json : JsonType, target? : any) : any`
     ```typescript
@@ -362,7 +408,7 @@ The default InstantiationMethod can be changed with `SetDefaultInstantiationMeth
             ship3: {}
         }
         /* re-use our existing map, if possible use existing plain objects in map, otherwise create new ones */
-        DeserializeMapRaw(json, Starship, existingMap); 
+        DeserializeMapRaw(json, () => Starship, existingMap); 
     ```
     
 
@@ -471,7 +517,7 @@ consider the following case :
     let animal: Living[] = [new Fish(), new Dog(), new Living()];
     let json = SerializeAsArray(animal, () => Living);
 ```
-But then, at deserialization you end up with a bunch of Living, but no dog nor fish. The runtime serialization will detect at runtime that there are other types in the array (it also work with simple variable). To do so, a ```$type``` attribute will be added. You have to provide the content of this attribute (it allows you to be compatible with [Newtonsoft](https://www.newtonsoft.com/) TypeNameHandling.Objects settings).
+At deserialization you end up with a bunch of Living, but no dog nor fish. The runtime serialization will detect at runtime that there are other types in the array (it also work with simple member). To do so, a ```$type``` attribute will be added to the serialized object. You have to provide the content of this attribute (this allows you to be compatible with [Newtonsoft](https://www.newtonsoft.com/) TypeNameHandling.Objects settings).
 The Runtime typing is enable as follow :
 ```typescript
     let animal: Living[] = [new Fish(), new Dog(), new Living()];
@@ -489,28 +535,37 @@ The Runtime typing is enable as follow :
 ```
 
 ### Note
-In the previous case, it will not enforce a class to be a subclass of Living.
-The last two line are not mandatory (if you want to serialize/deserialize more).
-Unfortunately, I didn't found a way to add Runtime Typing for Map (or object used as map). You can do the following (use a class that inherits form Map)
+In the previous case, nothing will enforce a class to be a subclass of `Living`.
+The last two line are not mandatory (if you want to serialize/deserialize more).  
+Unfortunately, I didn't found a way to add Runtime Typing for Map (or object used as map). You can do the following (use a class that inherits form Map):
 ```typescript
-class MyDico1 extends Map<string, Number>{
+class Satellite {
+    @serializeAs(() => String)
+    public name: string;
+    constructor(nameArg: string) {
+        this.name = nameArg;
+    }
 }
+@inheritSerialization(() => Satellite)
+class Moon extends Satellite {}
+class MyDico extends Map<string, Satellite> {}
 class Test0 {
-    @serializeAsObjectMap(() => Number) public dico1: MyDico1;
+    @serializeAsMap(() => String, () => Satellite, () => MyDico) public dico1: MyDico;
 }
 const s = new Test0();
-s.dico1 = new MyDico1([["1", 2], ["2", 3]]);
-s.dico1.set("3" , 4);
+s.dico1 = new MyDico([["1", new Moon("Europa")], ["2", new Satellite("Adrastea")]]);
+s.dico1.set("3" , new Moon("Callisto"));
 RuntimeTypingSetEnable(true);
+RuntimeTypingSetTypeString(Moon, "my Moon type");
+RuntimeTypingSetTypeString(Satellite, "my Satellite type");
 RuntimeTypingSetTypeString(Test0, "my Test0 type");
-RuntimeTypingSetTypeString(MyDico1, "my MyDico1 type");
-const json = Serialize(s, () => Test0); // {$type: "my Test0 type", dico1: {$type: "my 1 type", 1: 2, 2: 3, 3: 4}}
-RuntimeTypingSetEnable(false);
-RuntimeTypingResetDictionary();
+RuntimeTypingSetTypeString(MyDico, "my MyDico type");
+const json = Serialize(s, () => Test0);
+// "{"$type":"my Test0 type","dico1":{"1":{"$type":"my Moon type","name":"Europa"},"2":{"$type":"my Satellite type","name":"Adrastea"},"3":{"$type":"my Moon type","name":"Callisto"},"$type":"my MyDico type"}}"
 ```
 
 ## Default value
-### emitDefaultValue
+### `@emitDefaultValue`
 if this decorator has false in it's argument, the variable will not be serialized if it's value is the default.
 |   type  | default value |
 |:-------:|:-------------:|
@@ -518,8 +573,8 @@ if this decorator has false in it's argument, the variable will not be serialize
 | string  |       ""      |
 | boolean |     false     |
 
-### defaultValue
-This decorator permits to change the default value. It only work with primitive type.
+### `@defaultValue`
+This decorator permits to change the default value. It only work with primitive type. The default value of an object can not be changed.
 ```typescript
     class Test {
         @emitDefaultValue(false)
@@ -543,7 +598,7 @@ This decorator permits to change the default value. It only work with primitive 
 ```
 
 ### Note
-During deserialization, if a member decorated with `@emitDefaultValue(false)` is not in the parsed json, it will be initialized by the valueNotDefault2: 1
+During deserialization, if a member decorated with `@emitDefaultValue(false)` is not in the parsed json, it will be initialized by its default value.
 
 
 ## Reference and circular reference
@@ -560,9 +615,9 @@ Without this option, the following happens :
     const t = new Test();
     const t0 = new Test0();
     t0.value0 = t0.value1 = t;
-    const json = Serialize(t0, () => Test0); /*json = {"value0":{"value":10},"value1":{"value":10}}*/
+    const json = Serialize(t0, () => Test0); /* json = {"value0":{"value":10},"value1":{"value":10}} */
     const obj = Deserialize(json, () => Test0);
-    obj.value1 == obj.value0; /*false*/
+    obj.value1 == obj.value0; /* false */
 ```
 Even if ```t0.value0``` and ```t0.value1``` are the same, they are serialized as to separate object. Event worse, if the references form a loop, the serialization will crash. With SetRefCycleDetection, each object will have its own id, and will be referenced for any other references except the first one.
 ```typescript
@@ -595,11 +650,12 @@ For architectural code choice, during deserialization, the parser must read the 
     value2: { $id: 2, value: 1 }
 }
 ```
-Because the reference of object 2 would be read before its id.
+Because of the reference of object 2 would be read before its id.
+
 The generated json from SetRefCycleDetection is compatible with [PreserveReferencesHandling](https://www.newtonsoft.com/json/help/html/PreserveReferencesHandlingObject.htm) option form newtonsoft.
 
 ## Selective serialization
-You can serialize only some member and take this decision at runtime using bitmask : affect a bitmask to a member with `serializeBitMask` (up to 2^53). Before serialization, you can set a global bitmask using `SelectiveSerialization`. If and only if the bitmask of the member AND the global bitmask evaluate to true, then the member will be serialized.
+You can serialize only some member and take this decision at runtime using bitmask : affect a bitmask to a member with `@serializeBitMask` (up to 2^53). Before serialization, you can set a global bitmask using `SelectiveSerialization`. If and only if the bitmask of the member AND the global bitmask evaluate to true, then the member will be serialized.
 ```typescript
 {
     class Test {
@@ -621,7 +677,7 @@ You can serialize only some member and take this decision at runtime using bitma
     Serialize(s, () => Test); // {v1: 1, v2: 2, v3: 3}
 }
 ```
-To reset the selective serialization do `SelectiveSerialization()`.
+To reset the selective serialization do a call of `SelectiveSerialization()` without any parameters.
 
 ## Serialize and deserialize Infinities and NaN
 By default, `JSON.stringify(Number.POSITIVE_INFINITY)` return null. But we can provide an helper function that will stringify these numbers (Infinities and NaN) to custom string. You can code your own, or use the one provided by this library : `stringifyNumber`. The call will be `JSON.stringify(my object with Infinities, stringifyNumber);`
@@ -638,6 +694,7 @@ These two functions are compatible with the [FloatFormatHandling](https://www.ne
 | serializeAsJson   | deserializeAsJson   | autoserializeAsJson   | 
 | serializeAsObjectMap    | deserializeAsObjectMap    | autoserializeAsObjectMap    | 
 | serializeAsMap    | deserializeAsMap    | autoserializeAsMap    |
+| serializeAsSet    | deserializeAsSet    | autoserializeAsSet    | 
 | serializeUsing    | deserializeUsing    | autoserializeUsing    | 
 
 Other decorators
@@ -662,12 +719,15 @@ Other decorators
 * onSerialized
 
 ### Good to know
+* You can serialize and deserialize an enum using `@serializeAsJson`. They will be converted using their integer representation.
 * To reset the selective serialization do `SelectiveSerialization()`.
 * You need to specify the type of each member that you want to (de)serialize. Use String, Number, Boolean, Date, or RegExp for primitives types
 * Serialization return an *object* that can be stringified (use JSON.stringify after a call to Serialize).
 * Deserialization expect an *object* (use JSON.parse before a call to Deserialize).
-* You must use the `inheritSerialization` if you want to serialize object with inheritance.
+* You must use the `@inheritSerialization` if you want to serialize object with inheritance.
 * Use RefClean if you want that `$id` start to one again.
 * You don't need to call `RuntimeTypingSetEnable(false)` after a serialization if you want to use it again.
-* `@serializeAsArray` expect a non array type (ie if it's an array of `Boolean`, you should give `Boolean` as parameter). Same goes for `@serializeAsObjectMap`.
-* `@serializeAsMap` works on [`Map` object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map).
+* `@serializeAsArray` expect a non array type (ie if it's an array of `Boolean`, you should give `Boolean` as parameter). Same goes for `@serializeAsObjectMap`, `@serializeAsMap` and `@serializeAsSet`.
+* `@serializeAsMap` works on es6 [`Map` object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map).
+* if you create a loop between files by adding decorator, YOU MUST set the option `@emitDecoratorMetadata` to false in your tsconfig.json. Otherwise your project will fail to load.
+
