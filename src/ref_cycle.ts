@@ -29,7 +29,7 @@ export function referenceHandling(json: any, tmp: any) {
     if (json.hasOwnProperty("$ref")) {
         const ref = parseInt(json.$ref, 10);
         if (!cycle.ref2obj.has(ref)) {
-            throw new Error("Reference found befor its definiton");
+            throw new Error("Reference found before its definition");
         }
         tmp.a = cycle.ref2obj.get(ref);
         return true;
