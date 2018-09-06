@@ -2,13 +2,10 @@
 // in a type tagged with a serialization annotation will contain an array of these
 // objects each describing one property
 
-import { PairMap } from "./pair_map";
 import { NoOp } from "./string_transforms";
 import { ASerializableType, IConstructable, InstantiationMethod, primitive } from "./util";
 
 const TypeMap = new Map<any, MetaData[]>();
-
-const TypeMapMap = new PairMap<IConstructable, IConstructable, MetaData[]>();
 
 /** @internal */
 export const enum MetaDataFlag {
@@ -141,23 +138,6 @@ export class MetaData {
         return metaDataList[metaDataList.length - 1];
     }
 
-    public static getMetaDataMap(key: Function, value: Function, keyName: string): MetaData {
-        let metaDataList = TypeMapMap.get(key, value);
-
-        if (metaDataList === void 0) {
-            metaDataList = [];
-            TypeMapMap.set(key, value, metaDataList);
-        }
-
-        for (const metadata of metaDataList) {
-            if (metadata.keyName === keyName) {
-                return metadata;
-            }
-        }
-        metaDataList.push(new MetaData(keyName));
-        return metaDataList[metaDataList.length - 1];
-    }
-
     public static inheritMetaData(
         parentType: IConstructable,
         childType: IConstructable
@@ -181,8 +161,6 @@ export class MetaData {
     }
 
     public static readonly TypeMap = TypeMap;
-
-    public static readonly TypeMapMap = TypeMapMap;
 
     public static serializeKeyTransform = NoOp;
 
