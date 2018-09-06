@@ -811,6 +811,37 @@ describe("Serializing", function() {
             serializeAsJson: any
         ) {
             describe(blockName, function() {
+                it("serializes a typed map", function() {
+                    class Satellite {
+                        @serializeAs(() => String)
+                        public name: string;
+                        constructor(nameArg: string) {
+                            this.name = nameArg;
+                        }
+                    }
+                    @inheritSerialization(() => Satellite)
+                    class Moon extends Satellite {}
+                    class MyDico extends Map<string, Satellite> {}
+                    class Test0 {
+                        @serializeAsMap(() => String, () => Satellite, () => MyDico) public dico1: MyDico;
+                    }
+                    const s = new Test0();
+                    s.dico1 = new MyDico([["1", new Moon("Europa")], ["2", new Satellite("Adrastea")]]);
+                    s.dico1.set("3" , new Moon("Callisto"));
+                    RuntimeTypingSetEnable(true);
+                    RuntimeTypingSetTypeString(Moon, "my Moon type");
+                    RuntimeTypingSetTypeString(Satellite, "my Satellite type");
+                    RuntimeTypingSetTypeString(Test0, "my Test0 type");
+                    RuntimeTypingSetTypeString(MyDico, "my MyDico type");
+                    const json = Serialize(s, () => Test0);
+                    RuntimeTypingSetEnable(false);
+                    RuntimeTypingResetDictionary();
+                    expect((json.dico1 as any)["1"]).toEqual({$type: "my Moon type", name: "Europa"});
+                    expect((json.dico1 as any)["2"]).toEqual({$type: "my Satellite type", name: "Adrastea"});
+                    expect((json.dico1 as any)["3"]).toEqual({$type: "my Moon type", name: "Callisto"});
+                    expect((json.dico1 as any)["$type"]).toBe("my MyDico type");
+                });
+
                 it("serializes a primitive as json", function() {
                     class Test {
                         @serializeAsJson() public value0: string;
