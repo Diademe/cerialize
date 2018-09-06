@@ -731,3 +731,5 @@ Other decorators
 * `@serializeAsMap` works on es6 [`Map` object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map).
 * if you create a loop between files by adding decorator, YOU MUST set the option `@emitDecoratorMetadata` to false in your tsconfig.json. Otherwise your project will fail to load.
 
+## Contribute
+[Please follow this link for detailed explanations on how to contribute to the project](Contribute.md)
