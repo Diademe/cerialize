@@ -21,7 +21,6 @@
   "scripts": {
     "build": "tsc --project src/tsconfig.json",
     "test": "jest --colors",
-    "postinstall": "npm run build",
     "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
     "tslint": "tslint --config ./tslint.json -p src/tsconfig.json -p spec/tsconfig.json"
   },
@@ -30,7 +29,8 @@
     "jest": "^22.4.3",
     "prettier": "^1.12.1",
     "ts-jest": "^22.4.5",
-    "tslint": "^5.10.0"
+    "tslint": "^5.10.0",
+    "typescript": "^2.8.3"
   },
   "jest": {
     "testRegex": "/spec/.*\\.spec\\.([tj]sx?)$",
@@ -43,8 +43,5 @@
       "js",
       "jsx"
     ]
-  },
-  "dependencies": {
-    "typescript": "^2.8.3"
   }
 }
