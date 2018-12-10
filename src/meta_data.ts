@@ -142,7 +142,9 @@ export class MetaData {
         parentType: IConstructable,
         childType: IConstructable
     ) {
-        const parentMetaData: MetaData[] = TypeMap.get(parentType) || [];
+        const parentMetaData: MetaData[] = TypeMap.get(
+            Object.getOwnPropertyDescriptor(parentType, "__originalConstructor__") ?
+                (parentType as any).__originalConstructor__ : parentType) || [];
         const childMetaData: MetaData[] = TypeMap.get(childType) || [];
         for (const metadata of parentMetaData) {
             const keyName = metadata.keyName;
@@ -155,7 +157,10 @@ export class MetaData {
 
     public static getMetaDataForType(type: IConstructable) {
         if (type !== null && type !== void 0) {
-            return TypeMap.get(type) || null;
+            return TypeMap.get(
+                Object.getOwnPropertyDescriptor(type, "__originalConstructor__") ?
+                    (type as any).__originalConstructor__ : type)
+                || null;
         }
         return null;
     }
