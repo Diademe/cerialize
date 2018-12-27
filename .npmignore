@@ -1,4 +1,18 @@
+# Dependency directories
 node_modules
-.git
-spec
+
+# npm package lock
+package-lock.json
+
+# project files
 .vscode
+src
+spec
+.git
+.travis.yml
+.editorconfig
+.eslintignore
+.eslintrc
+.babelrc
+.gitignore
+Contribute.md
