@@ -5,7 +5,20 @@
 import { NoOp } from "./string_transforms";
 import { ASerializableType, IConstructable, InstantiationMethod, primitive } from "./util";
 
-const TypeMap = new Map<any, MetaData[]>();
+class TypeMapClass<K, V> extends Map<K, V>{
+    public get(key: K): V | undefined {
+        const type = Object.getOwnPropertyDescriptor(key, "__originalConstructor__") ?
+            (key as any).__originalConstructor__ : key;
+        return super.get(type);
+    }
+    public set(key: K, value: V): this {
+        const type = Object.getOwnPropertyDescriptor(key, "__originalConstructor__") ?
+            (key as any).__originalConstructor__ : key;
+        return super.set(type, value);
+    }
+}
+
+const TypeMap = new TypeMapClass<any, MetaData[]>();
 
 /** @internal */
 export const enum MetaDataFlag {
@@ -142,9 +155,7 @@ export class MetaData {
         parentType: IConstructable,
         childType: IConstructable
     ) {
-        const parentMetaData: MetaData[] = TypeMap.get(
-            Object.getOwnPropertyDescriptor(parentType, "__originalConstructor__") ?
-                (parentType as any).__originalConstructor__ : parentType) || [];
+        const parentMetaData: MetaData[] = TypeMap.get(parentType) || [];
         const childMetaData: MetaData[] = TypeMap.get(childType) || [];
         for (const metadata of parentMetaData) {
             const keyName = metadata.keyName;
@@ -157,10 +168,7 @@ export class MetaData {
 
     public static getMetaDataForType(type: IConstructable) {
         if (type !== null && type !== void 0) {
-            return TypeMap.get(
-                Object.getOwnPropertyDescriptor(type, "__originalConstructor__") ?
-                    (type as any).__originalConstructor__ : type)
-                || null;
+            return TypeMap.get(type) || null;
         }
         return null;
     }
