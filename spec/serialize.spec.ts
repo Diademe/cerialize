@@ -16,7 +16,7 @@ import {
     serializeAsSet,
     serializeBitMask,
     serializeUsing
-} from "../src/annotations";
+} from "../src/decorators";
 import {
     RefClean,
     SetRefCycleDetection,

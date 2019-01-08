@@ -9,7 +9,7 @@ export {
 } from "./runtime_typing";
 export * from "./serialize";
 export * from "./deserialize";
-export * from "./annotations";
+export * from "./decorators";
 export * from "./string_transforms";
 export { InstantiationMethod, parseNumber, stringifyNumber } from "./util";
 export { RefClean } from "./ref_cycle";
