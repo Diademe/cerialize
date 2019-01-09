@@ -32,7 +32,7 @@ import {
     Serialize,
     SerializeArray,
 } from "../src/serialize";
-import { Indexable, JsonObject } from "../src/util";
+import { Indexable, JsonObject } from "../src/types";
 
 describe("Serializing", function() {
     describe("Unannotated", function() {

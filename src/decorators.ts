@@ -3,11 +3,13 @@ import {
     ASerializableType,
     IConstructable,
     ISerializer,
-    isPrimitiveType,
     primitive,
     SerializeFn,
+} from "./types";
+import {
+    isPrimitiveType,
     setBitConditionally
-} from "./util";
+} from "./utils";
 
 // set a bitmask B. during compilation, if B & x, then the member will be serialized
 export function serializeBitMask(bitMask: number): any {

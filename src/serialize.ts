@@ -3,15 +3,18 @@ import { cycleBreaking } from "./ref_cycle";
 import { TypeString } from "./runtime_typing";
 import {
     ASerializableType,
-    DowncastPrimitive,
     Indexable,
-    isPrimitiveType,
     JsonObject,
     JsonType,
     primitive,
     SerializablePrimitiveType,
     SerializableType
-} from "./util";
+} from "./types";
+
+import {
+    DowncastPrimitive,
+    isPrimitiveType
+} from "./utils";
 
 let serializeBitMaskPrivate = Number.MAX_SAFE_INTEGER;
 

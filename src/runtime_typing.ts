@@ -1,4 +1,4 @@
-import { IConstructable } from "./util";
+import { IConstructable } from "./types";
 export { TypeString };
 // throw an exception if dic doesn't have key
 function lousyGet(dic: any, key: any) {

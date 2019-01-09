@@ -3,7 +3,7 @@
 // objects each describing one property
 
 import { NoOp } from "./string_transforms";
-import { ASerializableType, IConstructable, InstantiationMethod, primitive } from "./util";
+import { ASerializableType, IConstructable, InstantiationMethod, primitive } from "./types";
 
 class TypeMapClass<K, V> extends Map<K, V>{
     public get(key: K): V | undefined {

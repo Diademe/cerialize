@@ -33,7 +33,7 @@ import {
 import {
     Indexable,
     InstantiationMethod,
-} from "../src/util";
+} from "../src/types";
 
 function expectInstance(
     instance: any,

@@ -1,6 +1,6 @@
 import { MetaData } from "./meta_data";
 import { NoOp } from "./string_transforms";
-import { InstantiationMethod } from "./util";
+import { InstantiationMethod } from "./types";
 
 export {
     RuntimeTypingResetDictionary,
@@ -11,7 +11,8 @@ export * from "./serialize";
 export * from "./deserialize";
 export * from "./decorators";
 export * from "./string_transforms";
-export { InstantiationMethod, parseNumber, stringifyNumber } from "./util";
+export { Indexable, InstantiationMethod } from "./types";
+export { parseNumber, stringifyNumber } from "./utils";
 export { RefClean } from "./ref_cycle";
 
 export function SetSerializeKeyTransform(fn: (str: string) => string): void {

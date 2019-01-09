@@ -2,18 +2,21 @@ import { MetaData, MetaDataFlag } from "./meta_data";
 import { referenceHandling } from "./ref_cycle";
 import { TypeString } from "./runtime_typing";
 import {
-    ASerializableType,
     getTarget,
+    isPrimitiveType
+} from "./utils";
+
+import {
+    ASerializableType,
     IConstructable,
     Indexable,
     InstantiationMethod,
-    isPrimitiveType,
     JsonArray,
     JsonObject,
     JsonType,
     SerializablePrimitiveType,
     SerializableType
-} from "./util";
+} from "./types";
 
 const keywords = ["$id", "$type", "$ref"];
 function notAKeyword(y: string) {
