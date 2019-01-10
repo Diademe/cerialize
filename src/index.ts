@@ -1,6 +1,6 @@
 import { MetaData } from "./meta_data";
 import { NoOp } from "./string_transforms";
-import { InstantiationMethod } from "./types";
+import {  ASerializableTypeOrArray, IConstructable, InstantiationMethod, ItIsAnArrayInternal } from "./types";
 
 export {
     RuntimeTypingResetDictionary,
@@ -36,4 +36,11 @@ export function SetDefaultInstantiationMethod(
 // if true it deals with references and cycle references
 export function SetRefCycleDetection(b: boolean) {
     MetaData.refCycleDetection = b;
+}
+
+export function itIsAnArray(
+    type: ASerializableTypeOrArray<any>,
+    ctor?: () => IConstructable
+    ): ItIsAnArrayInternal {
+    return new ItIsAnArrayInternal(type, ctor);
 }

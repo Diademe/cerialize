@@ -39,6 +39,7 @@ export enum InstantiationMethod {
 
 export interface JsonObject {
     [idx: string]: JsonType | JsonObject;
+    $type?: string;
 }
 
 export interface JsonArray extends Array<JsonType> {}
@@ -62,4 +63,16 @@ export interface SerializableType<T> {
     ) => T | void;
 }
 export type ASerializableType<T> = () => SerializableType<T>;
+export type ASerializableTypeOrArray<T> = ASerializableType<T> | ItIsAnArrayInternal;
+export type Serialized<T> =
+    T extends ItIsAnArrayInternal ? JsonType[] :
+    JsonObject;
 
+export class ItIsAnArrayInternal {
+    constructor(
+        public type: ASerializableTypeOrArray<any>,
+        public ctor?: () => IConstructable
+        ) {
+            this.ctor = ctor || (() => Array);
+        }
+}

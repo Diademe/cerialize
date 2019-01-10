@@ -8,9 +8,11 @@ import {
 
 import {
     ASerializableType,
+    ASerializableTypeOrArray,
     IConstructable,
     Indexable,
     InstantiationMethod,
+    ItIsAnArrayInternal,
     JsonArray,
     JsonObject,
     JsonType,
@@ -25,7 +27,7 @@ function notAKeyword(y: string) {
 
 function _DeserializeObjectMap<T>(
     data: JsonObject,
-    type: ASerializableType<T>,
+    type: ASerializableTypeOrArray<T>,
     target?: Indexable<T>,
     instantiationMethod?: InstantiationMethod
 ): Indexable<T> {
@@ -67,8 +69,8 @@ function _DeserializeObjectMap<T>(
 
 function _DeserializeMap<K, V, C extends Map<K, V>>(
     data: JsonObject,
-    keyType: ASerializableType<K>,
-    valueType: ASerializableType<V>,
+    keyType: ASerializableTypeOrArray<K>,
+    valueType: ASerializableTypeOrArray<V>,
     constructor: () => C,
     target?: C,
     instantiationMethod?: InstantiationMethod
@@ -121,8 +123,8 @@ function _DeserializeMap<K, V, C extends Map<K, V>>(
 
 export function DeserializeMap<K, V>(
     data: JsonObject,
-    keyType: ASerializableType<K>,
-    valueType: ASerializableType<V>,
+    keyType: ASerializableTypeOrArray<K>,
+    valueType: ASerializableTypeOrArray<V>,
     target?: Map<K, V>,
     instantiationMethod?: InstantiationMethod
 ): Map<K, V> {
@@ -135,7 +137,7 @@ export function DeserializeMap<K, V>(
 
 export function DeserializeObjectMap<T>(
     data: JsonObject,
-    type: ASerializableType<T>,
+    valueType: ASerializableTypeOrArray<T>,
     target?: Indexable<T>,
     instantiationMethod?: InstantiationMethod
 ): Indexable<T> {
@@ -143,12 +145,12 @@ export function DeserializeObjectMap<T>(
         instantiationMethod = MetaData.deserializeInstantiationMethod;
     }
 
-    return _DeserializeObjectMap(data, type, target, instantiationMethod);
+    return _DeserializeObjectMap(data, valueType, target, instantiationMethod);
 }
 
 function _DeserializeArray<T, C extends T[]>(
     data: JsonArray,
-    type: ASerializableType<T>,
+    type: ASerializableTypeOrArray<T>,
     constructor: () => IConstructable,
     target?: C,
     instantiationMethod?: InstantiationMethod
@@ -177,7 +179,7 @@ function _DeserializeArray<T, C extends T[]>(
 
 export function DeserializeArray<T, C extends T[]>(
     data: JsonArray,
-    type: ASerializableType<T>,
+    type: ASerializableTypeOrArray<T>,
     constructor: () => IConstructable = () => Array,
     target?: C,
     instantiationMethod?: InstantiationMethod
@@ -191,28 +193,39 @@ export function DeserializeArray<T, C extends T[]>(
 
 function _DeserializeSet<K, C extends Set<K>>(
     data: JsonArray,
-    keyType: ASerializableType<K>,
+    keyType: ASerializableTypeOrArray<K>,
     constructor: () => IConstructable,
     target?: C,
     instantiationMethod?: InstantiationMethod
 ) {
-    if (!Array.isArray(data)) {
-        throw new Error(
-            "Expected input to be an array but received: " + typeof data
+    if (keyType instanceof ItIsAnArrayInternal) {
+        target = _DeserializeArray(
+            data as any,
+            keyType.type,
+            keyType.ctor,
+            target as any,
+            instantiationMethod
         );
     }
+    else {
+        if (!Array.isArray(data)) {
+            throw new Error(
+                "Expected input to be an array but received: " + typeof data
+            );
+        }
 
-    if (!(target instanceof Set)){
-        target = new (constructor() as any)();
-    }
+        if (!(target instanceof Set)){
+            target = new (constructor() as any)();
+        }
 
-    for (const d of data) {
-        target.add(_Deserialize(
-            d as any,
-            keyType,
-            null,
-            instantiationMethod
-        ));
+        for (const d of data) {
+            target.add(_Deserialize(
+                d as any,
+                keyType,
+                null,
+                instantiationMethod
+            ));
+        }
     }
 
     return target;
@@ -220,7 +233,7 @@ function _DeserializeSet<K, C extends Set<K>>(
 
 export function DeserializeSet<T, C extends Set<T>>(
     data: JsonArray,
-    keyType: ASerializableType<T>,
+    keyType: ASerializableTypeOrArray<T>,
     constructor: () => IConstructable = () => Set,
     target?: C,
     instantiationMethod?: InstantiationMethod
@@ -254,13 +267,12 @@ function DeserializePrimitive(
     }
 }
 
-export function DeserializeJSON<T extends JsonType>(
+export function DeserializeJSON(
     data: JsonType,
     transformKeys = true,
     target?: JsonType
 ): JsonType {
     target = {};
-
     if (Array.isArray(data)) {
         if (!Array.isArray(target)) {
             target = new Array<any>(data.length);
@@ -275,30 +287,29 @@ export function DeserializeJSON<T extends JsonType>(
                 (target as JsonType[])[i]
             );
         }
-
         return target;
     }
 
     const type = typeof data;
 
     if (type === "object") {
-        const retn = (target && typeof target === "object"
+        const returnValue = (target && typeof target === "object"
             ? target
             : {}) as Indexable<JsonType>;
         const keys = Object.keys(data as object);
         for (const key of keys) {
             const value = (data as Indexable<JsonType>)[key];
             if (value !== void 0) {
-                const retnKey = transformKeys
+                const returnValueKey = transformKeys
                     ? MetaData.deserializeKeyTransform(key)
                     : key;
-                retn[retnKey] = DeserializeJSON(
+                returnValue[returnValueKey] = DeserializeJSON(
                     (data as Indexable<JsonType>)[key],
                     transformKeys
                 );
             }
         }
-        return retn;
+        return returnValue;
     } else if (type === "function") {
         throw new Error(
             "Cannot deserialize a function, input is not a valid json object"
@@ -309,141 +320,152 @@ export function DeserializeJSON<T extends JsonType>(
 }
 
 function _Deserialize<T extends Indexable>(
-    data: JsonObject,
-    type: ASerializableType<T>,
+    data: JsonObject | JsonArray,
+    type: ASerializableTypeOrArray<T>,
     target?: T,
     instantiationMethod?: InstantiationMethod
 ): T | null {
-    if (TypeString.getRuntimeTyping() && !isPrimitiveType(type()) && data.$type) {
-        type = () => TypeString.getTypeFromString(
-            data.$type as any
-        ) as SerializableType<T>;
+    if (type instanceof ItIsAnArrayInternal) {
+        target = _DeserializeArray(
+            data as JsonArray,
+            type.type,
+            type.ctor,
+            target as any,
+            instantiationMethod
+        );
     }
+    else {
+        if (TypeString.getRuntimeTyping() && !isPrimitiveType(type()) && (data as JsonObject).$type) {
+            type = () => TypeString.getTypeFromString(
+                (data as JsonObject).$type
+            ) as SerializableType<T>;
+        }
 
-    const metadataList = MetaData.getMetaDataForType(type());
+        const metadataList = MetaData.getMetaDataForType(type());
 
-    if (metadataList === null) {
-        if (typeof type() === "function") {
-            if (isPrimitiveType(type())) {
-                return DeserializePrimitive(data, type as any, target as any);
+        if (metadataList === null) {
+            if (typeof type() === "function") {
+                if (isPrimitiveType(type())) {
+                    return DeserializePrimitive(data, type as any, target as any);
+                }
+                switch (instantiationMethod) {
+                    case InstantiationMethod.New:
+                        return new (type())();
+
+                    case InstantiationMethod.ObjectCreate:
+                        return Object.create(type().prototype);
+
+                    default:
+                        return {} as T;
+                }
             }
-            switch (instantiationMethod) {
-                case InstantiationMethod.New:
-                    return new (type())();
+            return null;
+        }
 
-                case InstantiationMethod.ObjectCreate:
-                    return Object.create(type().prototype);
+        target = getTarget(type() as any, target, instantiationMethod) as T;
+        const tmp = { a: target }; // hack to passe argument by ref
+        if (referenceHandling(data, tmp)) {
+            return tmp.a;
+        }
+        target = tmp.a;
+        let onDeserialized = "";
+        for (const metadata of metadataList) {
+            if (metadata.flags === MetaDataFlag.onDeserialized){
+                onDeserialized = metadata.keyName;
+                continue;
+            }
 
-                default:
-                    return {} as T;
+            if (metadata.deserializedKey === null) {
+                continue;
+            }
+
+            const source: any = (data as JsonObject)[metadata.getDeserializedKey()];
+            const keyName = metadata.keyName;
+            const flags = metadata.flags;
+
+            if (source === undefined && metadata.emitDefaultValue === false){
+                // if target[keyName] is a collection or a non primitive object
+                if (
+                    ((flags & MetaDataFlag.Collection)) ||
+                    ((flags & MetaDataFlag.PlainObject) && !(flags & MetaDataFlag.AutoPrimitive))
+                ){
+                    target[keyName] = null;
+                }
+                // if target[keyName] is a primitive
+                else {
+                    target[keyName] = metadata.defaultValue === undefined ?
+                    ((metadata.deserializedType as any)() as any)() : metadata.defaultValue;
+                }
+                continue;
+            }
+
+            if (source === void 0) {
+                continue;
+            }
+
+            if ((flags & MetaDataFlag.DeserializeObjectMap) !== 0) {
+                target[keyName] = _DeserializeObjectMap(
+                    source,
+                    metadata.deserializedType,
+                    target[keyName],
+                    instantiationMethod
+                );
+            } else if ((flags & MetaDataFlag.DeserializeMap) !== 0) {
+                target[keyName] = _DeserializeMap(
+                    source,
+                    metadata.deserializedKeyType,
+                    metadata.deserializedValueType,
+                    metadata.deserializedType as (() => MapConstructor),
+                    target[keyName],
+                    instantiationMethod
+                );
+            } else if ((flags & MetaDataFlag.DeserializeArray) !== 0) {
+                target[keyName] = _DeserializeArray(
+                    source,
+                    metadata.deserializedKeyType,
+                    metadata.deserializedType as (() => IConstructable),
+                    target[keyName],
+                    instantiationMethod
+                );
+            } else if ((flags & MetaDataFlag.DeserializeSet) !== 0) {
+                target[keyName] = _DeserializeSet(
+                    source,
+                    metadata.deserializedKeyType,
+                    metadata.deserializedType as (() => IConstructable),
+                    target[keyName],
+                    instantiationMethod
+                );
+            } else if ((flags & MetaDataFlag.DeserializePrimitive) !== 0) {
+                target[keyName] = DeserializePrimitive(
+                    source,
+                    metadata.deserializedType as (() => SerializablePrimitiveType),
+                    target[keyName]
+                );
+            } else if ((flags & MetaDataFlag.DeserializeObject) !== 0) {
+                target[keyName] = _Deserialize(
+                    source,
+                    metadata.deserializedType,
+                    target[keyName],
+                    instantiationMethod
+                );
+            } else if ((flags & MetaDataFlag.DeserializeJSON) !== 0) {
+                target[keyName] = DeserializeJSON(
+                    source,
+                    (flags & MetaDataFlag.DeserializeJSONTransformKeys) !== 0,
+                    instantiationMethod
+                );
+            } else if ((flags & MetaDataFlag.DeserializeUsing) !== 0) {
+                target[keyName] = (metadata.deserializedType as any)(
+                    source,
+                    target[keyName],
+                    instantiationMethod
+                );
             }
         }
-        return null;
-    }
 
-    target = getTarget(type() as any, target, instantiationMethod) as T;
-    const tmp = { a: target }; // hack to passe argument by ref
-    if (referenceHandling(data, tmp)) {
-        return tmp.a;
-    }
-    target = tmp.a;
-    let onDeserialized = "";
-    for (const metadata of metadataList) {
-        if (metadata.flags === MetaDataFlag.onDeserialized){
-            onDeserialized = metadata.keyName;
-            continue;
+        if (onDeserialized){
+            target[onDeserialized]();
         }
-
-        if (metadata.deserializedKey === null) {
-            continue;
-        }
-
-        const source: any = data[metadata.getDeserializedKey()];
-        const keyName = metadata.keyName;
-        const flags = metadata.flags;
-
-        if (source === undefined && metadata.emitDefaultValue === false){
-            // if target[keyName] is a collection or a non primitive object
-            if (
-                ((flags & MetaDataFlag.Collection)) ||
-                ((flags & MetaDataFlag.PlainObject) && !(flags & MetaDataFlag.AutoPrimitive))
-            ){
-                target[keyName] = null;
-            }
-            // if target[keyName] is a primitive
-            else {
-                target[keyName] = metadata.defaultValue === undefined ?
-                (metadata.deserializedType() as any)() : metadata.defaultValue;
-            }
-            continue;
-        }
-
-        if (source === void 0) {
-            continue;
-        }
-
-        if ((flags & MetaDataFlag.DeserializeObjectMap) !== 0) {
-            target[keyName] = _DeserializeObjectMap(
-                source,
-                metadata.deserializedType,
-                target[keyName],
-                instantiationMethod
-            );
-        } else if ((flags & MetaDataFlag.DeserializeMap) !== 0) {
-            target[keyName] = _DeserializeMap(
-                source,
-                metadata.deserializedKeyType,
-                metadata.deserializedValueType,
-                metadata.deserializedType as (() => MapConstructor),
-                target[keyName],
-                instantiationMethod
-            );
-        } else if ((flags & MetaDataFlag.DeserializeArray) !== 0) {
-            target[keyName] = _DeserializeArray(
-                source,
-                metadata.deserializedKeyType,
-                metadata.deserializedType,
-                target[keyName],
-                instantiationMethod
-            );
-        } else if ((flags & MetaDataFlag.DeserializeSet) !== 0) {
-            target[keyName] = _DeserializeSet(
-                source,
-                metadata.deserializedKeyType,
-                metadata.deserializedType,
-                target[keyName],
-                instantiationMethod
-            );
-        } else if ((flags & MetaDataFlag.DeserializePrimitive) !== 0) {
-            target[keyName] = DeserializePrimitive(
-                source,
-                metadata.deserializedType as (() => SerializablePrimitiveType),
-                target[keyName]
-            );
-        } else if ((flags & MetaDataFlag.DeserializeObject) !== 0) {
-            target[keyName] = _Deserialize(
-                source,
-                metadata.deserializedType,
-                target[keyName],
-                instantiationMethod
-            );
-        } else if ((flags & MetaDataFlag.DeserializeJSON) !== 0) {
-            target[keyName] = DeserializeJSON(
-                source,
-                (flags & MetaDataFlag.DeserializeJSONTransformKeys) !== 0,
-                instantiationMethod
-            );
-        } else if ((flags & MetaDataFlag.DeserializeUsing) !== 0) {
-            target[keyName] = (metadata.deserializedType as any)(
-                source,
-                target[keyName],
-                instantiationMethod
-            );
-        }
-    }
-
-    if (onDeserialized){
-        target[onDeserialized]();
     }
 
     return target as T;
@@ -452,6 +474,18 @@ function _Deserialize<T extends Indexable>(
 export function Deserialize<T extends Indexable>(
     data: JsonObject,
     type: ASerializableType<T>,
+    target?: T,
+    instantiationMethod?: InstantiationMethod
+): T | null;
+export function Deserialize<K, T extends K[]>(
+    data: JsonArray,
+    type: ItIsAnArrayInternal,
+    target?: T,
+    instantiationMethod?: InstantiationMethod
+): T | null;
+export function Deserialize<T extends Indexable>(
+    data: JsonObject | JsonArray,
+    type: ASerializableTypeOrArray<T>,
     target?: T,
     instantiationMethod?: InstantiationMethod
 ): T | null {
@@ -464,7 +498,7 @@ export function Deserialize<T extends Indexable>(
 
 export function DeserializeRaw<T>(
     data: JsonObject,
-    type: ASerializableType<T>,
+    type: ASerializableTypeOrArray<T>,
     target?: T
 ): T | null {
     return _Deserialize(data, type, target, InstantiationMethod.None);
@@ -472,7 +506,7 @@ export function DeserializeRaw<T>(
 
 export function DeserializeArrayRaw<T>(
     data: JsonArray,
-    type: ASerializableType<T>,
+    type: ASerializableTypeOrArray<T>,
     target?: T[]
 ): T[] | null {
     return _DeserializeArray(data, type, () => Array, target, InstantiationMethod.None);
@@ -480,7 +514,7 @@ export function DeserializeArrayRaw<T>(
 
 export function DeserializeMapRaw<T>(
     data: Indexable<JsonType>,
-    type: ASerializableType<T>,
+    type: ASerializableTypeOrArray<T>,
     target?: Indexable<T>
 ): Indexable<T> | null {
     return _DeserializeObjectMap(data, type, target, InstantiationMethod.None);

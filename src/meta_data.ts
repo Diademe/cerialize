@@ -3,7 +3,7 @@
 // objects each describing one property
 
 import { NoOp } from "./string_transforms";
-import { ASerializableType, IConstructable, InstantiationMethod, primitive } from "./types";
+import { ASerializableTypeOrArray, IConstructable, InstantiationMethod, primitive } from "./types";
 
 class TypeMapClass<K, V> extends Map<K, V>{
     public get(key: K): V | undefined {
@@ -63,12 +63,12 @@ export class MetaData {
     public keyName: string; // the key name of the property this meta data describes
     public serializedKey: string; // the target keyname for serializing
     public deserializedKey: string; // the target keyname for deserializing
-    public serializedType: ASerializableType<any>; // the type to use when serializing this property
-    public deserializedType: ASerializableType<any>; //  the type to use when deserializing this property
-    public serializedKeyType: ASerializableType<any>; //  the type to use when deserializing the key of a map
-    public deserializedKeyType: ASerializableType<any>; //  the type to use when serializing the key of a map
-    public serializedValueType: ASerializableType<any>; //  the type to use when deserializing the value of a map
-    public deserializedValueType: ASerializableType<any>; //  the type to use when serializing the value of a map
+    public serializedType: ASerializableTypeOrArray<any>; // the type to use when serializing this property
+    public deserializedType: ASerializableTypeOrArray<any>; //  the type to use when deserializing this property
+    public serializedKeyType: ASerializableTypeOrArray<any>; //  the type to use when deserializing the key of a map
+    public deserializedKeyType: ASerializableTypeOrArray<any>; //  the type to use when serializing the key of a map
+    public serializedValueType: ASerializableTypeOrArray<any>; //  the type to use when deserializing the value of a map
+    public deserializedValueType: ASerializableTypeOrArray<any>; //  the type to use when serializing the value of a map
     public flags: MetaDataFlag;
     public bitMaskSerialize: number;
     public emitDefaultValue: boolean;
