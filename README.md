@@ -171,6 +171,28 @@ If you want the same behavior for a property when serializing and deserializing,
 - `@autoserializeUsing(transforms : SerializeAndDeserializeFns, customKey? : string)`
 - `@autoserializeAsJson(customKey? : string)`
 - `@autoserializeAsMap(keyType: () => SerializableType<any>, valueType: () => SerializableType<any>, constructor?: () => SerializableType<any>, keyName?: string)`
+##### Array
+There is two way of serializing an array :
+```typescript
+Deserialize([1], itIsAnArray(() => Number))
+```
+```typescript
+DeserializeAsArray([1], () => Number)
+```
+Both are equivalent, but the former allow you to deserialize nested array
+```typescript
+Deserialize([[1], [2]], itIsAnArray(itIsAnArray(() => Number)))
+```
+Or Set/Map of array
+```typescript
+deserializeAsMap({v1: [1], v2: [2]}, () => String, itIsAnArray(itIsAnArray(() => Number)))
+```
+There is an optional second argument to itIsAnArray : a constructor used to deserialize into the correct type.
+```typescript
+class MyArray<T> extends Array<T> {}
+const instance = Deserialize([1], itIsAnArray(() => Number, () => MyArray));
+assert(instance instanceof MyArray);
+```
 ##### Types
 ```typescript
  type SerializationFn = <T>(target : T) => JsonType;
@@ -184,7 +206,7 @@ If you want the same behavior for a property when serializing and deserializing,
 ## Serializing Data to JSON
 Calling any of the `Serialize*` family of methods will convert the input object into json. The output is a plain javascript object that has not had `JSON.stringify` called on it.
 
-#### Functions for Serializing
+#### Functions for Serialization
 Depending on how your data is structured there are a few options for serialization. You can work with single objects, maps of objects, or arrays of objects. 
 
 - `Serialize<T>(target : T, () => ClassConstructor<T>) => JsonObject` 
@@ -482,12 +504,12 @@ When using `SetDeserializeKeyTransform(fn : (str : string) => string)` you need 
     }
 
     const json = {
-        VALUE: "strvalue",
+        VALUE: "strValue",
     };
 
     const instance = Deserialize(json, () => Test);
     expect(instance).toEqual({
-        value: "strvalue"
+        value: "strValue"
     });
 ```
 
@@ -521,7 +543,7 @@ At deserialization you end up with a bunch of Living, but no dog nor fish. The r
 The Runtime typing is enable as follow :
 ```typescript
     let animal: Living[] = [new Fish(), new Dog(), new Living()];
-    RuntimeTypingSetEnable(true);
+    RuntimeTypingEnable();
     RuntimeTypingSetTypeString(Fish, "It's a fish");
     RuntimeTypingSetTypeString(Dog, "and that is a dog");
     RuntimeTypingSetTypeString(Living, "every thing is fine as long as there are no collision");
@@ -529,7 +551,7 @@ The Runtime typing is enable as follow :
     let json = SerializeArray(animal, () => Living);
     ...
     let animal_d = DeserializeArray(json, () => Living);
-    RuntimeTypingSetEnable(false);
+    RuntimeTypingDisable();
     RuntimeTypingResetDictionary();
 
 ```
@@ -555,7 +577,7 @@ class Test0 {
 const s = new Test0();
 s.dico1 = new MyDico([["1", new Moon("Europa")], ["2", new Satellite("Adrastea")]]);
 s.dico1.set("3" , new Moon("Callisto"));
-RuntimeTypingSetEnable(true);
+RuntimeTypingEnable();
 RuntimeTypingSetTypeString(Moon, "my Moon type");
 RuntimeTypingSetTypeString(Satellite, "my Satellite type");
 RuntimeTypingSetTypeString(Test0, "my Test0 type");
@@ -712,7 +734,8 @@ Other decorators
 * SetSerializeKeyTransform
 * RuntimeTypingResetDictionary
 * RuntimeTypingSetTypeString
-* RuntimeTypingSetEnable
+* RuntimeTypingEnable
+* RuntimeTypingDisable
 * SelectiveSerialization
 
 ### Callback
@@ -726,7 +749,7 @@ Other decorators
 * Deserialization expect an *object* (use JSON.parse before a call to Deserialize).
 * You must use the `@inheritSerialization` if you want to serialize object with inheritance.
 * Use RefClean if you want that `$id` start to one again.
-* You don't need to call `RuntimeTypingSetEnable(false)` after a serialization if you want to use it again.
+* You don't need to call `RuntimeTypingDisable` after a serialization if you want to use it again.
 * `@serializeAsArray` expect a non array type (ie if it's an array of `Boolean`, you should give `Boolean` as parameter). Same goes for `@serializeAsObjectMap`, `@serializeAsMap` and `@serializeAsSet`.
 * `@serializeAsMap` works on es6 [`Map` object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map).
 * if you create a loop between files by adding decorator, YOU MUST set the option `@emitDecoratorMetadata` to false in your tsconfig.json. Otherwise your project will fail to load.
