@@ -26,8 +26,9 @@ import {
     SetRefCycleDetection
 } from "../src/index";
 import {
+    RuntimeTypingDisable,
+    RuntimeTypingEnable,
     RuntimeTypingResetDictionary,
-    RuntimeTypingSetEnable,
     RuntimeTypingSetTypeString,
 } from "../src/runtime_typing";
 import {
@@ -1315,7 +1316,7 @@ describe("Deserializing", function() {
             RuntimeTypingSetTypeString(Test1, "my Test1 type");
             RuntimeTypingSetTypeString(Test2, "my Test2 type");
             RuntimeTypingSetTypeString(Test3, "my Test3 type");
-            RuntimeTypingSetEnable(true);
+            RuntimeTypingEnable();
             const json = DeserializeArray([
                 { $type: "my Test0 type", valueA: 0 },
                 { $type: "my Test1 type", valueB: 1 },
@@ -1323,7 +1324,7 @@ describe("Deserializing", function() {
                 { $type: "my Test3 type", valueD: 3 }
             ], () => Test0);
             RuntimeTypingResetDictionary();
-            RuntimeTypingSetEnable(false);
+            RuntimeTypingDisable();
             expect(json[0] instanceof Test0).toBeTruthy();
             expect(json[1] instanceof Test1).toBeTruthy();
             expect(json[2] instanceof Test2).toBeTruthy();
@@ -1356,14 +1357,14 @@ describe("Deserializing", function() {
             RuntimeTypingSetTypeString(Test1, "my Test1 type");
             RuntimeTypingSetTypeString(Test2, "my Test2 type");
             RuntimeTypingSetTypeString(Test3, "my Test3 type");
-            RuntimeTypingSetEnable(true);
+            RuntimeTypingEnable();
             const json = Deserialize({
                 $type: "my Test3 type",
                 m1: { $type: "my Test0 type", valueA: true },
                 m2: { $type: "my Test2 type", valueB: true }
             }, () => Test3);
             RuntimeTypingResetDictionary();
-            RuntimeTypingSetEnable(false);
+            RuntimeTypingDisable();
             expect(json instanceof Test3).toBeTruthy();
             expect(json.m1 instanceof Test0).toBeTruthy();
             expect(json.m2 instanceof Test1).toBeTruthy();
@@ -1395,14 +1396,14 @@ describe("Deserializing", function() {
             RuntimeTypingSetTypeString(Test1, "my Test1 type");
             RuntimeTypingSetTypeString(Test2, "my Test2 type");
             RuntimeTypingSetTypeString(Test3, "my Test3 type");
-            RuntimeTypingSetEnable(true);
+            RuntimeTypingEnable();
             const json = Deserialize({
                 $type: "my Test3 type",
                 m1: { $type: "my Test0 type", valueA: true },
                 m2: { $type: "my Test2 type", valueB: true }
             }, () => Test3, null, InstantiationMethod.ObjectCreate);
             RuntimeTypingResetDictionary();
-            RuntimeTypingSetEnable(false);
+            RuntimeTypingDisable();
             expect(json instanceof Test3).toBeTruthy();
             expect(json.m1 instanceof Test0).toBeTruthy();
             expect(json.m2 instanceof Test1).toBeTruthy();

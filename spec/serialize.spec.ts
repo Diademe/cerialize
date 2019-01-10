@@ -23,8 +23,9 @@ import {
     SetSerializeKeyTransform
 } from "../src/index";
 import {
+    RuntimeTypingDisable,
+    RuntimeTypingEnable,
     RuntimeTypingResetDictionary,
-    RuntimeTypingSetEnable,
     RuntimeTypingSetTypeString,
 } from "../src/runtime_typing";
 import {
@@ -828,13 +829,13 @@ describe("Serializing", function() {
                     const s = new Test0();
                     s.dico1 = new MyDico([["1", new Moon("Europa")], ["2", new Satellite("Adrastea")]]);
                     s.dico1.set("3" , new Moon("Callisto"));
-                    RuntimeTypingSetEnable(true);
+                    RuntimeTypingEnable();
                     RuntimeTypingSetTypeString(Moon, "my Moon type");
                     RuntimeTypingSetTypeString(Satellite, "my Satellite type");
                     RuntimeTypingSetTypeString(Test0, "my Test0 type");
                     RuntimeTypingSetTypeString(MyDico, "my MyDico type");
                     const json = Serialize(s, () => Test0);
-                    RuntimeTypingSetEnable(false);
+                    RuntimeTypingDisable();
                     RuntimeTypingResetDictionary();
                     expect((json.dico1 as any)["1"]).toEqual({$type: "my Moon type", name: "Europa"});
                     expect((json.dico1 as any)["2"]).toEqual({$type: "my Satellite type", name: "Adrastea"});
@@ -1367,13 +1368,13 @@ describe("Serializing", function() {
             const s = new Test3();
             s.m1 = new Test0();
             s.m2 = new Test2();
-            RuntimeTypingSetEnable(true);
+            RuntimeTypingEnable();
             RuntimeTypingSetTypeString(Test0, "my Test0 type");
             RuntimeTypingSetTypeString(Test1, "my Test1 type");
             RuntimeTypingSetTypeString(Test2, "my Test2 type");
             RuntimeTypingSetTypeString(Test3, "my Test3 type");
             const json = Serialize(s, () => Test3);
-            RuntimeTypingSetEnable(false);
+            RuntimeTypingDisable();
             RuntimeTypingResetDictionary();
             expect(json).toEqual({
                 $type: "my Test3 type",

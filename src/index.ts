@@ -5,7 +5,8 @@ import { InstantiationMethod } from "./types";
 export {
     RuntimeTypingResetDictionary,
     RuntimeTypingSetTypeString,
-    RuntimeTypingSetEnable
+    RuntimeTypingEnable,
+    RuntimeTypingDisable
 } from "./runtime_typing";
 export * from "./serialize";
 export * from "./deserialize";

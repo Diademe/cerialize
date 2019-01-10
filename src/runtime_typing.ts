@@ -57,6 +57,10 @@ export function RuntimeTypingSetTypeString(t: any, s: string): void {
     TypeString.setTypeString(t, s);
 }
 
-export function RuntimeTypingSetEnable(b: boolean): void {
-    TypeString.setRuntimeTyping(b);
+export function RuntimeTypingEnable(): void {
+    TypeString.setRuntimeTyping(true);
+}
+
+export function RuntimeTypingDisable(): void {
+    TypeString.setRuntimeTyping(false);
 }
