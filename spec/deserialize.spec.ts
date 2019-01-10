@@ -101,10 +101,9 @@ describe("Deserializing", function() {
             describe(blockName, function() {
 
                 it("deserializes basic primitives", function() {
-
                     class Test {
                         @deserializeAs(() => String)
-                        public value0: string = "strvalue";
+                        public value0: string = "strValue";
                         @deserializeAs(() => Boolean)
                         public value1: boolean = true;
                         @deserializeAs(() => Number)
@@ -113,11 +112,11 @@ describe("Deserializing", function() {
 
                     const target = createTarget(makeTarget, instantiationMethod, Test);
                     const instance = Deserialize({
-                        value0: "strvalue1",
+                        value0: "strValue1",
                         value1: false,
                         value2: 101
                     }, () => Test, target, instantiationMethod);
-                    expect(instance.value0).toBe("strvalue1");
+                    expect(instance.value0).toBe("strValue1");
                     expect(instance.value1).toBe(false);
                     expect(instance.value2).toBe(101);
                     expectTarget(instance, target, makeTarget);
@@ -206,11 +205,11 @@ describe("Deserializing", function() {
                     const json = {
                         bool: true,
                         num: 100,
-                        str: "strval"
+                        str: "strValue"
                     };
                     const target = createTarget(makeTarget, instantiationMethod, Test);
                     const instance = Deserialize(json, () => Test, target, instantiationMethod);
-                    expect(instance.value0).toBe("strval");
+                    expect(instance.value0).toBe("strValue");
                     expect(instance.value1).toBe(true);
                     expect(instance.value2).toBe(100);
                     expectTarget(target, instance, makeTarget);
@@ -789,7 +788,7 @@ describe("Deserializing", function() {
                     }
 
                     const json = {
-                        value0: "strval",
+                        value0: "strValue",
                         value1: true,
                         value2: 1
                     };
@@ -797,7 +796,7 @@ describe("Deserializing", function() {
                     const target = createTarget(makeTarget, instantiationMethod, Test);
                     const instance = Deserialize(json, () => Test, target, instantiationMethod);
                     expect(instance).toEqual({
-                        value0: "strval",
+                        value0: "strValue",
                         value1: true,
                         value2: 1
                     });
@@ -813,14 +812,14 @@ describe("Deserializing", function() {
                     }
 
                     const json = {
-                        value0: ["strvalue", "00"],
+                        value0: ["strValue", "00"],
                         value1: [false, true],
                         value2: 100
                     };
                     const target = createTarget(makeTarget, instantiationMethod, Test);
                     const instance = Deserialize(json, () => Test, target, instantiationMethod);
                     expect(instance).toEqual({
-                        value0: ["strvalue", "00"],
+                        value0: ["strValue", "00"],
                         value1: [false, true],
                         value2: 100
                     });
@@ -992,7 +991,7 @@ describe("Deserializing", function() {
                     }
 
                     const json = {
-                        VALUE0: "strvalue",
+                        VALUE0: "strValue",
                         VALUE1: true,
                         VALUE2: 100
                     };
@@ -1001,7 +1000,7 @@ describe("Deserializing", function() {
                     const instance = Deserialize(json, () => Test, target, instantiationMethod);
                     SetDeserializeKeyTransform(null);
                     expect(instance).toEqual({
-                        value0: "strvalue",
+                        value0: "strValue",
                         value1: true,
                         value2: 100
                     });
@@ -1019,7 +1018,7 @@ describe("Deserializing", function() {
                     }
 
                     const json = {
-                        VALUE0: "strvalue",
+                        VALUE0: "strValue",
                         VALUE1: true,
                         VALUE2: 100
                     };
@@ -1028,7 +1027,7 @@ describe("Deserializing", function() {
                     const instance = Deserialize(json, () => Test, target, instantiationMethod);
                     SetDeserializeKeyTransform(null);
                     expect(instance).toEqual({
-                        value0: "strvalue",
+                        value0: "strValue",
                         value1: true,
                         value2: 100
                     });

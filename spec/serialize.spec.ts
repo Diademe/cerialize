@@ -51,10 +51,7 @@ describe("Serializing", function() {
     describe("SerializeAs", function() {
         function runTests(
             blockName: string,
-            serializeAs: any,
-            serializeAsObjectMap: any,
-            serializeAsArray: any,
-            serializeAsJson: any
+            serializeAs: any
         ) {
             describe(blockName, function() {
                 it("serializes basic primitives", function() {
@@ -65,11 +62,11 @@ describe("Serializing", function() {
                     }
 
                     const s = new Test();
-                    s.value0 = "strvalue";
+                    s.value0 = "strValue";
                     s.value1 = true;
                     s.value2 = 100;
                     const json = Serialize(s, () => Test);
-                    expect(json.value0).toBe("strvalue");
+                    expect(json.value0).toBe("strValue");
                     expect(json.value1).toBe(true);
                     expect(json.value2).toBe(100);
                 });
@@ -109,7 +106,7 @@ describe("Serializing", function() {
                     }
 
                     const s = new Test();
-                    s.value0 = "strvalue";
+                    s.value0 = "strValue";
                     s.value1 = true;
                     s.value2 = 100;
                     const json = Serialize(s, () => Test);
@@ -128,11 +125,11 @@ describe("Serializing", function() {
                     }
 
                     const s = new Test();
-                    s.value0 = "strvalue";
+                    s.value0 = "strValue";
                     s.value1 = true;
                     s.value2 = 100;
                     const json = Serialize(s, () => Test);
-                    expect(json.v0).toBe("strvalue");
+                    expect(json.v0).toBe("strValue");
                     expect(json.v1).toBe(true);
                     expect(json.value2).toBe(100);
                 });
@@ -233,17 +230,11 @@ describe("Serializing", function() {
 
         runTests(
             "Normal",
-            serializeAs,
-            serializeAsObjectMap,
-            serializeAsArray,
-            serializeAsJson
+            serializeAs
         );
         runTests(
             "Auto",
-            autoserializeAs,
-            autoserializeAsObjectMap,
-            autoserializeAsArray,
-            autoserializeAsJson
+            autoserializeAs
         );
     });
 
@@ -420,9 +411,7 @@ describe("Serializing", function() {
         function runTests(
             blockName: string,
             serializeAs: any,
-            serializeAsObjectMap: any,
-            serializeAsArray: any,
-            serializeAsJson: any
+            serializeAsObjectMap: any
         ) {
             describe(blockName, function() {
                 it("serializes a map of primitives", function() {
@@ -556,16 +545,12 @@ describe("Serializing", function() {
         runTests(
             "Normal",
             serializeAs,
-            serializeAsObjectMap,
-            serializeAsArray,
-            serializeAsJson
+            serializeAsObjectMap
         );
         runTests(
             "Auto",
             autoserializeAs,
-            autoserializeAsObjectMap,
-            autoserializeAsArray,
-            autoserializeAsJson
+            autoserializeAsObjectMap
         );
     });
 
@@ -573,9 +558,7 @@ describe("Serializing", function() {
         function runTests(
             blockName: string,
             serializeAs: any,
-            serializeAsObjectMap: any,
             serializeAsArray: any,
-            serializeAsJson: any
         ) {
             describe(blockName, function() {
                 it("serializes an array of primitives", function() {
@@ -680,16 +663,12 @@ describe("Serializing", function() {
         runTests(
             "Normal",
             serializeAs,
-            serializeAsObjectMap,
-            serializeAsArray,
-            serializeAsJson
+            serializeAsArray
         );
         runTests(
             "Auto",
             autoserializeAs,
-            autoserializeAsObjectMap,
-            autoserializeAsArray,
-            autoserializeAsJson
+            autoserializeAsArray
         );
     });
 
@@ -807,8 +786,6 @@ describe("Serializing", function() {
         function runTests(
             blockName: string,
             serializeAs: any,
-            serializeAsObjectMap: any,
-            serializeAsArray: any,
             serializeAsJson: any
         ) {
             describe(blockName, function() {
@@ -851,11 +828,11 @@ describe("Serializing", function() {
                     }
 
                     const s = new Test();
-                    s.value0 = "strvalue";
+                    s.value0 = "strValue";
                     s.value1 = true;
                     s.value2 = 100;
                     const json = Serialize(s, () => Test);
-                    expect(json.value0).toBe("strvalue");
+                    expect(json.value0).toBe("strValue");
                     expect(json.value1).toBe(true);
                     expect(json.value2).toBe(100);
                 });
@@ -868,11 +845,11 @@ describe("Serializing", function() {
                     }
 
                     const s = new Test();
-                    s.value0 = ["strvalue", "00"];
+                    s.value0 = ["strValue", "00"];
                     s.value1 = [false, true];
                     s.value2 = 100;
                     const json = Serialize(s, () => Test);
-                    expect(json.value0).toEqual(["strvalue", "00"]);
+                    expect(json.value0).toEqual(["strValue", "00"]);
                     expect(json.value1).toEqual([false, true]);
                     expect(json.value2).toBe(100);
                 });
@@ -908,22 +885,22 @@ describe("Serializing", function() {
                     const l0 = new TestL0();
                     const l1 = new TestL0();
                     s.values = [l0, l1];
-                    l0.value0 = "strvalue";
+                    l0.value0 = "strValue";
                     l0.value1 = true;
                     l0.value2 = 100;
-                    l1.value0 = "strvalue2";
+                    l1.value0 = "strValue2";
                     l1.value1 = true;
                     l1.value2 = 101;
                     const json = Serialize(s, () => Test);
                     expect(json).toEqual({
                         values: [
                             {
-                                value0: "strvalue",
+                                value0: "strValue",
                                 value1: true,
                                 value2: 100
                             },
                             {
-                                value0: "strvalue2",
+                                value0: "strValue2",
                                 value1: true,
                                 value2: 101
                             }
@@ -945,13 +922,13 @@ describe("Serializing", function() {
                     const s = new Test();
                     const l0 = new TestL0();
                     s.value0 = l0;
-                    l0.value0 = "strvalue";
+                    l0.value0 = "strValue";
                     l0.value1 = true;
                     l0.value2 = 100;
                     const json = Serialize(s, () => Test);
                     expect(json).toEqual({
                         value0: {
-                            value0: "strvalue",
+                            value0: "strValue",
                             value1: true,
                             value2: 100
                         }
@@ -973,22 +950,22 @@ describe("Serializing", function() {
                     const l0 = new TestL0();
                     const l1 = new TestL0();
                     s.values = { key0: l0, key1: l1 };
-                    l0.value0 = "strvalue";
+                    l0.value0 = "strValue";
                     l0.value1 = true;
                     l0.value2 = 100;
-                    l1.value0 = "strvalue2";
+                    l1.value0 = "strValue2";
                     l1.value1 = true;
                     l1.value2 = 101;
                     const json = Serialize(s, () => Test);
                     expect(json).toEqual({
                         values: {
                             key0: {
-                                value0: "strvalue",
+                                value0: "strValue",
                                 value1: true,
                                 value2: 100
                             },
                             key1: {
-                                value0: "strvalue2",
+                                value0: "strValue2",
                                 value1: true,
                                 value2: 101
                             }
@@ -1011,22 +988,22 @@ describe("Serializing", function() {
                     const l0 = new TestL0();
                     const l1 = new TestL0();
                     s.values = [l0, l1];
-                    l0.value0 = "strvalue";
+                    l0.value0 = "strValue";
                     l0.value1 = true;
                     l0.value2 = 100;
-                    l1.value0 = "strvalue2";
+                    l1.value0 = "strValue2";
                     l1.value1 = true;
                     l1.value2 = 101;
                     const json = Serialize(s, () => Test);
                     expect(json).toEqual({
                         values: [
                             {
-                                value0: "strvalue",
+                                value0: "strValue",
                                 value1: true,
                                 value2: 100
                             },
                             {
-                                value0: "strvalue2",
+                                value0: "strValue2",
                                 value1: true,
                                 value2: 101
                             }
@@ -1053,10 +1030,10 @@ describe("Serializing", function() {
                     }
 
                     const s = new Test();
-                    s.value0 = "strvalue";
+                    s.value0 = "strValue";
                     const json = Serialize(s, () => Test);
                     expect(json).toEqual({
-                        different: "strvalue"
+                        different: "strValue"
                     });
                 });
 
@@ -1089,13 +1066,13 @@ describe("Serializing", function() {
                     }
 
                     const s = new Test();
-                    s.value0 = "strvalue";
+                    s.value0 = "strValue";
                     s.value1 = true;
                     s.value2 = 100;
                     const json = Serialize(s, () => Test);
                     SetSerializeKeyTransform(null);
                     expect(json).toEqual({
-                        VALUE0: "strvalue",
+                        VALUE0: "strValue",
                         VALUE1: true,
                         VALUE2: 100
                     });
@@ -1116,13 +1093,13 @@ describe("Serializing", function() {
                     }
 
                     const s = new Test();
-                    s.value0 = "strvalue";
+                    s.value0 = "strValue";
                     s.value1 = true;
                     s.value2 = 100;
                     const json = Serialize(s, () => Test);
                     SetSerializeKeyTransform(null);
                     expect(json).toEqual({
-                        VALUE0: "strvalue",
+                        VALUE0: "strValue",
                         VALUE1: true,
                         VALUE2: 100
                     });
@@ -1158,15 +1135,11 @@ describe("Serializing", function() {
         runTests(
             "Normal",
             serializeAs,
-            serializeAsObjectMap,
-            serializeAsArray,
             serializeAsJson
         );
         runTests(
             "Auto",
             autoserializeAs,
-            autoserializeAsObjectMap,
-            autoserializeAsArray,
             autoserializeAsJson
         );
     });
@@ -1201,7 +1174,7 @@ describe("Serializing", function() {
                     json: JsonObject,
                     instance: Test
                 ): void {
-                    json.newvalue = "yes";
+                    json.newValue = "yes";
                     expect(instance instanceof Test).toBeTruthy();
                 }
             }
@@ -1209,7 +1182,7 @@ describe("Serializing", function() {
             const s = new Test();
             const json = Serialize(s, () => Test);
             expect(json).toEqual({
-                newvalue: "yes",
+                newValue: "yes",
                 value: 1
             });
         });
@@ -1335,13 +1308,13 @@ describe("Serializing", function() {
 
             const s = Array<Test0>();
             s.push(new Test0(), new Test1(), new Test2(), new Test3());
-            RuntimeTypingSetEnable(true);
+            RuntimeTypingEnable();
             RuntimeTypingSetTypeString(Test0, "my Test0 type");
             RuntimeTypingSetTypeString(Test1, "my Test1 type");
             RuntimeTypingSetTypeString(Test2, "my Test2 type");
             RuntimeTypingSetTypeString(Test3, "my Test3 type");
             const json = SerializeArray(s, () => Test0);
-            RuntimeTypingSetEnable(false);
+            RuntimeTypingDisable();
             RuntimeTypingResetDictionary();
             expect(json).toEqual([
                 { $type: "my Test0 type", valueA: 0 },
