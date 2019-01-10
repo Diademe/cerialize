@@ -18,6 +18,7 @@ import {
     serializeUsing
 } from "../src/decorators";
 import {
+    itIsAnArray,
     RefClean,
     SetRefCycleDetection,
     SetSerializeKeyTransform
@@ -239,6 +240,26 @@ describe("Serializing", function() {
     });
 
     describe("SerializeAsMap", function() {
+        it("serializes a map string to array", function() {
+            class Test {
+                @serializeAsMap(() => String, itIsAnArray(() => Number))
+                public values: Map<string, number[]>;
+            }
+
+            const t = new Test();
+            t.values = new Map([
+                ["v0", [1]],
+                ["v1", [2]],
+                ["v2", [3]]
+            ]);
+            const json = Serialize(t, () => Test);
+            expect(json.values).toEqual({
+                v0: [1],
+                v1: [2],
+                v2: [3]
+            });
+        });
+
         it("serializes a map of primitives", function() {
             class Test {
                 @serializeAsMap(() => String, () => Number)
@@ -561,7 +582,7 @@ describe("Serializing", function() {
             serializeAsArray: any,
         ) {
             describe(blockName, function() {
-                it("serializes an array of primitives", function() {
+                it("serializes an array of primitives 1", function() {
                     class Test {
                         @serializeAsArray(() => Number) public value: number[];
                     }
@@ -570,6 +591,23 @@ describe("Serializing", function() {
                     t.value = [1, 2, 3];
                     const json = Serialize(t, () => Test);
                     expect(json.value).toEqual([1, 2, 3]);
+                });
+
+                it("serializes an array of primitives 2", function() {
+                    class Test {
+                        @serializeAs(itIsAnArray(() => Number))
+                        public value: number[];
+                    }
+
+                    const t = new Test();
+                    t.value = [1, 2, 3];
+                    const json = Serialize(t, () => Test) as JsonObject;
+                    expect(json.value).toEqual([1, 2, 3]);
+                });
+
+                it("serializes an array of primitives 3", function() {
+                    const json = Serialize([1, 2, 3], itIsAnArray(() => Number));
+                    expect(json).toEqual([1, 2, 3]);
                 });
 
                 it("serializes an array of typed objects", function() {
@@ -599,7 +637,7 @@ describe("Serializing", function() {
                     ]);
                 });
 
-                it("serializes nested arrays", function() {
+                it("serializes nested arrays 1", function() {
                     class TestTypeL0 {
                         @serializeAs(() => String) public strVal: string;
 
@@ -643,6 +681,12 @@ describe("Serializing", function() {
                         { l0List: [{ strVal: "10" }, { strVal: "11" }] },
                         { l0List: [{ strVal: "20" }, { strVal: "21" }] }
                     ]);
+                });
+
+                it("serializes nested arrays 2", function() {
+                    const t = [[1, 2], [3, 4]];
+                    const json = Serialize(t, itIsAnArray(itIsAnArray(() => Number)));
+                    expect(json).toEqual([[1, 2], [3, 4]]);
                 });
 
                 it("serializes an array with a different key", function() {
@@ -1292,16 +1336,19 @@ describe("Serializing", function() {
 
     describe("RuntimeTyping serialization", function() {
 
-        it("Array", function() {
+        it("Array 1", function() {
             class Test0 {
                 @serializeAs(() => Number) public valueA: number = 0;
             }
+            @inheritSerialization(() => Test0)
             class Test1 extends Test0 {
                 @serializeAs(() => Number) public valueB: number = 1;
             }
+            @inheritSerialization(() => Test1)
             class Test2 extends Test1 {
                 @serializeAs(() => Number) public valueC: number = 2;
             }
+            @inheritSerialization(() => Test1)
             class Test3 extends Test1 {
                 @serializeAs(() => Number) public valueD: number = 3;
             }
@@ -1318,9 +1365,32 @@ describe("Serializing", function() {
             RuntimeTypingResetDictionary();
             expect(json).toEqual([
                 { $type: "my Test0 type", valueA: 0 },
-                { $type: "my Test1 type", valueB: 1 },
-                { $type: "my Test2 type", valueC: 2 },
-                { $type: "my Test3 type", valueD: 3 }
+                { $type: "my Test1 type", valueA: 0, valueB: 1 },
+                { $type: "my Test2 type", valueA: 0, valueB: 1, valueC: 2 },
+                { $type: "my Test3 type", valueA: 0, valueB: 1, valueD: 3 }
+            ]);
+        });
+
+        it("Array 2", function() {
+            class Test {
+                @serializeAs(() => Number)
+                public value: number = 0;
+            }
+
+            class MyArray extends Array {}
+
+            const s = new MyArray();
+            s.push(new Test(), new Test(), new Test(), new Test());
+            RuntimeTypingEnable();
+            RuntimeTypingSetTypeString(Test, "my Test type");
+            const json = Serialize(s, itIsAnArray(() => Test));
+            RuntimeTypingDisable();
+            RuntimeTypingResetDictionary();
+            expect(json).toEqual([
+                { $type: "my Test type", value: 0 },
+                { $type: "my Test type", value: 0 },
+                { $type: "my Test type", value: 0 },
+                { $type: "my Test type", value: 0 },
             ]);
         });
 

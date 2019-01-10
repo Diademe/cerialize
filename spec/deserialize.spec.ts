@@ -17,6 +17,7 @@ import {
     deserializeUsing,
     emitDefaultValue,
     inheritSerialization,
+    itIsAnArray,
     onDeserialized,
     SetDefaultInstantiationMethod,
     SetDeserializeKeyTransform
@@ -389,6 +390,37 @@ describe("Deserializing", function() {
                     expect(instance.values.v0).toEqual({ value: 1 });
                     expect(instance.values.v1).toEqual({ value: 2 });
                     expect(instance.values.v2).toEqual({ value: 3 });
+                });
+
+                it("deserializes a map of string to array of number", function() {
+                    class TestType {
+                        @deserializeAs(() => Number) public value: number;
+
+                        constructor(arg: number) {
+                            this.value = arg;
+                        }
+                    }
+
+                    class Test {
+                        @deserializeAsObjectMap(itIsAnArray(() => TestType))
+                        public values: Indexable<TestType[]>;
+                    }
+
+                    const json = {
+                        values: {
+                            v1: [{ value: 11 }, { value: 12 }, { value: 13 }],
+                            v2: [{ value: 21 }, { value: 22 }, { value: 23 }],
+                            v3: [{ value: 31 }, { value: 32 }, { value: 33 }]
+                        }
+                    };
+
+                    const target = createTarget(makeTarget, instantiationMethod, Test);
+                    const instance = Deserialize(json, () => Test, target, instantiationMethod);
+                    expect(instance.values).toEqual({
+                        v1: [{ value: 11 }, { value: 12 }, { value: 13 }],
+                        v2: [{ value: 21 }, { value: 22 }, { value: 23 }],
+                        v3: [{ value: 31 }, { value: 32 }, { value: 33 }]
+                    });
                 });
 
                 it("deserializes nested maps", function() {
@@ -1292,7 +1324,7 @@ describe("Deserializing", function() {
 
     describe("RuntimeTyping serialization", function() {
 
-        it("Array", function() {
+        it("Array 1", function() {
             class Test0 {
                 @deserializeAs(() => Number)
                 public valueA: number = 0;
@@ -1328,6 +1360,52 @@ describe("Deserializing", function() {
             expect(json[1] instanceof Test1).toBeTruthy();
             expect(json[2] instanceof Test2).toBeTruthy();
             expect(json[3] instanceof Test3).toBeTruthy();
+        });
+
+        it("Array 2", function() {
+            class Test0 {
+                @deserializeAs(() => Number)
+                public valueA: number = 0;
+            }
+            class Test1 {
+                @deserializeAs(() => Number)
+                public valueB: number = 1;
+            }
+            class Test2 {
+                @deserializeAs(() => Number)
+                public valueC: number = 2;
+            }
+            class Test3 {
+                @deserializeAs(() => Number)
+                public valueD: number = 3;
+            }
+
+            class MyArray<T> extends Array<T> { }
+
+            const s = new MyArray<Test0>();
+            RuntimeTypingSetTypeString(Test0, "my Test0 type");
+            RuntimeTypingSetTypeString(Test1, "my Test1 type");
+            RuntimeTypingSetTypeString(Test2, "my Test2 type");
+            RuntimeTypingSetTypeString(Test3, "my Test3 type");
+            RuntimeTypingEnable();
+            const json = Deserialize([
+                { $type: "my Test0 type", valueA: 0 },
+                { $type: "my Test1 type", valueB: 1 },
+                { $type: "my Test2 type", valueC: 2 },
+                { $type: "my Test3 type", valueD: 3 }
+            ], itIsAnArray(() => Test0, () => MyArray));
+            RuntimeTypingResetDictionary();
+            RuntimeTypingDisable();
+            expect(json[0] instanceof Test0).toBeTruthy();
+            expect(json[1] instanceof Test1).toBeTruthy();
+            expect(json[2] instanceof Test2).toBeTruthy();
+            expect(json[3] instanceof Test3).toBeTruthy();
+            expect(json).toEqual([
+                { valueA: 0 },
+                { valueB: 1 },
+                { valueC: 2 },
+                { valueD: 3 }
+            ]);
         });
 
         it("Object", function() {
