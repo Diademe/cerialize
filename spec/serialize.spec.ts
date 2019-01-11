@@ -1258,10 +1258,10 @@ describe("Serializing", function() {
             s.next = new Test();
             s.next.next = new Test();
             s.next.next.next = s;
-            SetRefCycleDetection(true);
+            RefCycleDetectionEnable();
             const json = Serialize(s, () => Test);
             RefClean();
-            SetRefCycleDetection(false);
+            RefCycleDetectionDisable();
             expect(json).toEqual({
                 $id: "1",
                 next: {
@@ -1283,10 +1283,10 @@ describe("Serializing", function() {
 
             const s = new Test();
             s.next = s;
-            SetRefCycleDetection(true);
+            RefCycleDetectionEnable();
             const json = Serialize(s, () => Test);
             RefClean();
-            SetRefCycleDetection(false);
+            RefCycleDetectionDisable();
             expect(json).toEqual({
                 $id: "1",
                 next: {

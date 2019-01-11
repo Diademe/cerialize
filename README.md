@@ -656,10 +656,10 @@ Even if ```t0.value0``` and ```t0.value1``` are the same, they are serialized as
         value0: { $id: 2, value: 1 },
         value1: { $ref: 2 }
     };
-    SetRefCycleDetection(true);
+    RefCycleDetectionEnable();
     const instance = Deserialize(json, () => Test0);
     RefClean();
-    SetRefCycleDetection(false);
+    RefCycleDetectionDisable();
     obj.value1 == obj.value0; /*true*/
 ```
 

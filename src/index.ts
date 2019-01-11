@@ -33,9 +33,18 @@ export function SetDefaultInstantiationMethod(
             : instantiationMethod;
 }
 
-// if true it deals with references and cycle references
-export function SetRefCycleDetection(b: boolean) {
-    MetaData.refCycleDetection = b;
+/**
+ * Enable references and cyclic references detection
+ */
+export function RefCycleDetectionEnable() {
+    MetaData.refCycleDetection = true;
+}
+
+/**
+ * Enable references and cyclic references detection
+ */
+export function RefCycleDetectionDisable() {
+    MetaData.refCycleDetection = false;
 }
 
 export function itIsAnArray(

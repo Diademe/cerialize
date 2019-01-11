@@ -1271,10 +1271,10 @@ describe("Deserializing", function() {
                 value0: { $id: "2", value: 1 },
                 value1: { $ref: "2" }
             };
-            SetRefCycleDetection(true);
+            RefCycleDetectionEnable();
             const instance = Deserialize(json, () => Test0);
             RefClean();
-            SetRefCycleDetection(false);
+            RefCycleDetectionDisable();
             expect(instance.value0).toBe(instance.value1);
         });
 
@@ -1295,10 +1295,10 @@ describe("Deserializing", function() {
                     }
                 }
             };
-            SetRefCycleDetection(true);
+            RefCycleDetectionEnable();
             const instance = Deserialize(json, () => Test);
             RefClean();
-            SetRefCycleDetection(false);
+            RefCycleDetectionDisable();
             expect(instance).toBe(instance.next.next.next);
         });
 
@@ -1313,10 +1313,10 @@ describe("Deserializing", function() {
                     $ref: "1"
                 }
             };
-            SetRefCycleDetection(true);
+            RefCycleDetectionEnable();
             const instance = Deserialize(json, () => Test);
             RefClean();
-            SetRefCycleDetection(false);
+            RefCycleDetectionDisable();
             expect(instance).toBe(instance.next.next.next);
         });
 
