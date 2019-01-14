@@ -19,13 +19,12 @@ import {
     inheritSerialization,
     itIsAnArray,
     onDeserialized,
+    RefClean,
+    RefCycleDetectionDisable,
+    RefCycleDetectionEnable,
     SetDefaultInstantiationMethod,
     SetDeserializeKeyTransform
 } from "../src";
-import {
-    RefClean,
-    SetRefCycleDetection
-} from "../src/index";
 import {
     RuntimeTypingDisable,
     RuntimeTypingEnable,

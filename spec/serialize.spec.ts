@@ -20,7 +20,8 @@ import {
 import {
     itIsAnArray,
     RefClean,
-    SetRefCycleDetection,
+    RefCycleDetectionDisable,
+    RefCycleDetectionEnable,
     SetSerializeKeyTransform
 } from "../src/index";
 import {
