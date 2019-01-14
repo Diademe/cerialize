@@ -1,7 +1,7 @@
 node_modules
-.idea
-
-spec/spec
-spec/src
-.gulp***
-gulp-**
+dist
+*.js
+*.map.js
+/.vscode
+/dcerialize.njsproj
+/dcerialize.code-workspace

@@ -1,0 +1,22 @@
+{
+    "defaultSeverity": "error",
+    "jsRules": {},
+    "rules": {
+        "no-bitwise": false,
+        "only-arrow-functions": false,
+        "one-line": false,
+        "member-ordering": false,
+        "max-classes-per-file": false,
+        "no-shadowed-variable": false,
+        "no-empty": false,
+        "ban-types": false,
+        "interface-name": false,
+        "interface-over-type-literal": false,
+        "no-object-literal-type-assertion": false,
+        "trailing-comma": false,
+        "no-string-literal" : false 
+    },
+    "extends": [
+        "tslint:latest"
+    ]
+}
