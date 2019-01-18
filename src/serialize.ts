@@ -117,7 +117,6 @@ export function SerializeArray<T>(
     }
     const returnValue = new Array<JsonType>(source.length);
     for (let i = 0; i < source.length; i++) {
-        const b = type instanceof ItIsAnArrayInternal;
         returnValue[i] = Serialize(source[i], type as any);
     }
     return returnValue;
