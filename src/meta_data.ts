@@ -160,7 +160,7 @@ export class MetaData {
         for (const metadata of parentMetaData) {
             const keyName = metadata.keyName;
             if (!MetaData.hasKeyName(childMetaData, keyName)) {
-                childMetaData.push(MetaData.clone(metadata));
+                childMetaData.unshift(MetaData.clone(metadata)); // TODO optimize unshift
             }
         }
         TypeMap.set(childType, childMetaData);
