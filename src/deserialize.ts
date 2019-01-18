@@ -334,6 +334,9 @@ function _Deserialize<T extends Indexable>(
         );
     }
     else {
+        if (data === null) {
+            return undefined;
+        }
         const tmp1 = {a: {}};
         if (getReference(data, tmp1)) {
             return tmp1.a as T;
