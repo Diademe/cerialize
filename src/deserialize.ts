@@ -1,5 +1,5 @@
 import { MetaData, MetaDataFlag } from "./meta_data";
-import { referenceHandling } from "./ref_cycle";
+import { getReference, referenceHandling, setId } from "./ref_cycle";
 import { TypeString } from "./runtime_typing";
 import {
     getTarget,
@@ -318,7 +318,6 @@ export function DeserializeJSON(
     // primitive case
     return data;
 }
-
 function _Deserialize<T extends Indexable>(
     data: JsonObject | JsonArray,
     type: ASerializableTypeOrArray<T>,
@@ -335,6 +334,10 @@ function _Deserialize<T extends Indexable>(
         );
     }
     else {
+        const tmp1 = {a: {}};
+        if (getReference(data, tmp1)) {
+            return tmp1.a as T;
+        }
         if (TypeString.getRuntimeTyping() && !isPrimitiveType(type()) && (data as JsonObject).$type) {
             type = () => TypeString.getTypeFromString(
                 (data as JsonObject).$type
@@ -363,11 +366,8 @@ function _Deserialize<T extends Indexable>(
         }
 
         target = getTarget(type() as any, target, instantiationMethod) as T;
-        const tmp = { a: target }; // hack to passe argument by ref
-        if (referenceHandling(data, tmp)) {
-            return tmp.a;
-        }
-        target = tmp.a;
+        setId(data, target);
+
         let onDeserialized = "";
         for (const metadata of metadataList) {
             if (metadata.flags === MetaDataFlag.onDeserialized){

@@ -22,7 +22,11 @@ class Cycle {
 
 let cycle = new Cycle();
 
-export function referenceHandling(json: any, tmp: any) {
+/**
+ * @param json
+ * @param tmp set tmp.a to the object of id $ref if data.$ref exist
+ */
+export function getReference(json: any, tmp: any) {
     if (MetaData.refCycleDetection === false) {
         return false;
     }
@@ -33,10 +37,19 @@ export function referenceHandling(json: any, tmp: any) {
         }
         tmp.a = cycle.ref2obj.get(ref);
         return true;
-    } else if (json.hasOwnProperty("$id")) {
-        cycle.ref2obj.set(parseInt(json.$id, 10), tmp.a);
     }
     return false;
+}
+
+export function setId(json: any, obj: any) {
+    if (MetaData.refCycleDetection === true && json.hasOwnProperty("$id")) {
+        cycle.ref2obj.set(parseInt(json.$id, 10), obj);
+    }
+}
+
+export function referenceHandling(json: any, tmp: any) {
+    setId(json, tmp.a);
+    return getReference(json, tmp);
 }
 
 export function cycleBreaking(json: any, instance: any) {
