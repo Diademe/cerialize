@@ -157,11 +157,11 @@ export class MetaData {
     ) {
         let childMetaData: MetaData[] = TypeMap.get(childType) || [];
         const parentMetaDataCloned: MetaData[] =
-            TypeMap.get(parentType)
+            (TypeMap.get(parentType) || [])
                 // prevent duplicate
                 .filter((elt) => !MetaData.hasKeyName(childMetaData, elt.keyName))
                 // clone parent
-                .map((elt) => MetaData.clone(elt)) || [];
+                .map((elt) => MetaData.clone(elt));
         childMetaData = parentMetaDataCloned.concat(childMetaData);
         TypeMap.set(childType, childMetaData);
     }

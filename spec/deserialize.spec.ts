@@ -1660,4 +1660,43 @@ describe("Deserializing", function() {
         });
     });
 
+    it("ordre of deserialization", function() {
+        class A {
+            public strHidden: string = "";
+            @deserializeAs(() => String)
+            public set a1(value: string) {
+                this.strHidden += "A1";
+            }
+            @deserializeAs(() => String)
+            public set a2(value: string) {
+                this.strHidden += "A2";
+            }
+        }
+        @inheritSerialization(() => A)
+        class B extends A {
+            @deserializeAs(() => String)
+            public set b1(value: string) {
+                this.strHidden += "B1";
+            }
+            @deserializeAs(() => String)
+            public set b2(value: string) {
+                this.strHidden += "B2";
+            }
+        }
+        @inheritSerialization(() => B)
+        class C extends B {
+            @deserializeAs(() => String)
+            public set c1(value: string) {
+                this.strHidden += "C1";
+            }
+            @deserializeAs(() => String)
+            public set c2(value: string) {
+                this.strHidden += "C2";
+            }
+        }
+        const json = {a1: "a1", a2: "a2", b1: "b1", b2: "b2", c1: "c1", c2: "c2"};
+        const obj = Deserialize(json, () => C);
+        expect(obj.strHidden).toEqual("A1A2B1B2C1C2");
+    });
+
 });
