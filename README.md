@@ -276,9 +276,9 @@ The simplest way to deserialize a piece of JSON is to call `Deserialize(json, ()
 It is also possible to re-use existing objects when deserializing with `Deserialize(json, () => Type, target)`. You might want to do this so that you can maintain references to things even after updating their properties. This is handled exactly the same way as `Deserialize(json, () => Type)` except that it takes one additional argument, the object you want to deserialize properties into. If the target instance you provide is null or undefined, this behaves identically to `Deserialize(json, () => Type)`, otherwise the deserialization will always use existing objects as write targets (if they are defined and of the expected type) instead of creating new ones.
 
 ```typescript
-    const existingInstance = new Type();
-    const instance = Deserialize(json, () => Type, existingInstance);
-    expect(existingInstance === instance).toBe(true);
+const existingInstance = new Type();
+const instance = Deserialize(json, () => Type, existingInstance);
+expect(existingInstance === instance).toBe(true);
 ```
 
 #### Deserializing Into Plain Objects
@@ -286,26 +286,26 @@ It is also possible to re-use existing objects when deserializing with `Deserial
 The `instantiationMethod` parameter can be used to change the way in which instances of the input type are created. With `InstantiationMethod.New`, the constructor will be invoked when a new instance needs to be created. With `InstantiationMethod.ObjectCreate`, the object will be created without invoking its constructor, which is useful for systems where constructed objects immediately freeze themselves. With `InstantiationMethod.None`, the `deserializeXXX` functions will return a plain object instead, which can be useful for systems like Redux that expect / require plain objects and not class instances.
 
 ```typescript
-	import {Deserialize, Instances} from 'dcerialize';
-	
-	class Immutable {
-	
-		public value : string;
-		
-		constructor(value : string) {
-			this.value = value;
-			Object.freeze(this);
-		}
-		
-		public getValue() : string {
-			return value;
-		}
-		
-	}
-	
-	Deserialize({value: 'example'}, Immutable, InstantiationMethod.New);          // Error because of Object.freeze
-	Deserialize({value: 'example'}, Immutable, InstantiationMethod.ObjectCreate); // Immutable {value 'example'}
-	Deserialize({value: 'example'}, Immutable, InstantiationMethod.None);         // Object {value: 'example'}
+import {Deserialize, Instances} from 'dcerialize';
+
+class Immutable {
+
+    public value : string;
+    
+    constructor(value : string) {
+        this.value = value;
+        Object.freeze(this);
+    }
+    
+    public getValue() : string {
+        return value;
+    }
+    
+}
+
+Deserialize({value: 'example'}, Immutable, InstantiationMethod.New);          // Error because of Object.freeze
+Deserialize({value: 'example'}, Immutable, InstantiationMethod.ObjectCreate); // Immutable {value 'example'}
+Deserialize({value: 'example'}, Immutable, InstantiationMethod.None);         // Object {value: 'example'}
 ```
 
 The default InstantiationMethod can be changed with `SetDefaultInstantiationMethod(instantiationMethod : InstantiationMethod)`
@@ -438,45 +438,45 @@ The default InstantiationMethod can be changed with `SetDefaultInstantiationMeth
 A callback can be provided for when a class is serialized. To define the callback, add a static method `onSerialized<T>(instance : T, json : JsonObject)` to the class that needs custom post processing. You can either return a new value from this function, or modify the `json` parameter.
 
 ```typescript 
-    class CrewMember {
+class CrewMember {
 
-        @autoserializeAs(() => String) firstName;
-        @autoserializeAs(() => String) lastName;
+    @autoserializeAs(() => String) firstName;
+    @autoserializeAs(() => String) lastName;
 
-        static onSerialized(instance : CrewMember, json : JsonObject) {
-            json["employeeId"] = instance.lastName.toUpperCase() + ", " + instance.firstName.toUpperCase();
-        }
-
+    static onSerialized(instance : CrewMember, json : JsonObject) {
+        json["employeeId"] = instance.lastName.toUpperCase() + ", " + instance.firstName.toUpperCase();
     }
+
+}
 ```
 
 ## onDeserialized Callback
 A callback can be provided for when a class is deserialized. Just add `@onDeserialized` on a function and it will be called on the instance after its class have been deserialized. You can add only one `@onDeserialized` callback to a class. The callback are inherited, but you have to call the callback of a parent yourself if the callback is overridden.
 
 ```typescript 
-    class CrewMember {
+class CrewMember {
 
-        @autoserializeAs(() => String) firstName;
-        @autoserializeAs(() => String) lastName;
+    @autoserializeAs(() => String) firstName;
+    @autoserializeAs(() => String) lastName;
 
-        @onDeserialized
-        static callBack() {
-            this.firstName = this.firstName.toLowerCase();
-            this.lastName = this.lastName.toLowerCase();
-        }
+    @onDeserialized
+    static callBack() {
+        this.firstName = this.firstName.toLowerCase();
+        this.lastName = this.lastName.toLowerCase();
     }
+}
 ```
 
 ## Inheriting Serialization
 Serialization behavior is not inherited by subclasses automatically. To inherit a base class's serialization / deserialization behavior, tag the subclass with `@inheritSerialization(() => ParentClass)`.
 
 ```typescript
-    import { inheritSerialization } from 'dcerialize';
+import { inheritSerialization } from 'dcerialize';
 
-    @inheritSerialization(() => User)
-    class Admin extends User {
+@inheritSerialization(() => User)
+class Admin extends User {
 
-    }
+}
 ```
 
 ## Customizing key transforms
@@ -492,67 +492,67 @@ Often your server and your client will have different property naming convention
 ##### Note
 When using `SetDeserializeKeyTransform(fn : (str : string) => string)` you need to provide a function that transforms the EXISTING keys to a format that allows indexing of the input object.
 ```typescript
-    //in this example we expect the server to give us upper cased key names
-    //we need to map our local camel cased key to match the server provided key
-    //NOT the other way around.
-    SetDeserializeKeyTransform(function (value : string) : string {
-        return value.toUpperCase();
-    });
+//in this example we expect the server to give us upper cased key names
+//we need to map our local camel cased key to match the server provided key
+//NOT the other way around.
+SetDeserializeKeyTransform(function (value : string) : string {
+    return value.toUpperCase();
+});
 
-    class Test {
-        @deserializeAs(() => String) value : string;
-    }
+class Test {
+    @deserializeAs(() => String) value : string;
+}
 
-    const json = {
-        VALUE: "strValue",
-    };
+const json = {
+    VALUE: "strValue",
+};
 
-    const instance = Deserialize(json, () => Test);
-    expect(instance).toEqual({
-        value: "strValue"
-    });
+const instance = Deserialize(json, () => Test);
+expect(instance).toEqual({
+    value: "strValue"
+});
 ```
 
 ## Runtime Typing
 consider the following case :
 ```typescript
-    class Living;
-        whoIAm(): string{
-            return "I am a living being";
-        }
+class Living {
+    whoIAm(): string{
+        return "I am a living being";
     }
+}
 
-    @inheritSerialization(() => Living)
-    class Dog extends Living;
-        whoIAm(): string{
-            return "I am a dog";
-        }
+@inheritSerialization(() => Living)
+class Dog extends Living {
+    whoIAm(): string{
+        return "I am a dog";
     }
+}
 
-    @inheritSerialization(() => Living)
-    class Fish extends Living;
-        whoIAm(): string{
-            return "I am a fish";
-        }
+@inheritSerialization(() => Living)
+class Fish extends Living {
+    whoIAm(): string{
+        return "I am a fish";
     }
+}
 
-    let animal: Living[] = [new Fish(), new Dog(), new Living()];
-    let json = SerializeAsArray(animal, () => Living);
+let animal: Living[] = [new Fish(), new Dog(), new Living()];
+let json = SerializeAsArray(animal, () => Living);
 ```
 At deserialization you end up with a bunch of Living, but no dog nor fish. The runtime serialization will detect at runtime that there are other types in the array (it also work with simple member). To do so, a ```$type``` attribute will be added to the serialized object. You have to provide the content of this attribute (this allows you to be compatible with [Newtonsoft](https://www.newtonsoft.com/) TypeNameHandling.Objects settings).
 The Runtime typing is enable as follow :
 ```typescript
-    let animal: Living[] = [new Fish(), new Dog(), new Living()];
-    RuntimeTypingEnable();
-    RuntimeTypingSetTypeString(Fish, "It's a fish");
-    RuntimeTypingSetTypeString(Dog, "and that is a dog");
-    RuntimeTypingSetTypeString(Living, "every thing is fine as long as there are no collision");
+let animal: Living[] = [new Fish(), new Dog(), new Living()];
+RuntimeTypingEnable();
+RuntimeTypingSetTypeString(Fish, "It's a fish");
+RuntimeTypingSetTypeString(Dog, "and that is a dog");
+RuntimeTypingSetTypeString(Living, "every thing is fine as long as there are no collision");
 
-    let json = SerializeArray(animal, () => Living);
-    ...
-    let animal_d = DeserializeArray(json, () => Living);
-    RuntimeTypingDisable();
-    RuntimeTypingResetDictionary();
+let json = SerializeArray(animal, () => Living);
+...
+let animal_d = DeserializeArray(json, () => Living);
+RuntimeTypingDisable();
+RuntimeTypingResetDictionary();
 
 ```
 
@@ -598,25 +598,25 @@ if this decorator has false in it's argument, the variable will not be serialize
 ### `@defaultValue`
 This decorator permits to change the default value. It only work with primitive type. The default value of an object can not be changed.
 ```typescript
-    class Test {
-        @emitDefaultValue(false)
-        @serializeAs(() => Boolean)
-        public valueDefault: boolean = false;
+class Test {
+    @emitDefaultValue(false)
+    @serializeAs(() => Boolean)
+    public valueDefault: boolean = false;
 
-        @emitDefaultValue(false)
-        @serializeAs(() => Boolean)
-        @defaultValue(true)
-        public valueFalse: boolean = false;
+    @emitDefaultValue(false)
+    @serializeAs(() => Boolean)
+    @defaultValue(true)
+    public valueFalse: boolean = false;
 
-        @serializeAs(() => Boolean)
-        @defaultValue(true)
-        @emitDefaultValue(false)
-        public valueTrue: boolean = true;
-    }
+    @serializeAs(() => Boolean)
+    @defaultValue(true)
+    @emitDefaultValue(false)
+    public valueTrue: boolean = true;
+}
 
-    const t = new Test();
-    const json = Serialize(t, () => Test);
-    /* { valueNotDefault2: 1 } */
+const t = new Test();
+const json = Serialize(t, () => Test);
+/* { valueNotDefault2: 1 } */
 ```
 
 ### Note
@@ -626,41 +626,41 @@ During deserialization, if a member decorated with `@emitDefaultValue(false)` is
 ## Reference and circular reference
 Without this option, the following happens :
 ```typescript
-    class Test {
-        @autoserializeAs(() => Number) public value: number = 10;
-    }
+class Test {
+    @autoserializeAs(() => Number) public value: number = 10;
+}
 
-    class Test0 {
-        @autoserializeAs(() => Test) public value0: Test;
-        @autoserializeAs(() => Test) public value1: Test;
-    }
-    const t = new Test();
-    const t0 = new Test0();
-    t0.value0 = t0.value1 = t;
-    const json = Serialize(t0, () => Test0); /* json = {"value0":{"value":10},"value1":{"value":10}} */
-    const obj = Deserialize(json, () => Test0);
-    obj.value1 == obj.value0; /* false */
+class Test0 {
+    @autoserializeAs(() => Test) public value0: Test;
+    @autoserializeAs(() => Test) public value1: Test;
+}
+const t = new Test();
+const t0 = new Test0();
+t0.value0 = t0.value1 = t;
+const json = Serialize(t0, () => Test0); /* json = {"value0":{"value":10},"value1":{"value":10}} */
+const obj = Deserialize(json, () => Test0);
+obj.value1 == obj.value0; /* false */
 ```
 Even if ```t0.value0``` and ```t0.value1``` are the same, they are serialized as to separate object. Event worse, if the references form a loop, the serialization will crash. With SetRefCycleDetection, each object will have its own id, and will be referenced for any other references except the first one.
 ```typescript
-    class Test {
-        @deserializeAsJson() public value: number = 10;
-    }
+class Test {
+    @deserializeAsJson() public value: number = 10;
+}
 
-    class Test0 {
-        @deserializeAsJson() public value0: Test;
-        @deserializeAsJson() public value1: Test;
-    }
-    const json = {
-        $id: 1,
-        value0: { $id: 2, value: 1 },
-        value1: { $ref: 2 }
-    };
-    RefCycleDetectionEnable();
-    const instance = Deserialize(json, () => Test0);
-    RefClean();
-    RefCycleDetectionDisable();
-    obj.value1 == obj.value0; /*true*/
+class Test0 {
+    @deserializeAsJson() public value0: Test;
+    @deserializeAsJson() public value1: Test;
+}
+const json = {
+    $id: 1,
+    value0: { $id: 2, value: 1 },
+    value1: { $ref: 2 }
+};
+RefCycleDetectionEnable();
+const instance = Deserialize(json, () => Test0);
+RefClean();
+RefCycleDetectionDisable();
+obj.value1 == obj.value0; /*true*/
 ```
 
 ### Note
@@ -680,23 +680,23 @@ The generated json from SetRefCycleDetection is compatible with [PreserveReferen
 You can serialize only some member and take this decision at runtime using bitmask : affect a bitmask to a member with `@serializeBitMask` (up to 2^53). Before serialization, you can set a global bitmask using `SelectiveSerialization`. If and only if the bitmask of the member AND the global bitmask evaluate to true, then the member will be serialized.
 ```typescript
 {
-    class Test {
-        @serializeBitMask(1)
-        @serializeAs(() => Number)
-        public v1: number = 1;
-        @serializeBitMask(3)
-        @serializeAs(() => Number)
-        public v2: number = 2;
-        @serializeAs(() => Number)
-        @serializeBitMask(2)
-        public v3: number = 3;
-    }
-    SelectiveSerialization(1);
-    Serialize(s, () => Test); // {v1: 1, v2: 2}
-    SelectiveSerialization(2);
-    Serialize(s, () => Test); // {v2: 2, v3: 3}
-    SelectiveSerialization(3);
-    Serialize(s, () => Test); // {v1: 1, v2: 2, v3: 3}
+class Test {
+    @serializeBitMask(1)
+    @serializeAs(() => Number)
+    public v1: number = 1;
+    @serializeBitMask(3)
+    @serializeAs(() => Number)
+    public v2: number = 2;
+    @serializeAs(() => Number)
+    @serializeBitMask(2)
+    public v3: number = 3;
+}
+SelectiveSerialization(1);
+Serialize(s, () => Test); // {v1: 1, v2: 2}
+SelectiveSerialization(2);
+Serialize(s, () => Test); // {v2: 2, v3: 3}
+SelectiveSerialization(3);
+Serialize(s, () => Test); // {v1: 1, v2: 2, v3: 3}
 }
 ```
 To reset the selective serialization do a call of `SelectiveSerialization()` without any parameters.
