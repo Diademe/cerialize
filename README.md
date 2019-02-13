@@ -5,6 +5,7 @@ Easy serialization through ES7/Typescript annotations
 This is a library to make serializing and deserializing complex JS objects a breeze. It works by applying meta data annotations (as described in ES7 proposal and experimental Typescript feature) to fields in a user defined class. It also aims to be compatible with [Newtonsoft](https://www.newtonsoft.com/) (a C# library for serialization).
 
 ## Concepts
+
 This library works by processing annotations on class types. Annotations are provided for reading (deserializing) and writing (serializing) values to and from json.
 
 Once you have annotated your class types, you can use the `Serialize*` and `Deserialize*`functions to serialize and deserialize your data. 
@@ -12,7 +13,6 @@ Once you have annotated your class types, you can use the `Serialize*` and `Dese
 ## Example
 
 ```typescript
-    
     const ship = new Starship();
     /* assume values assigned */
     const json = Serialize(ship, () => Starship);
@@ -139,6 +139,7 @@ Once you have annotated your class types, you can use the `Serialize*` and `Dese
         return { amount: instance.credits, currency: "galactic" };
     }
 ```
+
 ## Annotations
 
 When annotating your classes you can declare which fields get treated as which kinds of values and how they are read and written to and from json format. To specify how fields are written to json, use `@serialize*` annotations. For writing, use `@deserialize*`.
@@ -151,27 +152,34 @@ If you want the same behavior for a property when serializing and deserializing,
 
 
 ##### Serialization
+
 - `@serializeAs(type : () => ClassConstructor, customKey? : string)`
 - `@serializeAsObjectMap(type : () => ClassConstructor, customKey? : string)`
 - `@serializeAsArray(type : () => ClassConstructor, customKey? : string)`
 - `@serializeUsing(transform : SerializerFn, customKey? : string)`
 - `@serializeAsJson(customKey? : string)`
 - `@serializeAsMap(keyType: SerializableType<any>, valueType: SerializableType<any>, constructor?: () => SerializableType<any>, keyName?: string)`
+
 ##### Deserialization
+
 - `@deserializeAs(type : () => ClassConstructor, customKey? : string)`
 - `@deserializeAsArray(type : () => ClassConstructor, customKey? : string)`
 - `@deserializeAsObjectMap(type : () => ClassConstructor, customKey? : string)`
 - `@deserializeUsing(transform : DeserializerFn, customKey? : string)`
 - `@deserializeAsJson(customKey? : string)`
 - `@deserializeAsMap(keyType: () => SerializableType<any>, valueType: () => SerializableType<any>, constructor?: () => SerializableType<any>, keyName?: string)`
+
 ##### Serialization and Deserialization
+
 - `@autoserializeAs(type : () => ClassConstructor, customKey? : string)`
 - `@autoserializeAsObjectMap(type : () => ClassConstructor, customKey? : string)`
 - `@autoserializeAsArray(type : () => ClassConstructor, customKey? : string)`
 - `@autoserializeUsing(transforms : SerializeAndDeserializeFns, customKey? : string)`
 - `@autoserializeAsJson(customKey? : string)`
 - `@autoserializeAsMap(keyType: () => SerializableType<any>, valueType: () => SerializableType<any>, constructor?: () => SerializableType<any>, keyName?: string)`
+
 ##### Array
+
 There is two way of serializing an array :
 ```typescript
 Deserialize([1], itIsAnArray(() => Number))
@@ -194,6 +202,7 @@ const instance = Deserialize([1], itIsAnArray(() => Number, () => MyArray));
 assert(instance instanceof MyArray);
 ```
 ##### Types
+
 ```typescript
  type SerializationFn = <T>(target : T) => JsonType;
  type DeserializationFn = <T>(data : JsonType, target? : T, instantiationMethod? : InstantiationMethod) => T
@@ -204,6 +213,7 @@ assert(instance instanceof MyArray);
 ```
 
 ## Serializing Data to JSON
+
 Calling any of the `Serialize*` family of methods will convert the input object into json. The output is a plain javascript object that has not had `JSON.stringify` called on it.
 
 #### Functions for Serialization
@@ -311,6 +321,7 @@ Deserialize({value: 'example'}, Immutable, InstantiationMethod.None);         //
 The default InstantiationMethod can be changed with `SetDefaultInstantiationMethod(instantiationMethod : InstantiationMethod)`
 
 ##### Functions
+
 - `Deserialize<T>(json : JsonObject, () => ClassConstructor<T>, target? : T) : T`
     ```typescript
         /* takes a single object and serializes it using the provided class type. */
@@ -434,7 +445,8 @@ The default InstantiationMethod can be changed with `SetDefaultInstantiationMeth
     ```
     
 
-## onSerialized Callback 
+## onSerialized Callback
+
 A callback can be provided for when a class is serialized. To define the callback, add a static method `onSerialized<T>(instance : T, json : JsonObject)` to the class that needs custom post processing. You can either return a new value from this function, or modify the `json` parameter.
 
 ```typescript 
@@ -451,6 +463,7 @@ class CrewMember {
 ```
 
 ## onDeserialized Callback
+
 A callback can be provided for when a class is deserialized. Just add `@onDeserialized` on a function and it will be called on the instance after its class have been deserialized. You can add only one `@onDeserialized` callback to a class. The callback are inherited, but you have to call the callback of a parent yourself if the callback is overridden.
 
 ```typescript 
@@ -468,6 +481,7 @@ class CrewMember {
 ```
 
 ## Inheriting Serialization
+
 Serialization behavior is not inherited by subclasses automatically. To inherit a base class's serialization / deserialization behavior, tag the subclass with `@inheritSerialization(() => ParentClass)`.
 
 ```typescript
@@ -478,6 +492,10 @@ class Admin extends User {
 
 }
 ```
+
+## Order of serialization
+
+Properties of parents are serialized before those of the children. Inside a class, the order of serialization of property is the order of the decorator: first decorator is (de) serialized in first.
 
 ## Customizing key transforms
 
