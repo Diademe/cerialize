@@ -35,6 +35,26 @@ export function isPrimitiveType(type: Function): boolean {
 }
 
 /** @internal */
+export function isPrimitiveAnonymousType(type: () => Function): boolean {
+    try {
+        return (
+            type() === String ||
+            type() === Boolean ||
+            type() === Number ||
+            type() === Date ||
+            type() === RegExp
+        );
+    } catch (error) {
+        if (error instanceof ReferenceError) {
+            return false;
+        }
+        else {
+            throw error;
+        }
+    }
+}
+
+/** @internal */
 export function DefaultPrimitiveValue(value: any) {
     if (value instanceof String) {
         return String();

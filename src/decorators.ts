@@ -8,7 +8,7 @@ import {
     SerializeFn,
 } from "./types";
 import {
-    isPrimitiveType,
+    isPrimitiveAnonymousType,
     setBitConditionally
 } from "./utils";
 
@@ -47,7 +47,7 @@ export function serializeAs(type: ASerializableTypeOrArray<any>, keyName?: strin
         metadata.flags = setBitConditionally(
             metadata.flags,
             MetaDataFlag.SerializePrimitive,
-            type instanceof ItIsAnArrayInternal ? false : isPrimitiveType(type())
+            type instanceof ItIsAnArrayInternal ? false : isPrimitiveAnonymousType(type)
         );
     };
 }
@@ -69,7 +69,7 @@ export function serializeAsArray<T>(
         metadata.flags = setBitConditionally(
             metadata.flags,
             MetaDataFlag.SerializePrimitive,
-            type instanceof ItIsAnArrayInternal ? false : isPrimitiveType(type())
+            type instanceof ItIsAnArrayInternal ? false : isPrimitiveAnonymousType(type)
         );
     };
 }
@@ -86,7 +86,7 @@ export function serializeAsObjectMap<T>(type: ASerializableTypeOrArray<T>, keyNa
         metadata.flags = setBitConditionally(
             metadata.flags,
             MetaDataFlag.SerializePrimitive,
-            type instanceof ItIsAnArrayInternal ? false : isPrimitiveType(type())
+            type instanceof ItIsAnArrayInternal ? false : isPrimitiveAnonymousType(type)
         );
     };
 }
@@ -107,7 +107,7 @@ export function serializeAsSet<T>(
         metadata.flags = setBitConditionally(
             metadata.flags,
             MetaDataFlag.SerializePrimitive,
-            type instanceof ItIsAnArrayInternal ? false : isPrimitiveType(type())
+            type instanceof ItIsAnArrayInternal ? false : isPrimitiveAnonymousType(type)
         );
     };
 }
@@ -131,7 +131,7 @@ export function serializeAsMap(
         metadata.flags = setBitConditionally(
             metadata.flags,
             MetaDataFlag.SerializePrimitive,
-            valueType instanceof ItIsAnArrayInternal ? false : isPrimitiveType(valueType())
+            valueType instanceof ItIsAnArrayInternal ? false : isPrimitiveAnonymousType(valueType)
         );
     };
 }
@@ -186,7 +186,7 @@ export function deserializeAs(type: ASerializableTypeOrArray<any>, keyName?: str
         metadata.flags = setBitConditionally(
             metadata.flags,
             MetaDataFlag.DeserializePrimitive,
-            type instanceof ItIsAnArrayInternal ? false : isPrimitiveType(type())
+            type instanceof ItIsAnArrayInternal ? false : isPrimitiveAnonymousType(type)
         );
     };
 }
@@ -208,7 +208,7 @@ export function deserializeAsArray(
         metadata.flags = setBitConditionally(
             metadata.flags,
             MetaDataFlag.DeserializePrimitive,
-            type instanceof ItIsAnArrayInternal ? false : isPrimitiveType(type())
+            type instanceof ItIsAnArrayInternal ? false : isPrimitiveAnonymousType(type)
         );
     };
 }
@@ -230,7 +230,7 @@ export function deserializeAsSet(
         metadata.flags = setBitConditionally(
             metadata.flags,
             MetaDataFlag.DeserializePrimitive,
-            type instanceof ItIsAnArrayInternal ? false : isPrimitiveType(type())
+            type instanceof ItIsAnArrayInternal ? false : isPrimitiveAnonymousType(type)
         );
     };
 }
@@ -254,7 +254,7 @@ export function deserializeAsMap(
         metadata.flags = setBitConditionally(
             metadata.flags,
             MetaDataFlag.DeserializePrimitive,
-            valueType instanceof ItIsAnArrayInternal ? false : isPrimitiveType(valueType())
+            valueType instanceof ItIsAnArrayInternal ? false : isPrimitiveAnonymousType(valueType)
         );
     };
 }
@@ -274,7 +274,7 @@ export function deserializeAsObjectMap(
         metadata.flags = setBitConditionally(
             metadata.flags,
             MetaDataFlag.DeserializePrimitive,
-            valueType instanceof ItIsAnArrayInternal ? false : isPrimitiveType(valueType())
+            valueType instanceof ItIsAnArrayInternal ? false : isPrimitiveAnonymousType(valueType)
         );
     };
 }
@@ -339,7 +339,7 @@ export function autoserializeAs(type: ASerializableTypeOrArray<any>, keyName?: s
         metadata.flags = setBitConditionally(
             metadata.flags,
             MetaDataFlag.AutoPrimitive,
-            type instanceof ItIsAnArrayInternal ? false : isPrimitiveType(type())
+            type instanceof ItIsAnArrayInternal ? false : isPrimitiveAnonymousType(type)
         );
     };
 }
@@ -366,7 +366,7 @@ export function autoserializeAsArray(
         metadata.flags = setBitConditionally(
             metadata.flags,
             MetaDataFlag.AutoPrimitive,
-            type instanceof ItIsAnArrayInternal ? false : isPrimitiveType(type())
+            type instanceof ItIsAnArrayInternal ? false : isPrimitiveAnonymousType(type)
         );
     };
 }
@@ -393,7 +393,7 @@ export function autoserializeAsSet(
         metadata.flags = setBitConditionally(
             metadata.flags,
             MetaDataFlag.AutoPrimitive,
-            type instanceof ItIsAnArrayInternal ? false : isPrimitiveType(type())
+            type instanceof ItIsAnArrayInternal ? false : isPrimitiveAnonymousType(type)
         );
     };
 }
@@ -417,7 +417,7 @@ export function autoserializeAsObjectMap(
         metadata.flags = setBitConditionally(
             metadata.flags,
             MetaDataFlag.AutoPrimitive,
-            type instanceof ItIsAnArrayInternal ? false : isPrimitiveType(type())
+            type instanceof ItIsAnArrayInternal ? false : isPrimitiveAnonymousType(type)
         );
     };
 }
@@ -447,7 +447,7 @@ export function autoserializeAsMap(
         metadata.flags = setBitConditionally(
             metadata.flags,
             MetaDataFlag.AutoPrimitive,
-            valueType instanceof ItIsAnArrayInternal ? false : isPrimitiveType(valueType())
+            valueType instanceof ItIsAnArrayInternal ? false : isPrimitiveAnonymousType(valueType)
         );
     };
 }
