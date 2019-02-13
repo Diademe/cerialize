@@ -25,12 +25,12 @@
     "tslint": "tslint --config ./tslint.json -p src/tsconfig.json -p spec/tsconfig.json"
   },
   "devDependencies": {
-    "@types/jest": "^22.2.3",
-    "jest": "^22.4.3",
-    "prettier": "^1.12.1",
-    "ts-jest": "^22.4.5",
-    "tslint": "^5.10.0",
-    "typescript": "^2.8.3"
+    "@types/jest": "^24.0.3",
+    "jest": "^24.1.0",
+    "prettier": "^1.16.4",
+    "ts-jest": "^23.10.5",
+    "tslint": "^5.12.0",
+    "typescript": "^3.3.0"
   },
   "jest": {
     "testRegex": "/spec/.*\\.spec\\.([tj]sx?)$",
@@ -43,5 +43,8 @@
       "js",
       "jsx"
     ]
+  },
+  "dependencies": {
+    "@types/jest-diff": "^20.0.0"
   }
 }
