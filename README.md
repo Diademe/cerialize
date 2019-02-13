@@ -555,6 +555,15 @@ RuntimeTypingDisable();
 RuntimeTypingResetDictionary();
 
 ```
+Alternatively, you can decorate a class with the decorator `@typeString("It's a fish")` to specify the string for a class.
+```typescript
+@typeString("every thing is fine as long as there are no collision")
+class Living {
+    whoIAm(): string{
+        return "I am a living being";
+    }
+}
+```
 
 ### Note
 In the previous case, nothing will enforce a class to be a subclass of `Living`.
@@ -725,6 +734,7 @@ Other decorators
 * emitDefaultValue
 * defaultValue
 * onDeserialized
+* typeString
 
 ### Setting Accessor
 * SetRefCycleDetection

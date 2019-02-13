@@ -64,3 +64,9 @@ export function RuntimeTypingEnable(): void {
 export function RuntimeTypingDisable(): void {
     TypeString.setRuntimeTyping(false);
 }
+
+export function typeString(type: string) {
+    return function(classType: Function) {
+        TypeString.setTypeString(classType, type);
+    };
+}
