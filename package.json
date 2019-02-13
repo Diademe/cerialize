@@ -30,6 +30,7 @@
     "prettier": "^1.16.4",
     "ts-jest": "^23.10.5",
     "tslint": "^5.12.0",
+    "@types/jest-diff": "^20.0.0",
     "typescript": "^3.3.0"
   },
   "jest": {
@@ -43,8 +44,5 @@
       "js",
       "jsx"
     ]
-  },
-  "dependencies": {
-    "@types/jest-diff": "^20.0.0"
   }
 }
