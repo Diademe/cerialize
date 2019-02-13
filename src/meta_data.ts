@@ -155,14 +155,14 @@ export class MetaData {
         parentType: IConstructable,
         childType: IConstructable
     ) {
-        const parentMetaData: MetaData[] = TypeMap.get(parentType) || [];
-        const childMetaData: MetaData[] = TypeMap.get(childType) || [];
-        for (const metadata of parentMetaData) {
-            const keyName = metadata.keyName;
-            if (!MetaData.hasKeyName(childMetaData, keyName)) {
-                childMetaData.unshift(MetaData.clone(metadata)); // TODO optimize unshift
-            }
-        }
+        let childMetaData: MetaData[] = TypeMap.get(childType) || [];
+        const parentMetaDataCloned: MetaData[] =
+            TypeMap.get(parentType)
+                // prevent duplicate
+                .filter((elt) => !MetaData.hasKeyName(childMetaData, elt.keyName))
+                // clone parent
+                .map((elt) => MetaData.clone(elt)) || [];
+        childMetaData = parentMetaDataCloned.concat(childMetaData);
         TypeMap.set(childType, childMetaData);
     }
 
