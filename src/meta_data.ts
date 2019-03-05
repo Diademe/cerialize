@@ -4,17 +4,14 @@
 
 import { NoOp } from "./string_transforms";
 import { ASerializableTypeOrArray, IConstructable, InstantiationMethod, primitive } from "./types";
+import { getConstructor } from "./utils";
 
 class TypeMapClass<K, V> extends Map<K, V>{
     public get(key: K): V | undefined {
-        const type = Object.getOwnPropertyDescriptor(key, "__originalConstructor__") ?
-            (key as any).__originalConstructor__ : key;
-        return super.get(type);
+        return super.get(getConstructor(key) as any);
     }
     public set(key: K, value: V): this {
-        const type = Object.getOwnPropertyDescriptor(key, "__originalConstructor__") ?
-            (key as any).__originalConstructor__ : key;
-        return super.set(type, value);
+        return super.set(getConstructor(key) as any, value);
     }
 }
 

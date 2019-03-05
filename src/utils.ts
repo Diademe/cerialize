@@ -24,6 +24,12 @@ export function getTarget<T>(
 }
 
 /** @internal */
+export function getConstructor(type: any): new(...args: any[]) => any {
+    return Object.getOwnPropertyDescriptor(type, "__originalConstructor__") ?
+            (type as any).__originalConstructor__ : type;
+}
+
+/** @internal */
 export function isPrimitiveType(type: Function): boolean {
     return (
         type === String ||
