@@ -6,7 +6,8 @@ export {
     RuntimeTypingResetDictionary,
     RuntimeTypingSetTypeString,
     RuntimeTypingEnable,
-    RuntimeTypingDisable
+    RuntimeTypingDisable,
+    typeString
 } from "./runtime_typing";
 export * from "./serialize";
 export * from "./deserialize";
