@@ -39,11 +39,11 @@ function _DeserializeObjectMap<T>(
         );
     }
 
-    if (target === null || target === void 0) {
+    if (target === null || target === undefined) {
         target = {};
     }
 
-    if (data === null || data === void 0) {
+    if (data === null || data === undefined) {
         return null;
     }
 
@@ -56,7 +56,7 @@ function _DeserializeObjectMap<T>(
     const keys = Object.keys(data).filter(notAKeyword);
     for (const key of keys) {
         const value = data[key];
-        if (value !== void 0) {
+        if (value !== undefined) {
             target[MetaData.deserializeKeyTransform(key)] = _Deserialize(
                 data[key] as any,
                 type,
@@ -83,11 +83,11 @@ function _DeserializeMap<K, V, C extends Map<K, V>>(
         );
     }
 
-    if (target === null || target === void 0) {
+    if (target === null || target === undefined) {
         target = new (constructor() as any)();
     }
 
-    if (data === null || data === void 0) {
+    if (data === null || data === undefined) {
         return null;
     }
 
@@ -100,7 +100,7 @@ function _DeserializeMap<K, V, C extends Map<K, V>>(
     const keys = Object.keys(data).filter(notAKeyword);
     for (const key of keys) {
         const value = data[key];
-        if (value !== void 0) {
+        if (value !== undefined) {
             const keyTypeF = keyType as () => Function;
             const isString = keyTypeF() === String;
             const keyName = (isString ?
@@ -130,7 +130,7 @@ export function DeserializeMap<K, V>(
     target?: Map<K, V>,
     instantiationMethod?: InstantiationMethod
 ): Map<K, V> {
-    if (instantiationMethod === void 0) {
+    if (instantiationMethod === undefined) {
         instantiationMethod = MetaData.deserializeInstantiationMethod;
     }
 
@@ -143,7 +143,7 @@ export function DeserializeObjectMap<T>(
     target?: Indexable<T>,
     instantiationMethod?: InstantiationMethod
 ): Indexable<T> {
-    if (instantiationMethod === void 0) {
+    if (instantiationMethod === undefined) {
         instantiationMethod = MetaData.deserializeInstantiationMethod;
     }
 
@@ -186,7 +186,7 @@ export function DeserializeArray<T, C extends T[]>(
     target?: C,
     instantiationMethod?: InstantiationMethod
 ) {
-    if (instantiationMethod === void 0) {
+    if (instantiationMethod === undefined) {
         instantiationMethod = MetaData.deserializeInstantiationMethod;
     }
 
@@ -240,7 +240,7 @@ export function DeserializeSet<T, C extends Set<T>>(
     target?: C,
     instantiationMethod?: InstantiationMethod
 ) {
-    if (instantiationMethod === void 0) {
+    if (instantiationMethod === undefined) {
         instantiationMethod = MetaData.deserializeInstantiationMethod;
     }
 
@@ -301,7 +301,7 @@ export function DeserializeJSON(
         const keys = Object.keys(data as object);
         for (const key of keys) {
             const value = (data as Indexable<JsonType>)[key];
-            if (value !== void 0) {
+            if (value !== undefined) {
                 const returnValueKey = transformKeys
                     ? MetaData.deserializeKeyTransform(key)
                     : key;
@@ -394,7 +394,7 @@ function _Deserialize<T extends Indexable>(
                 continue;
             }
 
-            if (source === void 0) {
+            if (source === undefined) {
                 continue;
             }
 
@@ -484,7 +484,7 @@ export function Deserialize<T extends Indexable>(
     target?: T,
     instantiationMethod?: InstantiationMethod
 ): T | null {
-    if (instantiationMethod === void 0) {
+    if (instantiationMethod === undefined) {
         instantiationMethod = MetaData.deserializeInstantiationMethod;
     }
 

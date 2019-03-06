@@ -144,7 +144,7 @@ describe("Serializing", function() {
                     }
 
                     const s = new Test();
-                    s.value0 = void 0;
+                    s.value0 = undefined;
                     s.value1 = true;
                     s.value2 = 100;
                     const json = Serialize(s, () => Test);
@@ -415,7 +415,7 @@ describe("Serializing", function() {
 
             const t = new Test();
             t.values = new Map([
-                ["v0", void 0],
+                ["v0", undefined],
                 ["v1", 1],
                 ["v2", 2]
             ]);
@@ -550,7 +550,7 @@ describe("Serializing", function() {
 
                 const t = new Test();
                 t.values = {
-                    v0: void 0,
+                    v0: undefined,
                     v1: 1,
                     v2: 2
                 };
@@ -905,7 +905,7 @@ describe("Serializing", function() {
                     }
 
                     const s = new Test();
-                    s.value = { v0: 1, v1: void 0, v2: 2 };
+                    s.value = { v0: 1, v1: undefined, v2: 2 };
                     const json = Serialize(s, () => Test);
                     expect(json).toEqual({
                         value: {

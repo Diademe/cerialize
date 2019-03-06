@@ -34,7 +34,7 @@ export function SerializeObjectMap<T>(
     source: T,
     type: ASerializableTypeOrArray<T>
 ): Indexable<JsonType> {
-    if (source === null || source === void 0) {
+    if (source === null || source === undefined) {
         return null;
     }
     const target: Indexable<JsonType> = {};
@@ -56,7 +56,7 @@ export function SerializeObjectMap<T>(
 
         for (const key of keys) {
             const value = (source as any)[key];
-            if (value !== void 0) {
+            if (value !== undefined) {
                 target[MetaData.serializeKeyTransform(key)] = Serialize(
                     value,
                     type
@@ -73,7 +73,7 @@ export function SerializeMap<K, V>(
     keyType: ASerializableTypeOrArray<K>,
     valueType: ASerializableTypeOrArray<V>,
 ): Indexable<JsonType> {
-    if (source === null || source === void 0) {
+    if (source === null || source === undefined) {
         return null;
     }
     const target: Indexable<JsonType> = {};
@@ -89,7 +89,7 @@ export function SerializeMap<K, V>(
 
     for (const key of keys) {
         const value = source.get(key);
-        if (value !== void 0) {
+        if (value !== undefined) {
             let targetKey: string | K | JsonType[];
             if (keyType instanceof ItIsAnArrayInternal) {
                 targetKey = SerializeArray(key as any, keyType.type);
@@ -114,7 +114,7 @@ export function SerializeArray<T>(
     source: T[],
     type: ASerializableTypeOrArray<T>
 ): JsonType[] {
-    if (source === null || source === void 0) {
+    if (source === null || source === undefined) {
         return null;
     }
     const returnValue = new Array<JsonType>(source.length);
@@ -135,7 +135,7 @@ export function SerializePrimitive<T>(
     source: SerializablePrimitiveType,
     type: () => SerializablePrimitiveType
 ): JsonType {
-    if (source === null || source === void 0) {
+    if (source === null || source === undefined) {
         return null;
     }
 
@@ -168,7 +168,7 @@ export function SerializePrimitive<T>(
 }
 
 export function SerializeJSON(source: any, transformKeys = true): JsonType {
-    if (source === null || source === void 0) {
+    if (source === null || source === undefined) {
         return null;
     }
 
@@ -190,7 +190,7 @@ export function SerializeJSON(source: any, transformKeys = true): JsonType {
             const keys = Object.keys(source);
             for (const key of keys) {
                 const value = source[key];
-                if (value !== void 0) {
+                if (value !== undefined) {
                     const returnValueKey = transformKeys
                         ? MetaData.serializeKeyTransform(key)
                         : key;
@@ -211,7 +211,7 @@ export function Serialize<T>(
     instance: T,
     type: ASerializableTypeOrArray<T>
 ): null | JsonType[] | JsonObject {
-    if (instance === void 0 || instance === null) {
+    if (instance === undefined || instance === null) {
         return null;
     }
 
@@ -253,7 +253,7 @@ export function Serialize<T>(
 
             const source = (instance as any)[metadata.keyName];
 
-            if (source === void 0) {
+            if (source === undefined) {
                 continue;
             }
 
@@ -322,7 +322,7 @@ export function Serialize<T>(
 
         if (typeof type().onSerialized === "function") {
             const value = type().onSerialized(target, instance);
-            if (value !== void 0) {
+            if (value !== undefined) {
                 return value as JsonObject;
             }
         }

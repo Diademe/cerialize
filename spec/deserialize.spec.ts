@@ -223,7 +223,7 @@ describe("Deserializing", function() {
                     }
 
                     const json: any = {
-                        value0: void 0,
+                        value0: undefined,
                         value1: true,
                         value2: 100
                     };
@@ -458,7 +458,7 @@ describe("Deserializing", function() {
 
                     const json: any = {
                         values: {
-                            v0: void 0,
+                            v0: undefined,
                             v1: 1,
                             v2: 2
                         }
@@ -608,7 +608,7 @@ describe("Deserializing", function() {
 
                     const json: any = {
                         values: {
-                            v0: void 0,
+                            v0: undefined,
                             v1: 1,
                             v2: 2
                         }
@@ -865,7 +865,7 @@ describe("Deserializing", function() {
                     const json: any = {
                         value: {
                             v0: 1,
-                            v1: void 0,
+                            v1: undefined,
                             v2: 2
                         }
                     };

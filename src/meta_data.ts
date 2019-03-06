@@ -139,7 +139,7 @@ export class MetaData {
     public static getMetaData(target: Function, keyName: string): MetaData {
         let metaDataList = TypeMap.get(target);
 
-        if (metaDataList === void 0) {
+        if (metaDataList === undefined) {
             metaDataList = [];
             TypeMap.set(target, metaDataList);
         }
@@ -169,7 +169,7 @@ export class MetaData {
     }
 
     public static getMetaDataForType(type: IConstructable) {
-        if (type !== null && type !== void 0) {
+        if (type !== null && type !== undefined) {
             return TypeMap.get(type) || null;
         }
         return null;
