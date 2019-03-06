@@ -621,9 +621,10 @@ if this decorator has false in it's argument, the variable will not be serialize
 | number  |       0       |
 | string  |       ""      |
 | boolean |     false     |
+| object  |      null     |
 
 ### `@defaultValue`
-This decorator permits to change the default value. It only work with primitive type. The default value of an object can not be changed.
+This decorator permits to change the default value. Object are compared by references. It only works with emitDefaultValue set to false.
 ```typescript
 class Test {
     @emitDefaultValue(false)
@@ -647,7 +648,7 @@ const json = Serialize(t, () => Test);
 ```
 
 ### Note
-During deserialization, if a member decorated with `@emitDefaultValue(false)` is not in the parsed json, it will be initialized by its default value.
+During deserialization, if a member decorated with `@emitDefaultValue(false)` is not in the parsed json, it will be initialized by its default value. Be careful if an object is the default value, the object will be inserted as it is during serialization. If it appears in multiple place (ie its a sigle object with multiple reference to it).
 
 
 ## Reference and circular reference

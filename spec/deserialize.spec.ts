@@ -1517,52 +1517,52 @@ describe("Deserializing", function() {
             class Test {
                 @emitDefaultValue(false)
                 @autoserializeAs(() => Boolean)
-                public valueDefault: boolean;
+                public valueDefault: boolean; // no json value, default value not set
 
                 @emitDefaultValue(false)
                 @autoserializeAs(() => Boolean)
                 @defaultValue(true)
-                public valueFalse: boolean;
+                public shouldBeFalse: boolean; // no json value custom default value
 
                 @autoserializeAs(() => Boolean)
                 @defaultValue(true)
                 @emitDefaultValue(false)
-                public valueTrue: boolean;
+                public shouldBeTrue: boolean; // json value provided
             }
 
-            const t = {
-                valueFalse: false
+            const json = {
+                shouldBeFalse: false
             };
-            const json = Deserialize(t, () => Test);
-            expect(json.valueDefault).toBe(false);
-            expect(json.valueFalse).toBe(false);
-            expect(json.valueTrue).toBeTruthy();
+            const test = Deserialize(json, () => Test);
+            expect(test.valueDefault).toBe(false);
+            expect(test.shouldBeFalse).toBe(false);
+            expect(test.shouldBeTrue).toBeTruthy();
         });
 
         it("Number", function() {
             class Test {
                 @emitDefaultValue(false)
                 @autoserializeAs(() => Number)
-                public valueDefault: number;
+                public shouldBeO: number; // no json value
 
                 @emitDefaultValue(false)
                 @autoserializeAs(() => Number)
                 @defaultValue(2)
-                public valueNotDefault1: number;
+                public shouldBe2: number; // no json value, custom default value
 
                 @emitDefaultValue(false)
                 @autoserializeAs(() => Number)
                 @defaultValue(2)
-                public valueNotDefault2: number;
+                public shouldBe1: number; // json value provided
             }
 
-            const t = {
-                valueNotDefault2: 1
+            const json = {
+                shouldBe1: 1
             };
-            const json = Deserialize(t, () => Test);
-            expect(json.valueDefault).toEqual(0);
-            expect(json.valueNotDefault1).toEqual(2);
-            expect(json.valueNotDefault2).toEqual(1);
+            const test = Deserialize(json, () => Test);
+            expect(test.shouldBeO).toEqual(0);
+            expect(test.shouldBe2).toEqual(2);
+            expect(test.shouldBe1).toEqual(1);
         });
 
         it("Map", function() {
@@ -1572,9 +1572,9 @@ describe("Deserializing", function() {
                 public value: Map<string, number>;
             }
 
-            const t = {};
-            const json = Deserialize(t, () => Test);
-            expect(json.value).toBeNull();
+            const json = {};
+            const test = Deserialize(json, () => Test);
+            expect(test.value).toBeNull();
         });
 
         it("Array", function() {
@@ -1584,27 +1584,48 @@ describe("Deserializing", function() {
                 public value: string[];
             }
 
-            const t = {};
-            const json = Deserialize(t, () => Test);
-            expect(json.value).toBeNull();
+            const json = {
+                value: null as any
+            };
+            const test = Deserialize(json, () => Test);
+            expect(test.value).toBeNull();
         });
 
         it("Object", function() {
+            const elephant = {
+                name: "babar"
+            };
+            const snake = {
+                hasTail: true
+            };
             class Test {
-                @autoserializeAsArray(() => String)
-                public value0: string[];
-                @autoserializeAs(() => String)
-                public value1: string;
+                @emitDefaultValue(false)
+                @autoserializeAs(() => Object)
+                public shouldBeNull: Object; // no value provided in JSON nor default value
+
+                @autoserializeAs(() => Object)
+                public shouldBeUndefined: Object; // emitDefaultValue === true
+
+                @emitDefaultValue(false)
+                @autoserializeAs(() => Object)
+                @defaultValue(elephant)
+                public shouldBeElephant: Object; // no value provided in JSON
+
+                @emitDefaultValue(false)
+                @autoserializeAsJson()
+                @defaultValue(elephant)
+                public shouldBeSnake: Object; // value provided in JSON
             }
 
-            const test = new Test();
-            test.value0 = new Array<string>();
-            test.value0.push("v1", "v2");
-            test.value1  = "Babar";
+            const json = {
+                shouldBeSnake: snake
+            };
 
-            const t = {};
-            const json = Deserialize(t, () => Test, test);
-            expect(json).toEqual({value0: ["v1", "v2"], value1: "Babar"});
+            const test = Deserialize(json, () => Test);
+            expect(test.shouldBeNull).toBeNull();
+            expect(test.shouldBeUndefined).toBeUndefined();
+            expect(test.shouldBeElephant).toBe(elephant);
+            expect(test.shouldBeSnake).toEqual(snake);
         });
     });
 

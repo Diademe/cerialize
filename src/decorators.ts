@@ -508,7 +508,7 @@ export function onDeserialized(target: IConstructable, actualKeyName: string): v
         metadata.flags = MetaDataFlag.onDeserialized;
 }
 
-export function defaultValue(instance: primitive) {
+export function defaultValue(instance: Object) {
     return function(target: IConstructable, actualKeyName: string): void {
         const metadata = MetaData.getMetaData(
             target.constructor,

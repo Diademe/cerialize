@@ -3,8 +3,13 @@
 // objects each describing one property
 
 import { NoOp } from "./string_transforms";
-import { ASerializableTypeOrArray, IConstructable, InstantiationMethod, primitive } from "./types";
-import { getConstructor } from "./utils";
+import { ASerializableTypeOrArray,
+    IConstructable,
+    InstantiationMethod,
+    noDefaultValueSymbole,
+    primitive
+} from "./types";
+import { getConstructor, isPrimitiveAnonymousType } from "./utils";
 
 class TypeMapClass<K, V> extends Map<K, V>{
     public get(key: K): V | undefined {
@@ -69,7 +74,7 @@ export class MetaData {
     public flags: MetaDataFlag;
     public bitMaskSerialize: number;
     public emitDefaultValue: boolean;
-    public defaultValue: primitive;
+    public defaultValue: Object | symbol;
 
     constructor(keyName: string) {
         this.keyName = keyName;
@@ -82,7 +87,7 @@ export class MetaData {
         this.flags = 0;
         this.bitMaskSerialize = Number.MAX_SAFE_INTEGER;
         this.emitDefaultValue = true;
-        this.defaultValue = undefined;
+        this.defaultValue = noDefaultValueSymbole;
     }
 
     public getSerializedKey(): string {
@@ -179,4 +184,30 @@ export class MetaData {
     public static deserializeInstantiationMethod = InstantiationMethod.New;
 
     public static refCycleDetection = false;
+}
+
+export function isDefaultValue<T>(metadata: MetaData, val: T) {
+    if (metadata.emitDefaultValue === false) {
+        const defVal = getDefaultValue(metadata, val);
+        return defVal === val;
+    }
+    return false;
+}
+
+export function getDefaultValue<T>(metadata: MetaData, val: T) {
+    if (metadata.emitDefaultValue === false) {
+        if (metadata.defaultValue !== noDefaultValueSymbole) { // custom default value
+            return metadata.defaultValue;
+        }
+        // default value for primitive type wrapped or not
+        else if (isPrimitiveAnonymousType(metadata.serializedType as any) ||
+                (val !== undefined && val !== null && val !== Object(val))) {
+            return new ((metadata.serializedType as any)())().valueOf();
+        } else { // default value for Object, Date, Regex
+            return null;
+        }
+    }
+    else {
+        return undefined;
+    }
 }

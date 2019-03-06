@@ -1,8 +1,9 @@
-import { MetaData, MetaDataFlag } from "./meta_data";
+import { MetaData, MetaDataFlag, getDefaultValue } from "./meta_data";
 import { getReference, referenceHandling, setId } from "./ref_cycle";
 import { TypeString } from "./runtime_typing";
 import {
     getTarget,
+    isPrimitiveAnonymousType,
     isPrimitiveType
 } from "./utils";
 
@@ -16,6 +17,7 @@ import {
     JsonArray,
     JsonObject,
     JsonType,
+    noDefaultValueSymbole,
     SerializablePrimitiveType,
     SerializableType
 } from "./types";
@@ -386,19 +388,9 @@ function _Deserialize<T extends Indexable>(
             const keyName = metadata.keyName;
             const flags = metadata.flags;
 
-            if (source === undefined && metadata.emitDefaultValue === false){
-                // if target[keyName] is a collection or a non primitive object
-                if (
-                    ((flags & MetaDataFlag.Collection)) ||
-                    ((flags & MetaDataFlag.PlainObject) && !(flags & MetaDataFlag.AutoPrimitive))
-                ){
-                    target[keyName] = null;
-                }
-                // if target[keyName] is a primitive
-                else {
-                    target[keyName] = metadata.defaultValue === undefined ?
-                    ((metadata.deserializedType as any)() as any)() : metadata.defaultValue;
-                }
+            const defVal = getDefaultValue(metadata, source);
+            if (metadata.emitDefaultValue === false && (source === undefined || source === defVal)){
+                target[keyName] = defVal;
                 continue;
             }
 

@@ -1,4 +1,8 @@
-import { MetaData, MetaDataFlag } from "./meta_data";
+import {
+    isDefaultValue,
+    MetaData,
+    MetaDataFlag
+} from "./meta_data";
 import { cycleBreaking } from "./ref_cycle";
 import { TypeString } from "./runtime_typing";
 import {
@@ -6,13 +10,11 @@ import {
     ASerializableTypeOrArray,
     Indexable,
     ItIsAnArrayInternal,
-    JsonArray,
     JsonObject,
     JsonType,
     primitive,
     SerializablePrimitiveType,
-    SerializableType,
-    Serialized
+    SerializableType
 } from "./types";
 
 import {
@@ -263,25 +265,25 @@ export function Serialize<T>(
                     metadata.serializedKeyType,
                     metadata.serializedValueType,
                 );
-                if (defaultValue(metadata, val)) {
+                if (isDefaultValue(metadata, source)) {
                     continue;
                 }
                 target[keyName] = val;
             } else if ((flags & MetaDataFlag.SerializeObjectMap) !== 0) {
                 const val = SerializeObjectMap(source, metadata.serializedType);
-                if (defaultValue(metadata, val)) {
+                if (isDefaultValue(metadata, source)) {
                     continue;
                 }
                 target[keyName] = val;
             } else if ((flags & MetaDataFlag.SerializeSet) !== 0) {
                 const val = SerializeSet(source, metadata.serializedKeyType);
-                if (defaultValue(metadata, val)) {
+                if (isDefaultValue(metadata, source)) {
                     continue;
                 }
                 target[keyName] = val;
             } else if ((flags & MetaDataFlag.SerializeArray) !== 0) {
                 const val = SerializeArray(source, metadata.serializedKeyType);
-                if (defaultValue(metadata, val)) {
+                if (isDefaultValue(metadata, source)) {
                     continue;
                 }
                 target[keyName] = val;
@@ -290,13 +292,13 @@ export function Serialize<T>(
                     source,
                     metadata.serializedType as () => SerializablePrimitiveType
                 );
-                if (defaultValue(metadata, val)) {
+                if (isDefaultValue(metadata, source)) {
                     continue;
                 }
                 target[keyName] = val;
             } else if ((flags & MetaDataFlag.SerializeObject) !== 0) {
                 const val = Serialize(source, metadata.serializedType as any);
-                if (defaultValue(metadata, val)) {
+                if (isDefaultValue(metadata, source)) {
                     continue;
                 }
                 target[keyName] = val;
@@ -305,13 +307,13 @@ export function Serialize<T>(
                     source,
                     (flags & MetaDataFlag.SerializeJSONTransformKeys) !== 0
                 );
-                if (defaultValue(metadata, val)) {
+                if (isDefaultValue(metadata, source)) {
                     continue;
                 }
                 target[keyName] = val;
             } else if ((flags & MetaDataFlag.SerializeUsing) !== 0) {
                 const val = (metadata.serializedType as any)(source);
-                if (defaultValue(metadata, val)) {
+                if (isDefaultValue(metadata, source)) {
                     continue;
                 }
                 target[keyName] = val;
@@ -326,22 +328,4 @@ export function Serialize<T>(
         }
         return target;
     }
-}
-
-function defaultValue<T>(metadata: MetaData, val: T) {
-    if (metadata.emitDefaultValue === false) {
-        if (val === null){
-            return true;
-        } else if (metadata.defaultValue !== undefined) {
-            if (val instanceof Object){
-                val = val.valueOf() as any;
-            }
-            else {
-                return val === metadata.defaultValue;
-            }
-        } else {
-            return new ((metadata.serializedType as ASerializableType<T>)())().valueOf() === val;
-        }
-    }
-    return false;
 }

@@ -1479,6 +1479,33 @@ describe("Serializing", function() {
             const json = Serialize(t, () => Test);
             expect(json).toEqual({ valueNotDefault: 1 });
         });
+
+        it("Object", function() {
+            const elephant = {
+                name: "babar"
+            };
+            const snake = {
+                hasTail: true
+            };
+            class Test {
+                @emitDefaultValue(false)
+                @autoserializeAs(() => Object)
+                @defaultValue(elephant)
+                public shouldNotBeSerialized: Object; // default value
+
+                @emitDefaultValue(false)
+                @autoserializeAsJson()
+                @defaultValue(elephant)
+                public shouldBeSerialized: Object; // not default value
+            }
+
+            const test = new Test();
+            test.shouldNotBeSerialized = elephant;
+            test.shouldBeSerialized = snake;
+
+            const json = Serialize(test, () => Test);
+            expect(json).toEqual({ shouldBeSerialized: { hasTail: true } });
+        });
     });
 
     describe("Default Value", function() {

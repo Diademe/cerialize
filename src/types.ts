@@ -76,3 +76,6 @@ export class ItIsAnArrayInternal {
             this.ctor = ctor || (() => Array);
         }
 }
+
+/** @internal */
+export const noDefaultValueSymbole = Symbol("No default value");
