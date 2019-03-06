@@ -9,8 +9,8 @@ export type JsonType =
     | string
     | number
     | boolean
-    | JsonObject
-    | JsonArray;
+    | IJsonObject
+    | IJsonArray;
 
 export type Serializer<T> = (target: T) => JsonType;
 
@@ -20,7 +20,9 @@ export type Deserializer<T> = (
     instantiationMethod?: InstantiationMethod
 ) => T;
 
-export type IConstructable = { constructor: Function };
+export interface IConstructable {
+    constructor: Function;
+}
 
 export type SerializeFn = <T>(data: T) => JsonType;
 
@@ -37,36 +39,36 @@ export enum InstantiationMethod {
     ObjectCreate = 2
 }
 
-export interface JsonObject {
-    [idx: string]: JsonType | JsonObject;
+export interface IJsonObject {
+    [idx: string]: JsonType | IJsonObject;
     $type?: string;
 }
 
-export interface JsonArray extends Array<JsonType> {}
+export interface IJsonArray extends Array<JsonType> {}
 
 export interface ISerializer<T> {
     Serialize: Serializer<T>;
     Deserialize: Deserializer<T>;
 }
 
-export interface Indexable<T = any | null> {
+export interface IIndexable<T = any | null> {
     [idx: string]: T;
 }
 
-export interface SerializableType<T> {
-    new (...args: any[]): T;
-    onSerialized?: (data: JsonObject, instance: T) => JsonObject | void;
+export interface ISerializableType<T> {
+    onSerialized?: (data: IJsonObject, instance: T) => IJsonObject | void;
     onDeserialized?: (
-        data: JsonObject,
+        data: IJsonObject,
         instance: T,
         instantiationMethod?: InstantiationMethod
     ) => T | void;
+    new (...args: any[]): T;
 }
-export type ASerializableType<T> = () => SerializableType<T>;
+export type ASerializableType<T> = () => ISerializableType<T>;
 export type ASerializableTypeOrArray<T> = ASerializableType<T> | ItIsAnArrayInternal;
 export type Serialized<T> =
     T extends ItIsAnArrayInternal ? JsonType[] :
-    JsonObject;
+    IJsonObject;
 
 export class ItIsAnArrayInternal {
     constructor(

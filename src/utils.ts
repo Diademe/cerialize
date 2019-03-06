@@ -1,8 +1,13 @@
-import { InstantiationMethod, primitive, SerializablePrimitiveType, SerializableType } from "./types";
+import {
+    InstantiationMethod,
+    ISerializableType,
+    primitive,
+    SerializablePrimitiveType
+} from "./types";
 
 /** @internal */
 export function getTarget<T>(
-    type: SerializableType<T>,
+    type: ISerializableType<T>,
     target: T,
     instantiationMethod: InstantiationMethod
 ): T {
@@ -50,7 +55,8 @@ export function isPrimitiveAnonymousType(type: () => Function): boolean {
             type() === Date ||
             type() === RegExp
         );
-    } catch (error) {
+    }
+    catch (error) {
         if (error instanceof ReferenceError) {
             return false;
         }
@@ -97,7 +103,8 @@ export function setBitConditionally(
 ): number {
     if (condition) {
         return value | bits;
-    } else {
+    }
+    else {
         return value & ~bits;
     }
 }

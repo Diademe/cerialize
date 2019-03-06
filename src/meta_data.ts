@@ -62,49 +62,15 @@ export const enum MetaDataFlag {
 
 /** @internal */
 export class MetaData {
-    public keyName: string; // the key name of the property this meta data describes
-    public serializedKey: string; // the target keyname for serializing
-    public deserializedKey: string; // the target keyname for deserializing
-    public serializedType: ASerializableTypeOrArray<any>; // the type to use when serializing this property
-    public deserializedType: ASerializableTypeOrArray<any>; //  the type to use when deserializing this property
-    public serializedKeyType: ASerializableTypeOrArray<any>; //  the type to use when deserializing the key of a map
-    public deserializedKeyType: ASerializableTypeOrArray<any>; //  the type to use when serializing the key of a map
-    public serializedValueType: ASerializableTypeOrArray<any>; //  the type to use when deserializing the value of a map
-    public deserializedValueType: ASerializableTypeOrArray<any>; //  the type to use when serializing the value of a map
-    public flags: MetaDataFlag;
-    public bitMaskSerialize: number;
-    public emitDefaultValue: boolean;
-    public defaultValue: Object | symbol;
+    public static readonly TypeMap = TypeMap;
 
-    constructor(keyName: string) {
-        this.keyName = keyName;
-        this.serializedKey = "";
-        this.deserializedKey = "";
-        this.deserializedType = () => Function;
-        this.serializedType = () => Function;
-        this.serializedKeyType = () => Function;
-        this.deserializedKeyType = () => Function;
-        this.flags = 0;
-        this.bitMaskSerialize = Number.MAX_SAFE_INTEGER;
-        this.emitDefaultValue = true;
-        this.defaultValue = noDefaultValueSymbole;
-    }
+    public static serializeKeyTransform = NoOp;
 
-    public getSerializedKey(): string {
-        if (this.serializedKey === this.keyName) {
-            return MetaData.serializeKeyTransform(this.keyName);
-        }
-        return this.serializedKey ? this.serializedKey : this.keyName;
-    }
+    public static deserializeKeyTransform = NoOp;
 
-    public getDeserializedKey(): string {
-        if (this.deserializedKey === this.keyName) {
-            return MetaData.deserializeKeyTransform(this.keyName);
-        }
-        return MetaData.deserializeKeyTransform(
-            this.deserializedKey ? this.deserializedKey : this.keyName
-        );
-    }
+    public static deserializeInstantiationMethod = InstantiationMethod.New;
+
+    public static refCycleDetection = false;
 
     // checks for a key name in a meta data array
     public static hasKeyName(metadataArray: MetaData[], key: string): boolean {
@@ -175,15 +141,49 @@ export class MetaData {
         return null;
     }
 
-    public static readonly TypeMap = TypeMap;
+    public keyName: string; // the key name of the property this meta data describes
+    public serializedKey: string; // the target keyname for serializing
+    public deserializedKey: string; // the target keyname for deserializing
+    public serializedType: ASerializableTypeOrArray<any>; // the type to use when serializing this property
+    public deserializedType: ASerializableTypeOrArray<any>; //  the type to use when deserializing this property
+    public serializedKeyType: ASerializableTypeOrArray<any>; //  the type to use when deserializing the key of a map
+    public deserializedKeyType: ASerializableTypeOrArray<any>; //  the type to use when serializing the key of a map
+    public serializedValueType: ASerializableTypeOrArray<any>; //  the type to use when deserializing the value of a map
+    public deserializedValueType: ASerializableTypeOrArray<any>; //  the type to use when serializing the value of a map
+    public flags: MetaDataFlag;
+    public bitMaskSerialize: number;
+    public emitDefaultValue: boolean;
+    public defaultValue: Object | symbol;
 
-    public static serializeKeyTransform = NoOp;
+    constructor(keyName: string) {
+        this.keyName = keyName;
+        this.serializedKey = "";
+        this.deserializedKey = "";
+        this.deserializedType = () => Function;
+        this.serializedType = () => Function;
+        this.serializedKeyType = () => Function;
+        this.deserializedKeyType = () => Function;
+        this.flags = 0;
+        this.bitMaskSerialize = Number.MAX_SAFE_INTEGER;
+        this.emitDefaultValue = true;
+        this.defaultValue = noDefaultValueSymbole;
+    }
 
-    public static deserializeKeyTransform = NoOp;
+    public getSerializedKey(): string {
+        if (this.serializedKey === this.keyName) {
+            return MetaData.serializeKeyTransform(this.keyName);
+        }
+        return this.serializedKey ? this.serializedKey : this.keyName;
+    }
 
-    public static deserializeInstantiationMethod = InstantiationMethod.New;
-
-    public static refCycleDetection = false;
+    public getDeserializedKey(): string {
+        if (this.deserializedKey === this.keyName) {
+            return MetaData.deserializeKeyTransform(this.keyName);
+        }
+        return MetaData.deserializeKeyTransform(
+            this.deserializedKey ? this.deserializedKey : this.keyName
+        );
+    }
 }
 
 export function isDefaultValue<T>(metadata: MetaData, val: T) {
@@ -203,7 +203,8 @@ export function getDefaultValue<T>(metadata: MetaData, val: T) {
         else if (isPrimitiveAnonymousType(metadata.serializedType as any) ||
                 (val !== undefined && val !== null && val !== Object(val))) {
             return new ((metadata.serializedType as any)())().valueOf();
-        } else { // default value for Object, Date, Regex
+        }
+    else { // default value for Object, Date, Regex
             return null;
         }
     }

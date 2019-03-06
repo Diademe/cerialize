@@ -6,7 +6,8 @@ function lousyGet(dic: any, key: any) {
     const res = dic.get(key);
     if (res === undefined) {
         throw new Error(`The dictionary doesn't have the key ${key}`);
-    } else {
+    }
+    else {
         return res;
     }
 }
@@ -14,10 +15,8 @@ function lousyGet(dic: any, key: any) {
 export class TypeStringDictionary {
     private type2string: Map<IConstructable, string>;
     private string2type: Map<string, IConstructable>;
-    private init(): void {
-        this.type2string = new Map<IConstructable, string>();
-        this.string2type = new Map<string, IConstructable>();
-    }
+    private runtimeTyping: boolean = false;
+
     public constructor() {
         this.init();
     }
@@ -40,12 +39,16 @@ export class TypeStringDictionary {
     public resetDictionary(): void {
         this.init();
     }
-    private runtimeTyping: boolean = false;
     public setRuntimeTyping(rtt: boolean) {
         this.runtimeTyping = rtt;
     }
     public getRuntimeTyping(): boolean {
         return this.runtimeTyping;
+    }
+
+    private init(): void {
+        this.type2string = new Map<IConstructable, string>();
+        this.string2type = new Map<string, IConstructable>();
     }
 }
 const TypeString: TypeStringDictionary = new TypeStringDictionary();
@@ -67,7 +70,7 @@ export function RuntimeTypingDisable(): void {
 }
 
 export function typeString(type: string) {
-    return function(classType: Function) {
+    return (classType: Function) => {
         TypeString.setTypeString(getConstructor(classType), type);
     };
 }

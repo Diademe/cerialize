@@ -60,7 +60,8 @@ export function cycleBreaking(json: any, instance: any) {
         const id = cycle.obj2ref.get(instance).toString();
         json.$ref = id;
         return true;
-    } else {
+    }
+    else {
         const id = cycle.setObject(instance);
         json.$id = id;
         return false;

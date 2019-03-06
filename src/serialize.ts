@@ -8,13 +8,13 @@ import { TypeString } from "./runtime_typing";
 import {
     ASerializableType,
     ASerializableTypeOrArray,
-    Indexable,
+    IIndexable,
+    IJsonObject,
+    ISerializableType,
     ItIsAnArrayInternal,
-    JsonObject,
     JsonType,
     primitive,
-    SerializablePrimitiveType,
-    SerializableType
+    SerializablePrimitiveType
 } from "./types";
 
 import {
@@ -33,11 +33,11 @@ export function SelectiveSerialization(
 export function SerializeObjectMap<T>(
     source: T,
     type: ASerializableTypeOrArray<T>
-): Indexable<JsonType> {
+): IIndexable<JsonType> {
     if (source === null || source === undefined) {
         return null;
     }
-    const target: Indexable<JsonType> = {};
+    const target: IIndexable<JsonType> = {};
     const keys = Object.keys(source);
 
     if (cycleBreaking(target, source)) {
@@ -72,11 +72,11 @@ export function SerializeMap<K, V>(
     source: Map<K, V>,
     keyType: ASerializableTypeOrArray<K>,
     valueType: ASerializableTypeOrArray<V>,
-): Indexable<JsonType> {
+): IIndexable<JsonType> {
     if (source === null || source === undefined) {
         return null;
     }
-    const target: Indexable<JsonType> = {};
+    const target: IIndexable<JsonType> = {};
     const keys = source.keys();
 
     if (cycleBreaking(target, source)) {
@@ -185,8 +185,9 @@ export function SerializeJSON(source: any, transformKeys = true): JsonType {
     if (type === "object") {
         if (source instanceof Date || source instanceof RegExp) {
             return source.toString();
-        } else {
-            const returnValue: Indexable<JsonType> = {};
+        }
+    else {
+            const returnValue: IIndexable<JsonType> = {};
             const keys = Object.keys(source);
             for (const key of keys) {
                 const value = source[key];
@@ -199,23 +200,24 @@ export function SerializeJSON(source: any, transformKeys = true): JsonType {
             }
             return returnValue;
         }
-    } else if (type === "function") {
+    }
+    else if (type === "function") {
         return null;
     }
 
     return source;
 }
 export function Serialize<T>(instance: T, type: ItIsAnArrayInternal): JsonType[];
-export function Serialize<T>(instance: T, type: ASerializableType<T>): JsonObject;
+export function Serialize<T>(instance: T, type: ASerializableType<T>): IJsonObject;
 export function Serialize<T>(
     instance: T,
     type: ASerializableTypeOrArray<T>
-): null | JsonType[] | JsonObject {
+): null | JsonType[] | IJsonObject {
     if (instance === undefined || instance === null) {
         return null;
     }
 
-    const target: Indexable<JsonType> = {};
+    const target: IIndexable<JsonType> = {};
 
     if (type instanceof ItIsAnArrayInternal) {
         const a = SerializeArray(instance as any, type.type);
@@ -224,7 +226,7 @@ export function Serialize<T>(
     else {
         if (TypeString.getRuntimeTyping() && !isPrimitiveType(type())) {
             target.$type = TypeString.getStringFromType(instance.constructor);
-            type = () => (instance.constructor as SerializableType<T>);
+            type = () => (instance.constructor as ISerializableType<T>);
         }
 
         const metadataList = MetaData.getMetaDataForType(type());
@@ -233,7 +235,8 @@ export function Serialize<T>(
         if (metadataList === null) {
             if (isPrimitiveType(type())) {
                 return SerializePrimitive(instance as any, type as any) as any;
-            } else {
+            }
+            else {
                 return target;
             }
         }
@@ -269,25 +272,29 @@ export function Serialize<T>(
                     continue;
                 }
                 target[keyName] = val;
-            } else if ((flags & MetaDataFlag.SerializeObjectMap) !== 0) {
+            }
+            else if ((flags & MetaDataFlag.SerializeObjectMap) !== 0) {
                 const val = SerializeObjectMap(source, metadata.serializedType);
                 if (isDefaultValue(metadata, source)) {
                     continue;
                 }
                 target[keyName] = val;
-            } else if ((flags & MetaDataFlag.SerializeSet) !== 0) {
+            }
+            else if ((flags & MetaDataFlag.SerializeSet) !== 0) {
                 const val = SerializeSet(source, metadata.serializedKeyType);
                 if (isDefaultValue(metadata, source)) {
                     continue;
                 }
                 target[keyName] = val;
-            } else if ((flags & MetaDataFlag.SerializeArray) !== 0) {
+            }
+            else if ((flags & MetaDataFlag.SerializeArray) !== 0) {
                 const val = SerializeArray(source, metadata.serializedKeyType);
                 if (isDefaultValue(metadata, source)) {
                     continue;
                 }
                 target[keyName] = val;
-            } else if ((flags & MetaDataFlag.SerializePrimitive) !== 0) {
+            }
+            else if ((flags & MetaDataFlag.SerializePrimitive) !== 0) {
                 const val = SerializePrimitive(
                     source,
                     metadata.serializedType as () => SerializablePrimitiveType
@@ -296,13 +303,15 @@ export function Serialize<T>(
                     continue;
                 }
                 target[keyName] = val;
-            } else if ((flags & MetaDataFlag.SerializeObject) !== 0) {
+            }
+            else if ((flags & MetaDataFlag.SerializeObject) !== 0) {
                 const val = Serialize(source, metadata.serializedType as any);
                 if (isDefaultValue(metadata, source)) {
                     continue;
                 }
                 target[keyName] = val;
-            } else if ((flags & MetaDataFlag.SerializeJSON) !== 0) {
+            }
+            else if ((flags & MetaDataFlag.SerializeJSON) !== 0) {
                 const val = SerializeJSON(
                     source,
                     (flags & MetaDataFlag.SerializeJSONTransformKeys) !== 0
@@ -311,7 +320,8 @@ export function Serialize<T>(
                     continue;
                 }
                 target[keyName] = val;
-            } else if ((flags & MetaDataFlag.SerializeUsing) !== 0) {
+            }
+            else if ((flags & MetaDataFlag.SerializeUsing) !== 0) {
                 const val = (metadata.serializedType as any)(source);
                 if (isDefaultValue(metadata, source)) {
                     continue;
@@ -323,7 +333,7 @@ export function Serialize<T>(
         if (typeof type().onSerialized === "function") {
             const value = type().onSerialized(target, instance);
             if (value !== undefined) {
-                return value as JsonObject;
+                return value as IJsonObject;
             }
         }
         return target;

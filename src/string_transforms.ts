@@ -12,14 +12,14 @@ const STRING_DASHERIZE_REGEXP = /([a-z\d])([A-Z])/g;
 // convert strings like my_camel_string to myCamelString
 export function CamelCase(str: string): string {
     return str
-        .replace(STRING_CAMELIZE_REGEXP, function(
+        .replace(STRING_CAMELIZE_REGEXP, (
             match,
             separator,
             chr
-        ): string {
+        ): string => {
             return chr ? chr.toUpperCase() : "";
         })
-        .replace(/^([A-Z])/, function(match, separator, chr): string {
+        .replace(/^([A-Z])/, (match, separator, chr): string => {
             return match.toLowerCase();
         });
 }
