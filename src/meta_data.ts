@@ -3,11 +3,12 @@
 // objects each describing one property
 
 import { NoOp } from "./string_transforms";
-import { ASerializableTypeOrArray,
+import {
+    ArrayHandling,
+    ASerializableTypeOrArray,
     IConstructable,
     InstantiationMethod,
-    noDefaultValueSymbole,
-    primitive
+    noDefaultValueSymbole
 } from "./types";
 import { getConstructor, isPrimitiveAnonymousType } from "./utils";
 
@@ -97,6 +98,7 @@ export class MetaData {
         metadata.bitMaskSerialize = data.bitMaskSerialize;
         metadata.emitDefaultValue = data.emitDefaultValue;
         metadata.defaultValue = data.defaultValue;
+        metadata.arrayHandling = data.arrayHandling;
         return metadata;
     }
 
@@ -142,8 +144,8 @@ export class MetaData {
     }
 
     public keyName: string; // the key name of the property this meta data describes
-    public serializedKey: string; // the target keyname for serializing
-    public deserializedKey: string; // the target keyname for deserializing
+    public serializedKey: string; // the target keyName for serializing
+    public deserializedKey: string; // the target keyName for deserializing
     public serializedType: ASerializableTypeOrArray<any>; // the type to use when serializing this property
     public deserializedType: ASerializableTypeOrArray<any>; //  the type to use when deserializing this property
     public serializedKeyType: ASerializableTypeOrArray<any>; //  the type to use when deserializing the key of a map
@@ -154,6 +156,8 @@ export class MetaData {
     public bitMaskSerialize: number;
     public emitDefaultValue: boolean;
     public defaultValue: Object | symbol;
+    // if keyName refer to an array, define how do we deserialize the array
+    public arrayHandling: ArrayHandling;
 
     constructor(keyName: string) {
         this.keyName = keyName;
@@ -167,6 +171,7 @@ export class MetaData {
         this.bitMaskSerialize = Number.MAX_SAFE_INTEGER;
         this.emitDefaultValue = true;
         this.defaultValue = noDefaultValueSymbole;
+        this.arrayHandling = ArrayHandling.Into;
     }
 
     public getSerializedKey(): string {

@@ -39,6 +39,12 @@ export enum InstantiationMethod {
     ObjectCreate = 2
 }
 
+export enum ArrayHandling {
+    Into, /** deserialize into each cell, grow or shrink array to fit serialized array size */
+    ConcatAtTheEnd, /** keep previous array, add the deserialized one at the end */
+    New /** replace the array by a new one */
+}
+
 export interface IJsonObject {
     [idx: string]: JsonType | IJsonObject;
     $type?: string;
@@ -73,7 +79,8 @@ export type Serialized<T> =
 export class ItIsAnArrayInternal {
     constructor(
         public type: ASerializableTypeOrArray<any>,
-        public ctor?: () => IConstructable
+        public ctor?: () => IConstructable,
+        public handling: ArrayHandling = ArrayHandling.Into
         ) {
             this.ctor = ctor || (() => Array);
         }

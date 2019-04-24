@@ -10,6 +10,7 @@ import {
     Deserialize,
     DeserializeArray,
     deserializeAs,
+    deserializeAsArray,
     deserializeAsJson,
     deserializeAsMap,
     deserializeAsObjectMap,
@@ -32,6 +33,7 @@ import {
     RuntimeTypingSetTypeString,
 } from "../src/runtime_typing";
 import {
+    ArrayHandling,
     IIndexable,
     InstantiationMethod,
 } from "../src/types";
@@ -335,6 +337,70 @@ describe("Deserializing", () => {
         runTests("Auto > Create Instances > Without Target", InstantiationMethod.New, autoserializeAs, false);
         runTests("Auto > No Instances > With Target", InstantiationMethod.None, autoserializeAs, true);
         runTests("Auto > No Instances > Without Target", InstantiationMethod.None, autoserializeAs, false);
+
+    });
+
+    describe("DeserializeAsArray", () => {
+
+        class Element {
+            @autoserializeAs(() => String)
+            public name: string;
+            @autoserializeAs(() => Number)
+            public val: number;
+            constructor(name1: string, val1: number) {
+                this.name = name1;
+                this.val = val1;
+            }
+        }
+        function runTests(blockName: string,
+                          arrayHandling: ArrayHandling,
+                          expected: Array<Partial<Element>>) {
+
+            it(blockName, () => {
+                    class Test {
+                        @deserializeAsArray(() => Element, () => Array, "values", arrayHandling)
+                        public values: Element[];
+                        constructor() {
+                            this.values = [
+                                { name: "1", val: 1 },
+                                { name: "2", val: 2 },
+                                { name: "3", val: 3 }
+                            ];
+                        }
+                    }
+
+                    const json = { values: [{ name: "4" }, { name: "5", val: 25 }] };
+                    const target = new Test();
+                    const instance = Deserialize(json, () => Test, target);
+                    expect(instance.values).toEqual(expected);
+            });
+
+        }
+
+        runTests("Into",
+        ArrayHandling.Into,
+        [
+            { name: "4", val: 1 }, // we write {name: "4" } onto the object { name: "1", val: 1 }
+            { name: "5", val: 25 },
+        ]
+        );
+        runTests("Concat At The End",
+        ArrayHandling.ConcatAtTheEnd,
+        [
+            { name: "1", val: 1 },
+            { name: "2", val: 2 },
+            { name: "3", val: 3 },
+            { name: "4" },
+            { name: "5", val: 25 }
+        ]
+        );
+        runTests("New",
+        ArrayHandling.New,
+        [
+            { name: "4" },
+            { name: "5", val: 25 }
+        ]
+        );
 
     });
 

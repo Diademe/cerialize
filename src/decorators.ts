@@ -1,10 +1,10 @@
 import { MetaData, MetaDataFlag } from "./meta_data";
 import {
+    ArrayHandling,
     ASerializableTypeOrArray,
     IConstructable,
     ISerializer,
     ItIsAnArrayInternal,
-    primitive,
     SerializeFn,
 } from "./types";
 import {
@@ -74,7 +74,7 @@ export function serializeAsArray<T>(
     };
 }
 
-export function serializeAsObjectMap<T>(type: ASerializableTypeOrArray<T>, keyName?: string) {
+export function serializeAsObjectMap<T>( type: ASerializableTypeOrArray<T>, keyName?: string) {
     return (target: any, actualKeyName: string): any  => {
         const metadata = MetaData.getMetaData(
             target.constructor,
@@ -194,7 +194,8 @@ export function deserializeAs(type: ASerializableTypeOrArray<any>, keyName?: str
 export function deserializeAsArray(
     type: ASerializableTypeOrArray<any>,
     constructor?: () => IConstructable,
-    keyName?: string
+    keyName?: string,
+    handling: ArrayHandling = ArrayHandling.Into
 ) {
     return (target: IConstructable, actualKeyName: string): void  => {
         const metadata = MetaData.getMetaData(
@@ -204,6 +205,7 @@ export function deserializeAsArray(
         metadata.deserializedKey = keyName ? keyName : actualKeyName;
         metadata.deserializedKeyType = type;
         metadata.deserializedType = constructor as any || (() => Array);
+        metadata.arrayHandling = handling;
         metadata.flags |= MetaDataFlag.DeserializeArray;
         metadata.flags = setBitConditionally(
             metadata.flags,
@@ -347,7 +349,8 @@ export function autoserializeAs(type: ASerializableTypeOrArray<any>, keyName?: s
 export function autoserializeAsArray(
     type: ASerializableTypeOrArray<any>,
     constructor?: () => IConstructable,
-    keyName?: string
+    keyName?: string,
+    handling: ArrayHandling = ArrayHandling.Into
 ) {
     return (target: IConstructable, actualKeyName: string): void  => {
         const metadata = MetaData.getMetaData(
@@ -361,6 +364,7 @@ export function autoserializeAsArray(
         metadata.serializedKeyType = type;
         metadata.deserializedType = constructor as any || (() => Array);
         metadata.serializedType = constructor as any || (() => Array);
+        metadata.arrayHandling = handling;
         metadata.flags |=
             MetaDataFlag.SerializeArray | MetaDataFlag.DeserializeArray;
         metadata.flags = setBitConditionally(

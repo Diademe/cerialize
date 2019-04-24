@@ -163,7 +163,7 @@ If you want the same behavior for a property when serializing and deserializing,
 ##### Deserialization
 
 - `@deserializeAs(type : () => ClassConstructor, customKey? : string)`
-- `@deserializeAsArray(type : () => ClassConstructor, customKey? : string)`
+- `@deserializeAsArray(type : () => ClassConstructor, customKey? : string, handling?: ArrayHandling)`
 - `@deserializeAsObjectMap(type : () => ClassConstructor, customKey? : string)`
 - `@deserializeUsing(transform : DeserializerFn, customKey? : string)`
 - `@deserializeAsJson(customKey? : string)`
@@ -173,7 +173,7 @@ If you want the same behavior for a property when serializing and deserializing,
 
 - `@autoserializeAs(type : () => ClassConstructor, customKey? : string)`
 - `@autoserializeAsObjectMap(type : () => ClassConstructor, customKey? : string)`
-- `@autoserializeAsArray(type : () => ClassConstructor, customKey? : string)`
+- `@autoserializeAsArray(type : () => ClassConstructor, customKey? : string, handling?: ArrayHandling)`
 - `@autoserializeUsing(transforms : SerializeAndDeserializeFns, customKey? : string)`
 - `@autoserializeAsJson(customKey? : string)`
 - `@autoserializeAsMap(keyType: () => SerializableType<any>, valueType: () => SerializableType<any>, constructor?: () => SerializableType<any>, keyName?: string)`
@@ -199,6 +199,15 @@ There is an optional second argument to itIsAnArray : a constructor used to dese
 ```typescript
 class MyArray<T> extends Array<T> {}
 const instance = Deserialize([1], itIsAnArray(() => Number, () => MyArray));
+assert(instance instanceof MyArray);
+```
+There is an optional third argument to itIsAnArray : An enum that specify how the deserialization is done when deserializing into an existing object.
+ - `ArrayHandling.Into`: deserialize into each cell, grow or shrink array to fit serialized array size.
+ - `ArrayHandling.ConcatAtTheEnd`: keep previous array, add the deserialized one at the end.
+ - `ArrayHandling.New`: empty the array before adding element to it.
+```typescript
+class MyArray<T> extends Array<T> {}
+const instance = Deserialize([1], itIsAnArray(() => Number, () => MyArray), ArrayHandling.Into);
 assert(instance instanceof MyArray);
 ```
 ##### Types

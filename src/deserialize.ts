@@ -7,6 +7,7 @@ import {
 } from "./utils";
 
 import {
+    ArrayHandling,
     ASerializableType,
     ASerializableTypeOrArray,
     IConstructable,
@@ -152,8 +153,9 @@ function _DeserializeArray<T, C extends T[]>(
     data: IJsonArray,
     type: ASerializableTypeOrArray<T>,
     constructor: () => IConstructable,
+    handling: ArrayHandling,
     target?: C,
-    instantiationMethod?: InstantiationMethod
+    instantiationMethod?: InstantiationMethod,
 ) {
     if (!Array.isArray(data)) {
         throw new Error(
@@ -163,13 +165,25 @@ function _DeserializeArray<T, C extends T[]>(
     if (!Array.isArray(target)) {
         target = new (constructor() as any)();
     }
-
-    target.length = data.length;
+    let offset;
+    switch (handling) {
+        case ArrayHandling.Into:
+            offset = 0;
+            target.length = data.length;
+            break;
+        case ArrayHandling.New:
+            offset = 0;
+            target.length = 0;
+            break;
+        case ArrayHandling.ConcatAtTheEnd:
+            offset = target.length;
+            break;
+    }
     for (let i = 0; i < data.length; i++) {
-        target[i] = _Deserialize(
+        target[offset + i] = _Deserialize(
             data[i] as any,
             type,
-            target[i],
+            target[offset + i],
             instantiationMethod
         ) as T;
     }
@@ -181,6 +195,7 @@ export function DeserializeArray<T, C extends T[]>(
     data: IJsonArray,
     type: ASerializableTypeOrArray<T>,
     constructor: () => IConstructable = () => Array,
+    handling: ArrayHandling = ArrayHandling.Into,
     target?: C,
     instantiationMethod?: InstantiationMethod
 ) {
@@ -188,7 +203,7 @@ export function DeserializeArray<T, C extends T[]>(
         instantiationMethod = MetaData.deserializeInstantiationMethod;
     }
 
-    return _DeserializeArray(data, type, constructor, target, instantiationMethod);
+    return _DeserializeArray(data, type, constructor, handling, target, instantiationMethod);
 }
 
 function _DeserializeSet<K, C extends Set<K>>(
@@ -203,6 +218,7 @@ function _DeserializeSet<K, C extends Set<K>>(
             data as any,
             keyType.type,
             keyType.ctor,
+            keyType.handling,
             target as any,
             instantiationMethod
         );
@@ -334,6 +350,7 @@ function _Deserialize<T extends IIndexable>(
             data as IJsonArray,
             type.type,
             type.ctor,
+            type.handling,
             target as any,
             instantiationMethod
         );
@@ -424,6 +441,7 @@ function _Deserialize<T extends IIndexable>(
                     source,
                     metadata.deserializedKeyType,
                     metadata.deserializedType as (() => IConstructable),
+                    metadata.arrayHandling,
                     target[keyName],
                     instantiationMethod
                 );
@@ -512,9 +530,10 @@ export function DeserializeRaw<T>(
 export function DeserializeArrayRaw<T>(
     data: IJsonArray,
     type: ASerializableTypeOrArray<T>,
-    target?: T[]
+    target?: T[],
+    handling: ArrayHandling = ArrayHandling.Into
 ): T[] | null {
-    return _DeserializeArray(data, type, () => Array, target, InstantiationMethod.None);
+    return _DeserializeArray(data, type, () => Array, handling, target, InstantiationMethod.None);
 }
 
 export function DeserializeMapRaw<T>(
