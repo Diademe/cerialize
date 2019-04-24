@@ -141,8 +141,8 @@ export function initSerialization(): void {
 
 export function cleanupSerialization(): void {
     NbSerialization--;
-    if (getRefHandler().clean) {
-        getRefHandler().clean();
+    if (getRefHandler().done) {
+        getRefHandler().done();
     }
 }
 
@@ -155,8 +155,8 @@ export function initDeserialization(): void {
 
 export function cleanupDeserialization(): void {
     NbDeserialization--;
-    if (getRefHandler().clean) {
-        getRefHandler().clean();
+    if (getRefHandler().done) {
+        getRefHandler().done();
     }
 }
 
