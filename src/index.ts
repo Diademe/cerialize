@@ -1,3 +1,4 @@
+import { cleanCycleBreaking } from "./cycle";
 import {
     DeserializeArrayInternal,
     DeserializeInternal,
@@ -61,6 +62,7 @@ export function RefClean() {
     if (getRefHandler().clean) {
         getRefHandler().clean();
     }
+    cleanCycleBreaking();
 }
 
 export function SetSerializeKeyTransform(fn: (str: string) => string): void {

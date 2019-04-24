@@ -13,17 +13,9 @@ class CycleBreaking {
         return res;
     }
 }
-class StackCycleBreaking {
-    private readonly stack: CycleBreaking[] = [];
-    public seen(obj: any): boolean {
-        return this.stack[this.stack.length - 1].seen(obj);
-    }
-    public push() {
-        this.stack.push(new CycleBreaking());
-    }
-    public pop() {
-        this.stack.pop();
-    }
-}
 
-export const cycleBreaking = new StackCycleBreaking();
+export let cycleBreaking = new CycleBreaking();
+
+export function cleanCycleBreaking() {
+    cycleBreaking = new CycleBreaking();
+}

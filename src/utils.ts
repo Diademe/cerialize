@@ -134,7 +134,6 @@ let NbSerialization = 0;
 
 export function initSerialization(): void {
     NbSerialization++;
-    cycleBreaking.push();
     if (getRefHandler().init) {
         getRefHandler().init();
     }
@@ -142,7 +141,6 @@ export function initSerialization(): void {
 
 export function cleanupSerialization(): void {
     NbSerialization--;
-    cycleBreaking.pop();
     if (getRefHandler().clean) {
         getRefHandler().clean();
     }
