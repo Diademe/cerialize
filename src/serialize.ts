@@ -30,7 +30,7 @@ export function SelectiveSerialization(
     serializeBitMaskPrivate = bitMask;
 }
 
-export function SerializeObjectMap<T>(
+export function SerializeObjectMapInternal<T>(
     source: T,
     type: ASerializableTypeOrArray<T>
 ): IIndexable<JsonType> {
@@ -57,7 +57,7 @@ export function SerializeObjectMap<T>(
         for (const key of keys) {
             const value = (source as any)[key];
             if (value !== undefined) {
-                target[MetaData.serializeKeyTransform(key)] = Serialize(
+                target[MetaData.serializeKeyTransform(key)] = SerializeInternal(
                     value,
                     type
                 );
@@ -68,7 +68,7 @@ export function SerializeObjectMap<T>(
     return target;
 }
 
-export function SerializeMap<K, V>(
+export function SerializeMapInternal<K, V>(
     source: Map<K, V>,
     keyType: ASerializableTypeOrArray<K>,
     valueType: ASerializableTypeOrArray<V>,
@@ -92,14 +92,14 @@ export function SerializeMap<K, V>(
         if (value !== undefined) {
             let targetKey: string | K | JsonType[];
             if (keyType instanceof ItIsAnArrayInternal) {
-                targetKey = SerializeArray(key as any, keyType.type);
+                targetKey = SerializeArrayInternal(key as any, keyType.type);
             }
             else {
                 const keyTypeF = keyType() as Function;
                 const isString = keyTypeF === String;
                 targetKey = isString ? MetaData.serializeKeyTransform(key as any) : key;
             }
-            const targetValue = Serialize(
+            const targetValue = SerializeInternal(
                     value,
                     valueType as any
                 );
@@ -110,7 +110,7 @@ export function SerializeMap<K, V>(
     return target;
 }
 
-export function SerializeArray<T>(
+export function SerializeArrayInternal<T>(
     source: T[],
     type: ASerializableTypeOrArray<T>
 ): JsonType[] {
@@ -119,19 +119,19 @@ export function SerializeArray<T>(
     }
     const returnValue = new Array<JsonType>(source.length);
     for (let i = 0; i < source.length; i++) {
-        returnValue[i] = Serialize(source[i], type as any);
+        returnValue[i] = SerializeInternal(source[i], type as any);
     }
     return returnValue;
 }
 
-export function SerializeSet<T>(
+export function SerializeSetInternal<T>(
     source: T[],
     type: ASerializableTypeOrArray<T>
 ): JsonType[] {
-    return SerializeArray(Array.from(source.values()), type);
+    return SerializeArrayInternal(Array.from(source.values()), type);
 }
 
-export function SerializePrimitive<T>(
+export function SerializePrimitiveInternal<T>(
     source: SerializablePrimitiveType,
     type: () => SerializablePrimitiveType
 ): JsonType {
@@ -167,7 +167,7 @@ export function SerializePrimitive<T>(
     return primitiveSource.toString();
 }
 
-export function SerializeJSON(source: any, transformKeys = true): JsonType {
+export function SerializeJSONInternal(source: any, transformKeys = true): JsonType {
     if (source === null || source === undefined) {
         return null;
     }
@@ -175,7 +175,7 @@ export function SerializeJSON(source: any, transformKeys = true): JsonType {
     if (Array.isArray(source)) {
         const array = new Array<any>(source.length);
         for (let i = 0; i < source.length; i++) {
-            array[i] = SerializeJSON(source[i], transformKeys);
+            array[i] = SerializeJSONInternal(source[i], transformKeys);
         }
         return array;
     }
@@ -195,7 +195,7 @@ export function SerializeJSON(source: any, transformKeys = true): JsonType {
                     const returnValueKey = transformKeys
                         ? MetaData.serializeKeyTransform(key)
                         : key;
-                    returnValue[returnValueKey] = SerializeJSON(value, transformKeys);
+                    returnValue[returnValueKey] = SerializeJSONInternal(value, transformKeys);
                 }
             }
             return returnValue;
@@ -207,9 +207,9 @@ export function SerializeJSON(source: any, transformKeys = true): JsonType {
 
     return source;
 }
-export function Serialize<T>(instance: T, type: ItIsAnArrayInternal): JsonType[];
-export function Serialize<T>(instance: T, type: ASerializableType<T>): IJsonObject;
-export function Serialize<T>(
+export function SerializeInternal<T>(instance: T, type: ItIsAnArrayInternal): JsonType[];
+export function SerializeInternal<T>(instance: T, type: ASerializableType<T>): IJsonObject;
+export function SerializeInternal<T>(
     instance: T,
     type: ASerializableTypeOrArray<T>
 ): null | JsonType[] | IJsonObject {
@@ -220,7 +220,7 @@ export function Serialize<T>(
     const target: IIndexable<JsonType> = {};
 
     if (type instanceof ItIsAnArrayInternal) {
-        const a = SerializeArray(instance as any, type.type);
+        const a = SerializeArrayInternal(instance as any, type.type);
         return a;
     }
     else {
@@ -234,7 +234,7 @@ export function Serialize<T>(
         // todo -- maybe move this to a Generic deserialize
         if (metadataList === null) {
             if (isPrimitiveType(type())) {
-                return SerializePrimitive(instance as any, type as any) as any;
+                return SerializePrimitiveInternal(instance as any, type as any) as any;
             }
             else {
                 return target;
@@ -264,7 +264,7 @@ export function Serialize<T>(
             const flags = metadata.flags;
 
             if ((flags & MetaDataFlag.SerializeMap) !== 0) {
-                const val = SerializeMap(source,
+                const val = SerializeMapInternal(source,
                     metadata.serializedKeyType,
                     metadata.serializedValueType,
                 );
@@ -274,28 +274,28 @@ export function Serialize<T>(
                 target[keyName] = val;
             }
             else if ((flags & MetaDataFlag.SerializeObjectMap) !== 0) {
-                const val = SerializeObjectMap(source, metadata.serializedType);
+                const val = SerializeObjectMapInternal(source, metadata.serializedType);
                 if (isDefaultValue(metadata, source)) {
                     continue;
                 }
                 target[keyName] = val;
             }
             else if ((flags & MetaDataFlag.SerializeSet) !== 0) {
-                const val = SerializeSet(source, metadata.serializedKeyType);
+                const val = SerializeSetInternal(source, metadata.serializedKeyType);
                 if (isDefaultValue(metadata, source)) {
                     continue;
                 }
                 target[keyName] = val;
             }
             else if ((flags & MetaDataFlag.SerializeArray) !== 0) {
-                const val = SerializeArray(source, metadata.serializedKeyType);
+                const val = SerializeArrayInternal(source, metadata.serializedKeyType);
                 if (isDefaultValue(metadata, source)) {
                     continue;
                 }
                 target[keyName] = val;
             }
             else if ((flags & MetaDataFlag.SerializePrimitive) !== 0) {
-                const val = SerializePrimitive(
+                const val = SerializePrimitiveInternal(
                     source,
                     metadata.serializedType as () => SerializablePrimitiveType
                 );
@@ -305,14 +305,14 @@ export function Serialize<T>(
                 target[keyName] = val;
             }
             else if ((flags & MetaDataFlag.SerializeObject) !== 0) {
-                const val = Serialize(source, metadata.serializedType as any);
+                const val = SerializeInternal(source, metadata.serializedType as any);
                 if (isDefaultValue(metadata, source)) {
                     continue;
                 }
                 target[keyName] = val;
             }
             else if ((flags & MetaDataFlag.SerializeJSON) !== 0) {
-                const val = SerializeJSON(
+                const val = SerializeJSONInternal(
                     source,
                     (flags & MetaDataFlag.SerializeJSONTransformKeys) !== 0
                 );

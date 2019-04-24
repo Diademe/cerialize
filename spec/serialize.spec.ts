@@ -32,8 +32,8 @@ import {
 } from "../src/runtime_typing";
 import {
     SelectiveSerialization,
-    Serialize,
-    SerializeArray,
+    SerializeArrayInternal,
+    SerializeInternal,
 } from "../src/serialize";
 import { IIndexable, IJsonObject } from "../src/types";
 
@@ -45,7 +45,7 @@ describe("Serializing", () => {
             }
 
             const x = new Test();
-            const json = Serialize(x, () => Test);
+            const json = SerializeInternal(x, () => Test);
             expect(json).toEqual({});
         });
     });
@@ -67,7 +67,7 @@ describe("Serializing", () => {
                     s.value0 = "strValue";
                     s.value1 = true;
                     s.value2 = 100;
-                    const json = Serialize(s, () => Test);
+                    const json = SerializeInternal(s, () => Test);
                     expect(json.value0).toBe("strValue");
                     expect(json.value1).toBe(true);
                     expect(json.value2).toBe(100);
@@ -81,7 +81,7 @@ describe("Serializing", () => {
                     const d = new Date();
                     const s = new Test();
                     s.value0 = d;
-                    const json = Serialize(s, () => Test);
+                    const json = SerializeInternal(s, () => Test);
                     expect(json).toEqual({
                         value0: d.valueOf()
                     });
@@ -94,7 +94,7 @@ describe("Serializing", () => {
 
                     const s = new Test();
                     s.value0 = /[123]/g;
-                    const json = Serialize(s, () => Test);
+                    const json = SerializeInternal(s, () => Test);
                     expect(json).toEqual({
                         value0: "/[123]/g"
                     });
@@ -111,7 +111,7 @@ describe("Serializing", () => {
                     s.value0 = "strValue";
                     s.value1 = true;
                     s.value2 = 100;
-                    const json = Serialize(s, () => Test);
+                    const json = SerializeInternal(s, () => Test);
                     expect(json.value0).toBe(NaN);
                     expect(json.value1).toBe("true");
                     expect(json.value2).toBe(true);
@@ -130,7 +130,7 @@ describe("Serializing", () => {
                     s.value0 = "strValue";
                     s.value1 = true;
                     s.value2 = 100;
-                    const json = Serialize(s, () => Test);
+                    const json = SerializeInternal(s, () => Test);
                     expect(json.v0).toBe("strValue");
                     expect(json.v1).toBe(true);
                     expect(json.value2).toBe(100);
@@ -147,7 +147,7 @@ describe("Serializing", () => {
                     s.value0 = undefined;
                     s.value1 = true;
                     s.value2 = 100;
-                    const json = Serialize(s, () => Test);
+                    const json = SerializeInternal(s, () => Test);
                     expect(json.value0).not.toBeDefined();
                     expect(json.value1).toBe(true);
                     expect(json.value2).toBe(100);
@@ -164,7 +164,7 @@ describe("Serializing", () => {
                     s.value0 = null;
                     s.value1 = true;
                     s.value2 = 100;
-                    const json = Serialize(s, () => Test);
+                    const json = SerializeInternal(s, () => Test);
                     expect(json.value0).toBeNull();
                     expect(json.value1).toBe(true);
                     expect(json.value2).toBe(100);
@@ -187,7 +187,7 @@ describe("Serializing", () => {
                     s.value0 = null;
                     s.value1 = true;
                     s.value2 = 100;
-                    const json = Serialize(x, () => Test0);
+                    const json = SerializeInternal(x, () => Test0);
                     expect(json.test).toEqual({
                         value0: null,
                         value1: true,
@@ -218,7 +218,7 @@ describe("Serializing", () => {
                     s.value0 = null;
                     s.value1 = true;
                     s.value2 = 100;
-                    const json = Serialize(z, () => Test1);
+                    const json = SerializeInternal(z, () => Test1);
                     expect(json.test).toEqual({
                         test: {
                             value0: null,
@@ -253,7 +253,7 @@ describe("Serializing", () => {
                 ["v1", [2]],
                 ["v2", [3]]
             ]);
-            const json = Serialize(t, () => Test);
+            const json = SerializeInternal(t, () => Test);
             expect(json.values).toEqual({
                 v0: [1],
                 v1: [2],
@@ -273,7 +273,7 @@ describe("Serializing", () => {
                 ["v1", 2],
                 ["v2", 3]
             ]);
-            const json = Serialize(t, () => Test);
+            const json = SerializeInternal(t, () => Test);
             expect(json.values).toEqual({
                 v0: 1,
                 v1: 2,
@@ -293,7 +293,7 @@ describe("Serializing", () => {
                 ["v1", 2],
                 ["v2", 3]
             ]);
-            const json = Serialize(t, () => Test);
+            const json = SerializeInternal(t, () => Test);
             expect(json.values).toEqual({
                 v0: 1,
                 v1: 2,
@@ -314,7 +314,7 @@ describe("Serializing", () => {
                 ["v1", 2],
                 ["v2", 3]
             ]);
-            const json = Serialize(t, () => Test);
+            const json = SerializeInternal(t, () => Test);
             expect(json.values).toEqual({
                 v0: 1,
                 v1: 2,
@@ -342,7 +342,7 @@ describe("Serializing", () => {
                 ["v1", new TestType(1)],
                 ["v2", new TestType(2)]
             ]);
-            const json = Serialize(t, () => Test);
+            const json = SerializeInternal(t, () => Test);
             expect(json.values).toEqual({
                 v0: { value: 0 },
                 v1: { value: 1 },
@@ -370,7 +370,7 @@ describe("Serializing", () => {
                 ["v1", new TestType(1)],
                 ["v2", new TestType(2)]
             ]);
-            const json = Serialize(t, () => Test);
+            const json = SerializeInternal(t, () => Test);
             expect(json.values).not.toBeDefined();
             expect(json.different).toEqual({
                 v0: { value: 0 },
@@ -400,7 +400,7 @@ describe("Serializing", () => {
                 ["v1", new TestType(new Map([["v10", 2], ["v11", 2] ]))],
                 ["v2", new TestType(new Map([["v20", 3], ["v21", 2] ]))]
                 ]);
-            const json = Serialize(t, () => Test);
+            const json = SerializeInternal(t, () => Test);
             expect(json.values).toEqual({
                 v0: { value: { v00: 1, v01: 2 } },
                 v1: { value: { v10: 2, v11: 2 } },
@@ -419,7 +419,7 @@ describe("Serializing", () => {
                 ["v1", 1],
                 ["v2", 2]
             ]);
-            const json = Serialize(t, () => Test);
+            const json = SerializeInternal(t, () => Test);
             expect(json).toEqual({
                 values: {
                     v1: 1,
@@ -448,7 +448,7 @@ describe("Serializing", () => {
                         v1: 2,
                         v2: 3
                     };
-                    const json = Serialize(t, () => Test);
+                    const json = SerializeInternal(t, () => Test);
                     expect(json.values).toEqual({
                         v0: 1,
                         v1: 2,
@@ -476,7 +476,7 @@ describe("Serializing", () => {
                         v1: new TestType(1),
                         v2: new TestType(2)
                     };
-                    const json = Serialize(t, () => Test);
+                    const json = SerializeInternal(t, () => Test);
                     expect(json.values).toEqual({
                         v0: { value: 0 },
                         v1: { value: 1 },
@@ -504,7 +504,7 @@ describe("Serializing", () => {
                         v1: new TestType(1),
                         v2: new TestType(2)
                     };
-                    const json = Serialize(t, () => Test);
+                    const json = SerializeInternal(t, () => Test);
                     expect(json.values).not.toBeDefined();
                     expect(json.different).toEqual({
                         v0: { value: 0 },
@@ -534,7 +534,7 @@ describe("Serializing", () => {
                         v1: new TestType({ v10: 2, v11: 2 }),
                         v2: new TestType({ v20: 3, v21: 2 })
                     };
-                    const json = Serialize(t, () => Test);
+                    const json = SerializeInternal(t, () => Test);
                     expect(json.values).toEqual({
                         v0: { value: { v00: 1, v01: 2 } },
                         v1: { value: { v10: 2, v11: 2 } },
@@ -554,7 +554,7 @@ describe("Serializing", () => {
                     v1: 1,
                     v2: 2
                 };
-                const json = Serialize(t, () => Test);
+                const json = SerializeInternal(t, () => Test);
                 expect(json).toEqual({
                     values: {
                         v1: 1,
@@ -590,7 +590,7 @@ describe("Serializing", () => {
 
                     const t = new Test();
                     t.value = [1, 2, 3];
-                    const json = Serialize(t, () => Test);
+                    const json = SerializeInternal(t, () => Test);
                     expect(json.value).toEqual([1, 2, 3]);
                 });
 
@@ -602,12 +602,12 @@ describe("Serializing", () => {
 
                     const t = new Test();
                     t.value = [1, 2, 3];
-                    const json = Serialize(t, () => Test) as IJsonObject;
+                    const json = SerializeInternal(t, () => Test) as IJsonObject;
                     expect(json.value).toEqual([1, 2, 3]);
                 });
 
                 it("serializes an array of primitives 3", () => {
-                    const json = Serialize([1, 2, 3], itIsAnArray(() => Number));
+                    const json = SerializeInternal([1, 2, 3], itIsAnArray(() => Number));
                     expect(json).toEqual([1, 2, 3]);
                 });
 
@@ -630,7 +630,7 @@ describe("Serializing", () => {
                         new TestType("str1"),
                         new TestType("str2")
                     ];
-                    const json = Serialize(t, () => Test);
+                    const json = SerializeInternal(t, () => Test);
                     expect(json.value).toEqual([
                         { strVal: "str0" },
                         { strVal: "str1" },
@@ -676,7 +676,7 @@ describe("Serializing", () => {
                             new TestTypeL0("21")
                         ])
                     ];
-                    const json = Serialize(t, () => Test);
+                    const json = SerializeInternal(t, () => Test);
                     expect(json.value).toEqual([
                         { l0List: [{ strVal: "00" }, { strVal: "01" }] },
                         { l0List: [{ strVal: "10" }, { strVal: "11" }] },
@@ -686,7 +686,7 @@ describe("Serializing", () => {
 
                 it("serializes nested arrays 2", () => {
                     const t = [[1, 2], [3, 4]];
-                    const json = Serialize(t, itIsAnArray(itIsAnArray(() => Number)));
+                    const json = SerializeInternal(t, itIsAnArray(itIsAnArray(() => Number)));
                     expect(json).toEqual([[1, 2], [3, 4]]);
                 });
 
@@ -698,7 +698,7 @@ describe("Serializing", () => {
 
                     const t = new Test();
                     t.value = [1, 2, 3];
-                    const json = Serialize(t, () => Test);
+                    const json = SerializeInternal(t, () => Test);
                     expect(json.value).toBeUndefined();
                     expect(json.different).toEqual([1, 2, 3]);
                 });
@@ -726,7 +726,7 @@ describe("Serializing", () => {
 
             const t = new Test();
             t.value = new MySet([1, 2, 3]);
-            const json = Serialize(t, () => Test);
+            const json = SerializeInternal(t, () => Test);
             expect(json.value).toEqual([1, 2, 3]);
         });
 
@@ -737,7 +737,7 @@ describe("Serializing", () => {
 
             const t = new Test();
             t.value = new Set([1, 2, 3]);
-            const json = Serialize(t, () => Test);
+            const json = SerializeInternal(t, () => Test);
             expect(json.value).toEqual([1, 2, 3]);
         });
         it("serializes an array of typed objects", () => {
@@ -759,7 +759,7 @@ describe("Serializing", () => {
                 new TestType("str1"),
                 new TestType("str2")
             ]);
-            const json = Serialize(t, () => Test);
+            const json = SerializeInternal(t, () => Test);
             expect(json.value).toEqual([
                 { strVal: "str0" },
                 { strVal: "str1" },
@@ -805,7 +805,7 @@ describe("Serializing", () => {
                     new TestTypeL0("21")
                 ]))
             ]);
-            const json = Serialize(t, () => Test);
+            const json = SerializeInternal(t, () => Test);
             expect(json.value).toEqual([
                 { l0List: [{ strVal: "00" }, { strVal: "01" }] },
                 { l0List: [{ strVal: "10" }, { strVal: "11" }] },
@@ -821,7 +821,7 @@ describe("Serializing", () => {
 
             const t = new Test();
             t.value = new Set([1, 2, 3]);
-            const json = Serialize(t, () => Test);
+            const json = SerializeInternal(t, () => Test);
             expect(json.value).toBeUndefined();
             expect(json.different).toEqual([1, 2, 3]);
         });
@@ -856,7 +856,7 @@ describe("Serializing", () => {
                     RuntimeTypingSetTypeString(Satellite, "my Satellite type");
                     RuntimeTypingSetTypeString(Test0, "my Test0 type");
                     RuntimeTypingSetTypeString(MyDico, "my MyDico type");
-                    const json = Serialize(s, () => Test0);
+                    const json = SerializeInternal(s, () => Test0);
                     RuntimeTypingDisable();
                     RuntimeTypingResetDictionary();
                     expect((json.dico1 as any)["1"]).toEqual({$type: "my Moon type", name: "Europa"});
@@ -876,7 +876,7 @@ describe("Serializing", () => {
                     s.value0 = "strValue";
                     s.value1 = true;
                     s.value2 = 100;
-                    const json = Serialize(s, () => Test);
+                    const json = SerializeInternal(s, () => Test);
                     expect(json.value0).toBe("strValue");
                     expect(json.value1).toBe(true);
                     expect(json.value2).toBe(100);
@@ -893,7 +893,7 @@ describe("Serializing", () => {
                     s.value0 = ["strValue", "00"];
                     s.value1 = [false, true];
                     s.value2 = 100;
-                    const json = Serialize(s, () => Test);
+                    const json = SerializeInternal(s, () => Test);
                     expect(json.value0).toEqual(["strValue", "00"]);
                     expect(json.value1).toEqual([false, true]);
                     expect(json.value2).toBe(100);
@@ -906,7 +906,7 @@ describe("Serializing", () => {
 
                     const s = new Test();
                     s.value = { v0: 1, v1: undefined, v2: 2 };
-                    const json = Serialize(s, () => Test);
+                    const json = SerializeInternal(s, () => Test);
                     expect(json).toEqual({
                         value: {
                             v0: 1,
@@ -936,7 +936,7 @@ describe("Serializing", () => {
                     l1.value0 = "strValue2";
                     l1.value1 = true;
                     l1.value2 = 101;
-                    const json = Serialize(s, () => Test);
+                    const json = SerializeInternal(s, () => Test);
                     expect(json).toEqual({
                         values: [
                             {
@@ -970,7 +970,7 @@ describe("Serializing", () => {
                     l0.value0 = "strValue";
                     l0.value1 = true;
                     l0.value2 = 100;
-                    const json = Serialize(s, () => Test);
+                    const json = SerializeInternal(s, () => Test);
                     expect(json).toEqual({
                         value0: {
                             value0: "strValue",
@@ -1001,7 +1001,7 @@ describe("Serializing", () => {
                     l1.value0 = "strValue2";
                     l1.value1 = true;
                     l1.value2 = 101;
-                    const json = Serialize(s, () => Test);
+                    const json = SerializeInternal(s, () => Test);
                     expect(json).toEqual({
                         values: {
                             key0: {
@@ -1039,7 +1039,7 @@ describe("Serializing", () => {
                     l1.value0 = "strValue2";
                     l1.value1 = true;
                     l1.value2 = 101;
-                    const json = Serialize(s, () => Test);
+                    const json = SerializeInternal(s, () => Test);
                     expect(json).toEqual({
                         values: [
                             {
@@ -1063,7 +1063,7 @@ describe("Serializing", () => {
 
                     const s = new Test();
                     s.value0 = () => {};
-                    const json = Serialize(s, () => Test);
+                    const json = SerializeInternal(s, () => Test);
                     expect(json).toEqual({
                         value0: null
                     });
@@ -1076,7 +1076,7 @@ describe("Serializing", () => {
 
                     const s = new Test();
                     s.value0 = "strValue";
-                    const json = Serialize(s, () => Test);
+                    const json = SerializeInternal(s, () => Test);
                     expect(json).toEqual({
                         different: "strValue"
                     });
@@ -1093,7 +1093,7 @@ describe("Serializing", () => {
 
                     const s = new Test();
                     s.value0 = new Sub();
-                    const json = Serialize(s, () => Test);
+                    const json = SerializeInternal(s, () => Test);
                     expect(json).toEqual({
                         value0: { n: "100" }
                     });
@@ -1114,7 +1114,7 @@ describe("Serializing", () => {
                     s.value0 = "strValue";
                     s.value1 = true;
                     s.value2 = 100;
-                    const json = Serialize(s, () => Test);
+                    const json = SerializeInternal(s, () => Test);
                     SetSerializeKeyTransform(null);
                     expect(json).toEqual({
                         VALUE0: "strValue",
@@ -1141,7 +1141,7 @@ describe("Serializing", () => {
                     s.value0 = "strValue";
                     s.value1 = true;
                     s.value2 = 100;
-                    const json = Serialize(s, () => Test);
+                    const json = SerializeInternal(s, () => Test);
                     SetSerializeKeyTransform(null);
                     expect(json).toEqual({
                         VALUE0: "strValue",
@@ -1165,7 +1165,7 @@ describe("Serializing", () => {
                     }
 
                     const s = new Test();
-                    const json = Serialize(s, () => Test);
+                    const json = SerializeInternal(s, () => Test);
                     SetSerializeKeyTransform(null);
                     expect(json).toEqual({
                         VALUE0: { v0: "yes", v1: "no" },
@@ -1202,7 +1202,7 @@ describe("Serializing", () => {
             }
 
             const s = new Test();
-            const json = Serialize(s, () => Test);
+            const json = SerializeInternal(s, () => Test);
             expect(json).toEqual({
                 value: "yes",
                 value1: "yes"
@@ -1226,7 +1226,7 @@ describe("Serializing", () => {
             }
 
             const s = new Test();
-            const json = Serialize(s, () => Test);
+            const json = SerializeInternal(s, () => Test);
             expect(json).toEqual({
                 newValue: "yes",
                 value: 1
@@ -1242,7 +1242,7 @@ describe("Serializing", () => {
             }
 
             const s = new Test();
-            const json = Serialize(s, () => Test);
+            const json = SerializeInternal(s, () => Test);
             expect(json).toEqual({
                 v: "hello"
             });
@@ -1260,7 +1260,7 @@ describe("Serializing", () => {
             s.next.next = new Test();
             s.next.next.next = s;
             RefCycleDetectionEnable();
-            const json = Serialize(s, () => Test);
+            const json = SerializeInternal(s, () => Test);
             RefClean();
             RefCycleDetectionDisable();
             expect(json).toEqual({
@@ -1285,7 +1285,7 @@ describe("Serializing", () => {
             const s = new Test();
             s.next = s;
             RefCycleDetectionEnable();
-            const json = Serialize(s, () => Test);
+            const json = SerializeInternal(s, () => Test);
             RefClean();
             RefCycleDetectionDisable();
             expect(json).toEqual({
@@ -1313,19 +1313,19 @@ describe("Serializing", () => {
 
             const s = new Test();
             SelectiveSerialization(1);
-            const json1 = Serialize(s, () => Test);
+            const json1 = SerializeInternal(s, () => Test);
             expect(json1).toEqual({
                 v1: 1,
                 v2: 2
             });
             SelectiveSerialization(2);
-            const json2 = Serialize(s, () => Test);
+            const json2 = SerializeInternal(s, () => Test);
             expect(json2).toEqual({
                 v2: 2,
                 v3: 3
             });
             SelectiveSerialization(3);
-            const json3 = Serialize(s, () => Test);
+            const json3 = SerializeInternal(s, () => Test);
             expect(json3).toEqual({
                 v1: 1,
                 v2: 2,
@@ -1361,7 +1361,7 @@ describe("Serializing", () => {
             RuntimeTypingSetTypeString(Test1, "my Test1 type");
             RuntimeTypingSetTypeString(Test2, "my Test2 type");
             RuntimeTypingSetTypeString(Test3, "my Test3 type");
-            const json = SerializeArray(s, () => Test0);
+            const json = SerializeArrayInternal(s, () => Test0);
             RuntimeTypingDisable();
             RuntimeTypingResetDictionary();
             expect(json).toEqual([
@@ -1384,7 +1384,7 @@ describe("Serializing", () => {
             s.push(new Test(), new Test(), new Test(), new Test());
             RuntimeTypingEnable();
             RuntimeTypingSetTypeString(Test, "my Test type");
-            const json = Serialize(s, itIsAnArray(() => Test));
+            const json = SerializeInternal(s, itIsAnArray(() => Test));
             RuntimeTypingDisable();
             RuntimeTypingResetDictionary();
             expect(json).toEqual([
@@ -1417,7 +1417,7 @@ describe("Serializing", () => {
             RuntimeTypingSetTypeString(Test1, "my Test1 type");
             RuntimeTypingSetTypeString(Test2, "my Test2 type");
             RuntimeTypingSetTypeString(Test3, "my Test3 type");
-            const json = Serialize(s, () => Test3);
+            const json = SerializeInternal(s, () => Test3);
             RuntimeTypingDisable();
             RuntimeTypingResetDictionary();
             expect(json).toEqual({
@@ -1442,7 +1442,7 @@ describe("Serializing", () => {
             }
 
             const d = new Flag(2);
-            const json = Serialize(d, () => Flag);
+            const json = SerializeInternal(d, () => Flag);
             expect(json).toEqual({ bPrime: 3 });
         });
     });
@@ -1460,7 +1460,7 @@ describe("Serializing", () => {
             }
 
             const t = new Test();
-            const json = Serialize(t, () => Test);
+            const json = SerializeInternal(t, () => Test);
             expect(json).toEqual({ valueTrue: true });
         });
 
@@ -1476,7 +1476,7 @@ describe("Serializing", () => {
             }
 
             const t = new Test();
-            const json = Serialize(t, () => Test);
+            const json = SerializeInternal(t, () => Test);
             expect(json).toEqual({ valueNotDefault: 1 });
         });
 
@@ -1503,7 +1503,7 @@ describe("Serializing", () => {
             test.shouldNotBeSerialized = elephant;
             test.shouldBeSerialized = snake;
 
-            const json = Serialize(test, () => Test);
+            const json = SerializeInternal(test, () => Test);
             expect(json).toEqual({ shouldBeSerialized: { hasTail: true } });
         });
     });
@@ -1529,7 +1529,7 @@ describe("Serializing", () => {
             const t = new Test();
             // tslint:disable-next-line:no-construct
             t.valueFalse = new Boolean(false);
-            const json = Serialize(t, () => Test);
+            const json = SerializeInternal(t, () => Test);
             expect(json).toEqual({ valueFalse: false });
         });
 
@@ -1551,7 +1551,7 @@ describe("Serializing", () => {
             }
 
             const t = new Test();
-            const json = Serialize(t, () => Test);
+            const json = SerializeInternal(t, () => Test);
             expect(json).toEqual({ valueNotDefault1: 1 });
         });
     });

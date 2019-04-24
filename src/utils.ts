@@ -5,7 +5,6 @@ import {
     SerializablePrimitiveType
 } from "./types";
 
-/** @internal */
 export function getTarget<T>(
     type: ISerializableType<T>,
     target: T,
@@ -28,13 +27,11 @@ export function getTarget<T>(
     return {} as T;
 }
 
-/** @internal */
 export function getConstructor(type: any): new(...args: any[]) => any {
     return Object.getOwnPropertyDescriptor(type, "__originalConstructor__") ?
             (type as any).__originalConstructor__ : type;
 }
 
-/** @internal */
 export function isPrimitiveType(type: Function): boolean {
     return (
         type === String ||
@@ -45,7 +42,6 @@ export function isPrimitiveType(type: Function): boolean {
     );
 }
 
-/** @internal */
 export function isPrimitiveAnonymousType(type: () => Function): boolean {
     try {
         return (
@@ -66,7 +62,6 @@ export function isPrimitiveAnonymousType(type: () => Function): boolean {
     }
 }
 
-/** @internal */
 export function DefaultPrimitiveValue(value: any) {
     if (value instanceof String) {
         return String();
@@ -83,7 +78,6 @@ export function DefaultPrimitiveValue(value: any) {
     return null;
 }
 
-/** @internal */
 export function DowncastPrimitive(value: SerializablePrimitiveType): primitive {
     if (value instanceof String
         || value instanceof Boolean
@@ -95,7 +89,6 @@ export function DowncastPrimitive(value: SerializablePrimitiveType): primitive {
     throw new Error("DowncastPrimitive failed on " + value);
 }
 
-/** @internal */
 export function setBitConditionally(
     value: number,
     bits: number,
@@ -132,4 +125,37 @@ export function stringifyNumber(key: string, value: any) {
         }
     }
     return value;
+}
+
+let NbDeserialization = 0;
+let NbSerialization = 0;
+
+export function initSerialization(): void {
+    NbSerialization++;
+}
+
+export function cleanupSerialization(): void {
+    NbSerialization--;
+}
+
+export function initDeserialization(): void {
+    NbDeserialization++;
+}
+
+export function cleanupDeserialization(): void {
+    NbDeserialization--;
+}
+
+/**
+ * return true if there is we are deserializing
+ */
+export function DeserializationOccurring() {
+    return NbDeserialization > 0;
+}
+
+/**
+ * return true if there is we are serializing
+ */
+export function SerializationOccurring() {
+    return NbSerialization > 0;
 }
