@@ -42,7 +42,7 @@ export enum InstantiationMethod {
 export enum ArrayHandling {
     Into, /** deserialize into each cell, grow or shrink array to fit serialized array size */
     ConcatAtTheEnd, /** keep previous array, add the deserialized one at the end */
-    New /** replace the array by a new one */
+    New /** empty the array before adding element to it */
 }
 
 export interface IJsonObject {
@@ -86,5 +86,35 @@ export class ItIsAnArrayInternal {
         }
 }
 
-/** @internal */
 export const noDefaultValueSymbole = Symbol("No default value");
+
+/**
+ * @template R type of reference stored in the serialized json
+ */
+export interface IRefHandler {
+    /** list of keywords to be ignored during deserialization */
+    keyWord: string[];
+
+    /** set an ID for the given object. idempotent
+     * @param json the data resulting of the serialization (ie where to store the ref)
+     * @param obj the object being serialized
+     */
+    serializationSetID(json: JsonType, obj: any): void;
+    /**
+     * @param json where to store the ref
+     * @param obj the object from which we get the ref
+     */
+    serializationSetRef(json: JsonType, obj: any): void;
+    /** get the object corresponding to the reference carried by json */
+    deserializationGetObject(json: JsonType): any;
+    /** associate the ref carried by json to the object obj */
+    deserializationRegisterObject(json: JsonType, obj: any): void;
+    /** cleanup function. called at the end of serialization. may be used to remove unnecessary ID */
+    removeID?(obj: any): void;
+    /** called when user want to start over the ref (refHandler may be used from nested serialization) */
+    clean?(): void;
+    /** called at each call to a (de)serialize function (not a decorator) */
+    init?(): void;
+    /** called at the end of a (de)serialize function (not a decorator) */
+    done?(): void;
+}

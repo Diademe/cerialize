@@ -3,7 +3,6 @@ import {
     MetaData,
     MetaDataFlag
 } from "./meta_data";
-import { cycleBreaking } from "./ref_cycle";
 import { TypeString } from "./runtime_typing";
 import {
     ASerializableType,
@@ -17,6 +16,8 @@ import {
     SerializablePrimitiveType
 } from "./types";
 
+import { cycleBreaking } from "./cycle";
+import { getRefHandler } from "./ref";
 import {
     DowncastPrimitive,
     isPrimitiveType
@@ -40,8 +41,14 @@ export function SerializeObjectMapInternal<T>(
     const target: IIndexable<JsonType> = {};
     const keys = Object.keys(source);
 
-    if (cycleBreaking(target, source)) {
-        return target;
+    if (MetaData.refCycleDetection) {
+        if (cycleBreaking.seen(source)) {
+            getRefHandler().serializationSetRef(target, source);
+            return target;
+        }
+        else {
+            getRefHandler().serializationSetID(target, source);
+        }
     }
 
     if (type instanceof ItIsAnArrayInternal) {
@@ -79,8 +86,14 @@ export function SerializeMapInternal<K, V>(
     const target: IIndexable<JsonType> = {};
     const keys = source.keys();
 
-    if (cycleBreaking(target, source)) {
-        return target;
+    if (MetaData.refCycleDetection) {
+        if (cycleBreaking.seen(source)) {
+            getRefHandler().serializationSetRef(target, source);
+            return target;
+        }
+        else {
+            getRefHandler().serializationSetID(target, source);
+        }
     }
 
     if (TypeString.getRuntimeTyping()) {
@@ -241,8 +254,14 @@ export function SerializeInternal<T>(
             }
         }
 
-        if (cycleBreaking(target, instance)) {
-            return target;
+        if (MetaData.refCycleDetection) {
+            if (cycleBreaking.seen(instance)) {
+                getRefHandler().serializationSetRef(target, instance);
+                return target;
+            }
+            else {
+                getRefHandler().serializationSetID(target, instance);
+            }
         }
 
         for (const metadata of metadataList) {

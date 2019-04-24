@@ -6,6 +6,7 @@ import {
     DeserializeObjectMapInternal
 } from "./deserialize";
 import { MetaData } from "./meta_data";
+import { getRefHandler, } from "./ref";
 import {
     SerializeArrayInternal,
     SerializeInternal,
@@ -43,6 +44,7 @@ export {
     RuntimeTypingDisable,
     typeString
 } from "./runtime_typing";
+export { setRefHandler, RefHandler } from "./ref";
 export * from "./serialize";
 export * from "./deserialize";
 export * from "./decorators";
@@ -54,8 +56,12 @@ export {
     stringifyNumber,
     SerializationOccurring
 } from "./utils";
-export { RefClean } from "./ref_cycle";
 
+export function RefClean() {
+    if (getRefHandler().clean) {
+        getRefHandler().clean();
+    }
+}
 
 export function SetSerializeKeyTransform(fn: (str: string) => string): void {
     MetaData.serializeKeyTransform = typeof fn === "function" ? fn : NoOp;

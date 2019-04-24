@@ -1,5 +1,5 @@
 import { getDefaultValue, MetaData, MetaDataFlag } from "./meta_data";
-import { getReference, referenceHandling, setId } from "./ref_cycle";
+import { getRefHandler } from "./ref";
 import { TypeString } from "./runtime_typing";
 import {
     getTarget,
@@ -8,7 +8,6 @@ import {
 
 import {
     ArrayHandling,
-    ASerializableType,
     ASerializableTypeOrArray,
     IConstructable,
     IIndexable,
@@ -21,9 +20,9 @@ import {
     SerializablePrimitiveType
 } from "./types";
 
-const keywords = ["$id", "$type", "$ref"];
+const keywords = ["$type"];
 function notAKeyword(y: string) {
-    return keywords.find((x) => x === y) === undefined;
+    return Array.from(getRefHandler().keyWord).concat(keywords).find((x) => x === y) === undefined;
 }
 
 export function DeserializeObjectMapInternal<T>(
@@ -46,11 +45,12 @@ export function DeserializeObjectMapInternal<T>(
         return null;
     }
 
-    const tmp = { a: target as IIndexable<T> };
-    if (referenceHandling(data, tmp)) {
-        return tmp.a;
+    if (MetaData.refCycleDetection) {
+        const refObject = getRefHandler().deserializationGetObject(data);
+        if (refObject !== undefined) {
+            return refObject as IIndexable<T>;
+        }
     }
-    target = tmp.a;
 
     const keys = Object.keys(data).filter(notAKeyword);
     for (const key of keys) {
@@ -90,11 +90,14 @@ export function DeserializeMapInternal<K, V, C extends Map<K, V>>(
         return null;
     }
 
-    const tmp = { a: target as C };
-    if (referenceHandling(data, tmp)) {
-        return tmp.a;
+    // if we detect references, then if the reference is defined, return the corresponding object
+    if (MetaData.refCycleDetection) {
+        const refObject = getRefHandler().deserializationGetObject(data);
+        if (refObject !== undefined) {
+            return refObject;
+        }
+        getRefHandler().deserializationRegisterObject(data, target);
     }
-    target = tmp.a;
 
     const keys = Object.keys(data).filter(notAKeyword);
     for (const key of keys) {
@@ -317,9 +320,11 @@ export function DeserializeInternal<T extends IIndexable>(
         if (data === null) {
             return undefined;
         }
-        const tmp1 = {a: {}};
-        if (getReference(data, tmp1)) {
-            return tmp1.a as T;
+        if (MetaData.refCycleDetection) {
+            const refObject = getRefHandler().deserializationGetObject(data);
+            if (refObject !== undefined) {
+                return refObject as T;
+            }
         }
         if (TypeString.getRuntimeTyping() && !isPrimitiveType(type()) && (data as IJsonObject).$type) {
             type = () => TypeString.getTypeFromString(
@@ -349,7 +354,9 @@ export function DeserializeInternal<T extends IIndexable>(
         }
 
         target = getTarget(type() as any, target, instantiationMethod) as T;
-        setId(data, target);
+        if (MetaData.refCycleDetection) {
+            getRefHandler().deserializationRegisterObject(data, target);
+        }
 
         let onDeserialized = "";
         for (const metadata of metadataList) {

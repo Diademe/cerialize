@@ -743,6 +743,12 @@ By default, `JSON.stringify(Number.POSITIVE_INFINITY)` return null. But we can p
 The same problem arise during parse. Use `JSON.parse('"Infinity"', parseNumber);`.
 These two functions are compatible with the [FloatFormatHandling](https://www.newtonsoft.com/json/help/html/T_Newtonsoft_Json_FloatFormatHandling.htm) Newtonsoft option.
 
+## define your own module to deal with references
+you can set your own module to deal with references. see the source `ref.ts` for an example.
+```typescript
+setRefHandler(new RefHandler());
+```
+
 ## Summary
 
 ### Decorator

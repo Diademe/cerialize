@@ -1,3 +1,5 @@
+import { cycleBreaking } from "./cycle";
+import { getRefHandler } from "./ref";
 import {
     InstantiationMethod,
     ISerializableType,
@@ -132,18 +134,32 @@ let NbSerialization = 0;
 
 export function initSerialization(): void {
     NbSerialization++;
+    cycleBreaking.push();
+    if (getRefHandler().init) {
+        getRefHandler().init();
+    }
 }
 
 export function cleanupSerialization(): void {
     NbSerialization--;
+    cycleBreaking.pop();
+    if (getRefHandler().clean) {
+        getRefHandler().clean();
+    }
 }
 
 export function initDeserialization(): void {
     NbDeserialization++;
+    if (getRefHandler().init) {
+        getRefHandler().init();
+    }
 }
 
 export function cleanupDeserialization(): void {
     NbDeserialization--;
+    if (getRefHandler().clean) {
+        getRefHandler().clean();
+    }
 }
 
 /**
