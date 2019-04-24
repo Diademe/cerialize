@@ -50,7 +50,7 @@ export * from "./serialize";
 export * from "./deserialize";
 export * from "./decorators";
 export * from "./string_transforms";
-export { IIndexable as Indexable, InstantiationMethod } from "./types";
+export { IIndexable as Indexable, InstantiationMethod, ArrayHandling } from "./types";
 export {
     DeserializationOccurring,
     parseNumber,
