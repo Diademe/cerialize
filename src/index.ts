@@ -180,37 +180,6 @@ export function SerializeObjectMap<T>(
 Deserialization
 */
 
-export function DeserializeRaw<T>(
-    data: IJsonObject,
-    type: ASerializableTypeOrArray<T>,
-    target?: T
-): T | null {
-    return Deserialize(data as any, type as any, target, InstantiationMethod.None);
-}
-
-export function DeserializeArrayRaw<T>(
-    data: IJsonArray,
-    type: ASerializableTypeOrArray<T>,
-    target?: T[],
-    handling: ArrayHandling = ArrayHandling.Into
-): T[] | null {
-    initDeserialization();
-    const ret = DeserializeArrayInternal(data, type, () => Array, handling, target, InstantiationMethod.None);
-    cleanupDeserialization();
-    return ret;
-}
-
-export function DeserializeMapRaw<T>(
-    data: IIndexable<JsonType>,
-    type: ASerializableTypeOrArray<T>,
-    target?: IIndexable<T>
-): IIndexable<T> | null {
-    initDeserialization();
-    const ret = DeserializeObjectMapInternal(data, type, target, InstantiationMethod.None);
-    cleanupDeserialization();
-    return ret;
-}
-
 export function DeserializeObjectMap<T>(
     data: IJsonObject,
     type: ASerializableTypeOrArray<T>,

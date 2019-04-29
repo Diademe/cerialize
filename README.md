@@ -403,57 +403,6 @@ The default InstantiationMethod can be changed with `SetDefaultInstantiationMeth
         const json = DeserializeJson(value);
     ```
 
-- `DeserializeRaw<T>(data : JsonObject, type : () => SerializableType<T>, target? : T) : T`  
-    `Raw` is a invoke the deserialization with InstantiationMethod set to None.
-    ```typescript
-        const json = {/* some values from server */};
-
-        //deserialize into a new object
-        const newObject = DeserializeRaw(json, Starship);
-
-        //deserialize into an existing object
-        const existingObject = {};
-        DeserializeRaw(json, Starship, existingObject);
-    ```
-- `DeserializeArrayRaw<T>(data : JsonArray, type : () => SerializableType<T>, target? : Array<T>) : Array<T>`
-    ```typescript
-        const json = [
-            {/* some values from server */},
-            {/* some values from server */},
-            {/* some values from server */}
-        ];
-
-        // make a new array of plain objects
-        const plainObjectArray = DeserializeArrayRaw(json, Starship); 
-        const existingArray = [{}, {}];
-        
-        const value0 = existingArray[0];
-        const value1 = existingArray[1];
-
-        /* re-use our existing array, if possible use existing plain objects in array, otherwise create new ones */
-        DeserializeArrayRaw(json, () => Starship, existingArray); 
-        expect(existingArray[0]).toBe(value0);
-        expect(existingArray[1]).toBe(value1);
-        expect(existingArray.length).toBe(3);
-
-    ```
-- `DeserializeMapRaw<T>(data : Indexable<JsonType>, type : SerializableType<T>, target? : Indexable<T>) : Indexable<T>`
-    ```typescript
-        const json = {
-            ship0: {/* some values from server */},
-            ship1: {/* some values from server */},
-            ship2: {/* some values from server */}
-        };
-        const plainObjectMap = DeserializeMapRaw(json, () => Starship); // make a new map of plain objects
-        const existingMap = {
-            ship0: {},
-            ship3: {}
-        }
-        /* re-use our existing map, if possible use existing plain objects in map, otherwise create new ones */
-        DeserializeMapRaw(json, () => Starship, existingMap); 
-    ```
-    
-
 ## onSerialized Callback
 
 A callback can be provided for when a class is serialized. To define the callback, add a static method `onSerialized<T>(instance : T, json : JsonObject)` to the class that needs custom post processing. You can either return a new value from this function, or modify the `json` parameter.
