@@ -132,32 +132,40 @@ export function stringifyNumber(key: string, value: any) {
 let NbDeserialization = 0;
 let NbSerialization = 0;
 
-export function initSerialization(): void {
-    NbSerialization++;
-    if (getRefHandler().init) {
-        getRefHandler().init();
+export function serializationContinuation<T>(func: (...args: any[]) => T, ...args: any[]): T {
+    let ret: T;
+    try {
+        NbSerialization++;
+        if (getRefHandler().init) {
+            getRefHandler().init();
+        }
+        ret = func.apply(null, args);
+        if (getRefHandler().done) {
+            getRefHandler().done();
+        }
     }
+    finally {
+        NbSerialization--;
+    }
+    return ret;
 }
 
-export function cleanupSerialization(): void {
-    NbSerialization--;
-    if (getRefHandler().done) {
-        getRefHandler().done();
+export function deserializationContinuation<T>(func: (...args: any[]) => T, ...args: any[]): T {
+    let ret: T;
+    try {
+        NbDeserialization++;
+        if (getRefHandler().init) {
+            getRefHandler().init();
+        }
+        ret = func.apply(null, args);
+        if (getRefHandler().done) {
+            getRefHandler().done();
+        }
     }
-}
-
-export function initDeserialization(): void {
-    NbDeserialization++;
-    if (getRefHandler().init) {
-        getRefHandler().init();
+    finally {
+        NbDeserialization--;
     }
-}
-
-export function cleanupDeserialization(): void {
-    NbDeserialization--;
-    if (getRefHandler().done) {
-        getRefHandler().done();
-    }
+    return ret;
 }
 
 /**

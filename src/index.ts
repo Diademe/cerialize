@@ -32,10 +32,8 @@ import {
     SerializablePrimitiveType
 } from "./types";
 import {
-    cleanupDeserialization,
-    cleanupSerialization,
-    initDeserialization,
-    initSerialization
+    deserializationContinuation,
+    serializationContinuation
 } from "./utils";
 
 export {
@@ -112,47 +110,32 @@ export function Serialize<T>(
     instance: T,
     type: ASerializableTypeOrArray<T>
 ): null | JsonType[] | IJsonObject {
-    initSerialization();
-    const ret = SerializeInternal(instance, type as any);
-    cleanupSerialization();
-    return ret;
+    return serializationContinuation(SerializeInternal, instance, type as any);
 }
 
 export function SerializeJSON(source: any, transformKeys = true): JsonType {
-    initSerialization();
-    const ret = SerializeJSONInternal(source, transformKeys);
-    cleanupSerialization();
-    return ret;
+    return serializationContinuation(SerializeJSONInternal, source, transformKeys);
 }
 
 export function SerializePrimitive<T>(
     source: SerializablePrimitiveType,
     type: () => SerializablePrimitiveType
 ): JsonType {
-    initSerialization();
-    const ret = SerializePrimitiveInternal(source, type);
-    cleanupSerialization();
-    return ret;
+    return serializationContinuation(SerializePrimitiveInternal, source, type);
 }
 
 export function SerializeSet<T>(
     source: T[],
     type: ASerializableTypeOrArray<T>
 ): JsonType[] {
-    initSerialization();
-    const ret = SerializeSetInternal(source, type);
-    cleanupSerialization();
-    return ret;
+    return serializationContinuation(SerializeSetInternal, source, type);
 }
 
 export function SerializeArray<T>(
     source: T[],
     type: ASerializableTypeOrArray<T>
 ): JsonType[] {
-    initSerialization();
-    const ret = SerializeArrayInternal(source, type);
-    cleanupSerialization();
-    return ret;
+    return serializationContinuation(SerializeArrayInternal, source, type);
 }
 
 export function SerializeMap<K, V>(
@@ -160,20 +143,14 @@ export function SerializeMap<K, V>(
     keyType: ASerializableTypeOrArray<K>,
     valueType: ASerializableTypeOrArray<V>,
 ): IIndexable<JsonType> {
-    initSerialization();
-    const ret = SerializeMapInternal(source, keyType, valueType);
-    cleanupSerialization();
-    return ret;
+    return serializationContinuation(SerializeMapInternal, source, keyType, valueType);
 }
 
 export function SerializeObjectMap<T>(
     source: T,
     type: ASerializableTypeOrArray<T>
 ): IIndexable<JsonType> {
-    initSerialization();
-    const ret = SerializeObjectMapInternal(source, type);
-    cleanupSerialization();
-    return ret;
+    return serializationContinuation(SerializeObjectMapInternal, source, type);
 }
 
 /*
@@ -186,10 +163,9 @@ export function DeserializeObjectMap<T>(
     target?: IIndexable<T>,
     instantiationMethod: InstantiationMethod = MetaData.deserializeInstantiationMethod
 ): IIndexable<T> {
-    initDeserialization();
-    const ret = DeserializeObjectMapInternal(data, type, target, instantiationMethod);
-    cleanupDeserialization();
-    return ret;
+    return deserializationContinuation<IIndexable<T>>(
+        DeserializeObjectMapInternal,
+        data, type, target, instantiationMethod);
 }
 
 export function DeserializeMap<K, V>(
@@ -199,10 +175,9 @@ export function DeserializeMap<K, V>(
     target?: Map<K, V>,
     instantiationMethod: InstantiationMethod = MetaData.deserializeInstantiationMethod
 ): Map<K, V> {
-    initDeserialization();
-    const ret = DeserializeMapInternal(data, keyType, valueType, () => Map as any, null, instantiationMethod);
-    cleanupDeserialization();
-    return ret;
+    return deserializationContinuation<Map<K, V>>(
+        DeserializeMapInternal,
+        data, keyType, valueType, () => Map as any, target, instantiationMethod);
 }
 
 export function DeserializeArray<T, C extends T[]>(
@@ -213,10 +188,9 @@ export function DeserializeArray<T, C extends T[]>(
     target?: C,
     instantiationMethod: InstantiationMethod = MetaData.deserializeInstantiationMethod
 ) {
-    initDeserialization();
-    const ret = DeserializeArrayInternal(data, type, constructor, handling, target, instantiationMethod);
-    cleanupDeserialization();
-    return ret;
+    return deserializationContinuation<C>(
+        DeserializeArrayInternal,
+        data, type, constructor, handling, target, instantiationMethod);
 }
 
 export function DeserializeJSON(
@@ -224,10 +198,9 @@ export function DeserializeJSON(
     transformKeys = true,
     target?: JsonType
 ): JsonType {
-    initDeserialization();
-    const ret = DeserializeJSONInternal(data, transformKeys, target);
-    cleanupDeserialization();
-    return ret;
+    return deserializationContinuation<JsonType>(
+        DeserializeJSONInternal,
+        data, transformKeys, target);
 }
 
 export function Deserialize<T extends IIndexable>(
@@ -248,8 +221,7 @@ export function Deserialize<T extends IIndexable>(
     target?: T,
     instantiationMethod: InstantiationMethod = MetaData.deserializeInstantiationMethod
 ): T | null {
-    initDeserialization();
-    const ret = DeserializeInternal(data, type, target, instantiationMethod);
-    cleanupDeserialization();
-    return ret;
+    return deserializationContinuation(
+        DeserializeInternal,
+        data, type, target, instantiationMethod);
 }
