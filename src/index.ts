@@ -55,7 +55,8 @@ export {
     IIndexable as Indexable,
     InstantiationMethod,
     ArrayHandling,
-    IRefHandler
+    IRefHandler,
+    JsonType
 } from "./types";
 export {
     DeserializationOccurring,
