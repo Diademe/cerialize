@@ -6,7 +6,10 @@ import {
     DeserializeMapInternal,
     DeserializeObjectMapInternal
 } from "./deserialize";
-import { MetaData } from "./meta_data";
+import {
+    ClassMetaData,
+    PropMetaData
+} from "./meta_data";
 import { getRefHandler, } from "./ref";
 import {
     SerializeArrayInternal,
@@ -64,17 +67,17 @@ export function RefClean() {
 }
 
 export function SetSerializeKeyTransform(fn: (str: string) => string): void {
-    MetaData.serializeKeyTransform = typeof fn === "function" ? fn : NoOp;
+    PropMetaData.serializeKeyTransform = typeof fn === "function" ? fn : NoOp;
 }
 
 export function SetDeserializeKeyTransform(fn: (str: string) => string): void {
-    MetaData.deserializeKeyTransform = typeof fn === "function" ? fn : NoOp;
+    PropMetaData.deserializeKeyTransform = typeof fn === "function" ? fn : NoOp;
 }
 
 export function SetDefaultInstantiationMethod(
     instantiationMethod: InstantiationMethod
 ): void {
-    MetaData.deserializeInstantiationMethod =
+    PropMetaData.deserializeInstantiationMethod =
         instantiationMethod === null
             ? InstantiationMethod.New
             : instantiationMethod;
@@ -84,14 +87,14 @@ export function SetDefaultInstantiationMethod(
  * Enable references and cyclic references detection
  */
 export function RefCycleDetectionEnable() {
-    MetaData.refCycleDetection = true;
+    ClassMetaData.refCycleDetection = true;
 }
 
 /**
  * Enable references and cyclic references detection
  */
 export function RefCycleDetectionDisable() {
-    MetaData.refCycleDetection = false;
+    ClassMetaData.refCycleDetection = false;
 }
 
 export function itIsAnArray(
@@ -161,7 +164,7 @@ export function DeserializeObjectMap<T>(
     data: IJsonObject,
     type: ASerializableTypeOrArray<T>,
     target?: IIndexable<T>,
-    instantiationMethod: InstantiationMethod = MetaData.deserializeInstantiationMethod
+    instantiationMethod: InstantiationMethod = PropMetaData.deserializeInstantiationMethod
 ): IIndexable<T> {
     return deserializationContinuation<IIndexable<T>>(
         DeserializeObjectMapInternal,
@@ -173,7 +176,7 @@ export function DeserializeMap<K, V>(
     keyType: ASerializableTypeOrArray<K>,
     valueType: ASerializableTypeOrArray<V>,
     target?: Map<K, V>,
-    instantiationMethod: InstantiationMethod = MetaData.deserializeInstantiationMethod
+    instantiationMethod: InstantiationMethod = PropMetaData.deserializeInstantiationMethod
 ): Map<K, V> {
     return deserializationContinuation<Map<K, V>>(
         DeserializeMapInternal,
@@ -186,7 +189,7 @@ export function DeserializeArray<T, C extends T[]>(
     constructor: () => IConstructable = () => Array,
     handling: ArrayHandling = ArrayHandling.Into,
     target?: C,
-    instantiationMethod: InstantiationMethod = MetaData.deserializeInstantiationMethod
+    instantiationMethod: InstantiationMethod = PropMetaData.deserializeInstantiationMethod
 ) {
     return deserializationContinuation<C>(
         DeserializeArrayInternal,
@@ -219,7 +222,7 @@ export function Deserialize<T extends IIndexable>(
     data: IJsonObject | IJsonArray,
     type: ASerializableTypeOrArray<T>,
     target?: T,
-    instantiationMethod: InstantiationMethod = MetaData.deserializeInstantiationMethod
+    instantiationMethod: InstantiationMethod = PropMetaData.deserializeInstantiationMethod
 ): T | null {
     return deserializationContinuation(
         DeserializeInternal,

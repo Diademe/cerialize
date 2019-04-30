@@ -18,6 +18,7 @@ import {
     deserializeUsing,
     emitDefaultValue,
     inheritSerialization,
+    isReference,
     itIsAnArray,
     onDeserialized,
     RefClean,
@@ -1343,8 +1344,46 @@ describe("Deserializing", () => {
             expect(instance.value0).toBe(instance.value1);
         });
 
-        it("Cycle length 3", () => {
+        it("ReferenceCycle = true, is reference = false", () => {
+            class Test {
+                @deserializeAsJson() public value: number = 10;
+            }
+            @isReference(false)
+            class Test0 {
+                @deserializeAs(() => Test) public value0: Test;
+                @deserializeAs(() => Test) public value1: Test;
+            }
+            const json = {
+                value0: { $id: "2", value: 1 },
+                value1: { $ref: "2" }
+            };
+            RefCycleDetectionEnable();
+            const instance = Deserialize(json, () => Test0);
+            RefClean();
+            RefCycleDetectionDisable();
+            expect(instance.value0).toBe(instance.value1);
+        });
 
+        it("ReferenceCycle = false, is reference = true", () => {
+            @isReference(true)
+            class Test {
+                @deserializeAsJson() public value: number = 10;
+            }
+
+            class Test0 {
+                @deserializeAs(() => Test) public value0: Test;
+                @deserializeAs(() => Test) public value1: Test;
+            }
+            const json = {
+                value0: { $id: "2", value: 1 },
+                value1: { $ref: "2" }
+            };
+            const instance = Deserialize(json, () => Test0);
+            RefClean();
+            expect(instance.value0).toBe(instance.value1);
+        });
+
+        it("Cycle length 3", () => {
             class Test {
                 @deserializeAs(() => Test) public next: Test;
             }

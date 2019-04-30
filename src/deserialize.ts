@@ -1,4 +1,9 @@
-import { getDefaultValue, MetaData, MetaDataFlag } from "./meta_data";
+import {
+    ClassMetaData,
+    getDefaultValue,
+    PropMetaData,
+    PropMetaDataFlag
+} from "./meta_data";
 import { getRefHandler } from "./ref";
 import { TypeString } from "./runtime_typing";
 import {
@@ -15,6 +20,7 @@ import {
     IJsonObject,
     InstantiationMethod,
     ISerializableType,
+    IsReference,
     ItIsAnArrayInternal,
     JsonType,
     SerializablePrimitiveType
@@ -45,7 +51,11 @@ export function DeserializeObjectMapInternal<T>(
         return null;
     }
 
-    if (MetaData.refCycleDetection) {
+    const isReference = ClassMetaData.getMetaData(target.constructor).isReference;
+    if (
+        ClassMetaData.refCycleDetection && isReference !== IsReference.False ||
+        isReference === IsReference.True
+        ) {
         const refObject = getRefHandler().deserializationGetObject(data);
         if (refObject !== undefined) {
             return refObject as IIndexable<T>;
@@ -56,7 +66,7 @@ export function DeserializeObjectMapInternal<T>(
     for (const key of keys) {
         const value = data[key];
         if (value !== undefined) {
-            target[MetaData.deserializeKeyTransform(key)] = DeserializeInternal(
+            target[PropMetaData.deserializeKeyTransform(key)] = DeserializeInternal(
                 data[key] as any,
                 type,
                 target[key],
@@ -91,7 +101,11 @@ export function DeserializeMapInternal<K, V, C extends Map<K, V>>(
     }
 
     // if we detect references, then if the reference is defined, return the corresponding object
-    if (MetaData.refCycleDetection) {
+    const isReference = ClassMetaData.getMetaData(target.constructor).isReference;
+    if (
+        ClassMetaData.refCycleDetection && isReference !== IsReference.False ||
+        isReference === IsReference.True
+        ) {
         const refObject = getRefHandler().deserializationGetObject(data);
         if (refObject !== undefined) {
             return refObject;
@@ -106,7 +120,7 @@ export function DeserializeMapInternal<K, V, C extends Map<K, V>>(
             const keyTypeF = keyType as () => Function;
             const isString = keyTypeF() === String;
             const keyName = (isString ?
-                MetaData.deserializeKeyTransform(key) :
+                PropMetaData.deserializeKeyTransform(key) :
                 DeserializeInternal<K>(
                     JSON.parse(key),
                     keyType,
@@ -216,7 +230,7 @@ export function DeserializeSet<T, C extends Set<T>>(
     instantiationMethod?: InstantiationMethod
 ) {
     if (instantiationMethod === undefined) {
-        instantiationMethod = MetaData.deserializeInstantiationMethod;
+        instantiationMethod = PropMetaData.deserializeInstantiationMethod;
     }
 
     return DeserializeSetInternal(data, keyType, constructor, target, instantiationMethod);
@@ -282,7 +296,7 @@ export function DeserializeJSONInternal(
             const value = (data as IIndexable<JsonType>)[key];
             if (value !== undefined) {
                 const returnValueKey = transformKeys
-                    ? MetaData.deserializeKeyTransform(key)
+                    ? PropMetaData.deserializeKeyTransform(key)
                     : key;
                 returnValue[returnValueKey] = DeserializeJSONInternal(
                     (data as IIndexable<JsonType>)[key],
@@ -320,19 +334,33 @@ export function DeserializeInternal<T extends IIndexable>(
         if (data === null) {
             return undefined;
         }
-        if (MetaData.refCycleDetection) {
-            const refObject = getRefHandler().deserializationGetObject(data);
-            if (refObject !== undefined) {
-                return refObject as T;
-            }
-        }
         if (TypeString.getRuntimeTyping() && !isPrimitiveType(type()) && (data as IJsonObject).$type) {
             type = () => TypeString.getTypeFromString(
                 (data as IJsonObject).$type
             ) as ISerializableType<T>;
         }
+        let classType: Function;
+        if (type()) {
+            classType = type();
+        }
+        else if (target) {
+            classType = target.constructor;
+        }
+        else {
+            throw new Error("Can not infer the type of the class deserialized");
+        }
+        let isReference = ClassMetaData.getMetaData(classType).isReference;
+        if (
+            ClassMetaData.refCycleDetection && isReference !== IsReference.False ||
+            isReference === IsReference.True
+            ) {
+            const refObject = getRefHandler().deserializationGetObject(data);
+            if (refObject !== undefined) {
+                return refObject as T;
+            }
+        }
 
-        const metadataList = MetaData.getMetaDataForType(type());
+        const metadataList = PropMetaData.getMetaDataForType(type());
 
         if (metadataList === null) {
             if (typeof type() === "function") {
@@ -354,13 +382,17 @@ export function DeserializeInternal<T extends IIndexable>(
         }
 
         target = getTarget(type() as any, target, instantiationMethod) as T;
-        if (MetaData.refCycleDetection) {
+        isReference = ClassMetaData.getMetaData(target.constructor).isReference;
+        if (
+            ClassMetaData.refCycleDetection && isReference !== IsReference.False ||
+            isReference === IsReference.True
+            ) {
             getRefHandler().deserializationRegisterObject(data, target);
         }
 
         let onDeserialized = "";
         for (const metadata of metadataList) {
-            if (metadata.flags === MetaDataFlag.onDeserialized){
+            if (metadata.flags === PropMetaDataFlag.onDeserialized){
                 onDeserialized = metadata.keyName;
                 continue;
             }
@@ -383,7 +415,7 @@ export function DeserializeInternal<T extends IIndexable>(
                 continue;
             }
 
-            if ((flags & MetaDataFlag.DeserializeObjectMap) !== 0) {
+            if ((flags & PropMetaDataFlag.DeserializeObjectMap) !== 0) {
                 target[keyName] = DeserializeObjectMapInternal(
                     source,
                     metadata.deserializedType,
@@ -391,7 +423,7 @@ export function DeserializeInternal<T extends IIndexable>(
                     instantiationMethod
                 );
             }
-    else if ((flags & MetaDataFlag.DeserializeMap) !== 0) {
+    else if ((flags & PropMetaDataFlag.DeserializeMap) !== 0) {
                 target[keyName] = DeserializeMapInternal(
                     source,
                     metadata.deserializedKeyType,
@@ -401,7 +433,7 @@ export function DeserializeInternal<T extends IIndexable>(
                     instantiationMethod
                 );
             }
-    else if ((flags & MetaDataFlag.DeserializeArray) !== 0) {
+    else if ((flags & PropMetaDataFlag.DeserializeArray) !== 0) {
                 target[keyName] = DeserializeArrayInternal(
                     source,
                     metadata.deserializedKeyType,
@@ -411,7 +443,7 @@ export function DeserializeInternal<T extends IIndexable>(
                     instantiationMethod
                 );
             }
-    else if ((flags & MetaDataFlag.DeserializeSet) !== 0) {
+    else if ((flags & PropMetaDataFlag.DeserializeSet) !== 0) {
                 target[keyName] = DeserializeSetInternal(
                     source,
                     metadata.deserializedKeyType,
@@ -420,14 +452,14 @@ export function DeserializeInternal<T extends IIndexable>(
                     instantiationMethod
                 );
             }
-    else if ((flags & MetaDataFlag.DeserializePrimitive) !== 0) {
+    else if ((flags & PropMetaDataFlag.DeserializePrimitive) !== 0) {
                 target[keyName] = DeserializePrimitive(
                     source,
                     metadata.deserializedType as (() => SerializablePrimitiveType),
                     target[keyName]
                 );
             }
-    else if ((flags & MetaDataFlag.DeserializeObject) !== 0) {
+    else if ((flags & PropMetaDataFlag.DeserializeObject) !== 0) {
                 target[keyName] = DeserializeInternal(
                     source,
                     metadata.deserializedType,
@@ -435,14 +467,14 @@ export function DeserializeInternal<T extends IIndexable>(
                     instantiationMethod
                 );
             }
-    else if ((flags & MetaDataFlag.DeserializeJSON) !== 0) {
+    else if ((flags & PropMetaDataFlag.DeserializeJSON) !== 0) {
                 target[keyName] = DeserializeJSONInternal(
                     source,
-                    (flags & MetaDataFlag.DeserializeJSONTransformKeys) !== 0,
+                    (flags & PropMetaDataFlag.DeserializeJSONTransformKeys) !== 0,
                     instantiationMethod
                 );
             }
-    else if ((flags & MetaDataFlag.DeserializeUsing) !== 0) {
+    else if ((flags & PropMetaDataFlag.DeserializeUsing) !== 0) {
                 target[keyName] = (metadata.deserializedType as any)(
                     source,
                     target[keyName],

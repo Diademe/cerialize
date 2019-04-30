@@ -1,7 +1,8 @@
 import {
+    ClassMetaData,
     isDefaultValue,
-    MetaData,
-    MetaDataFlag
+    PropMetaData,
+    PropMetaDataFlag
 } from "./meta_data";
 import { TypeString } from "./runtime_typing";
 import {
@@ -10,6 +11,7 @@ import {
     IIndexable,
     IJsonObject,
     ISerializableType,
+    IsReference,
     ItIsAnArrayInternal,
     JsonType,
     primitive,
@@ -41,7 +43,11 @@ export function SerializeObjectMapInternal<T>(
     const target: IIndexable<JsonType> = {};
     const keys = Object.keys(source);
 
-    if (MetaData.refCycleDetection) {
+    const isReference = ClassMetaData.getMetaData(source.constructor).isReference;
+    if (
+        ClassMetaData.refCycleDetection && isReference !== IsReference.False ||
+        isReference === IsReference.True
+        ) {
         if (cycleBreaking.seen(source)) {
             getRefHandler().serializationSetRef(target, source);
             return target;
@@ -64,7 +70,7 @@ export function SerializeObjectMapInternal<T>(
         for (const key of keys) {
             const value = (source as any)[key];
             if (value !== undefined) {
-                target[MetaData.serializeKeyTransform(key)] = SerializeInternal(
+                target[PropMetaData.serializeKeyTransform(key)] = SerializeInternal(
                     value,
                     type
                 );
@@ -86,7 +92,11 @@ export function SerializeMapInternal<K, V>(
     const target: IIndexable<JsonType> = {};
     const keys = source.keys();
 
-    if (MetaData.refCycleDetection) {
+    const isReference = ClassMetaData.getMetaData(source.constructor).isReference;
+    if (
+        ClassMetaData.refCycleDetection && isReference !== IsReference.False ||
+        isReference === IsReference.True
+        ) {
         if (cycleBreaking.seen(source)) {
             getRefHandler().serializationSetRef(target, source);
             return target;
@@ -110,7 +120,7 @@ export function SerializeMapInternal<K, V>(
             else {
                 const keyTypeF = keyType() as Function;
                 const isString = keyTypeF === String;
-                targetKey = isString ? MetaData.serializeKeyTransform(key as any) : key;
+                targetKey = isString ? PropMetaData.serializeKeyTransform(key as any) : key;
             }
             const targetValue = SerializeInternal(
                     value,
@@ -206,7 +216,7 @@ export function SerializeJSONInternal(source: any, transformKeys = true): JsonTy
                 const value = source[key];
                 if (value !== undefined) {
                     const returnValueKey = transformKeys
-                        ? MetaData.serializeKeyTransform(key)
+                        ? PropMetaData.serializeKeyTransform(key)
                         : key;
                     returnValue[returnValueKey] = SerializeJSONInternal(value, transformKeys);
                 }
@@ -242,7 +252,7 @@ export function SerializeInternal<T>(
             type = () => (instance.constructor as ISerializableType<T>);
         }
 
-        const metadataList = MetaData.getMetaDataForType(type());
+        const metadataList = PropMetaData.getMetaDataForType(type());
 
         // todo -- maybe move this to a Generic deserialize
         if (metadataList === null) {
@@ -253,8 +263,11 @@ export function SerializeInternal<T>(
                 return target;
             }
         }
-
-        if (MetaData.refCycleDetection) {
+        const isReference = ClassMetaData.getMetaData(instance.constructor).isReference;
+        if (
+            ClassMetaData.refCycleDetection && isReference !== IsReference.False ||
+            isReference === IsReference.True
+            ) {
             if (cycleBreaking.seen(instance)) {
                 getRefHandler().serializationSetRef(target, instance);
                 return target;
@@ -282,7 +295,7 @@ export function SerializeInternal<T>(
             const keyName = metadata.getSerializedKey();
             const flags = metadata.flags;
 
-            if ((flags & MetaDataFlag.SerializeMap) !== 0) {
+            if ((flags & PropMetaDataFlag.SerializeMap) !== 0) {
                 const val = SerializeMapInternal(source,
                     metadata.serializedKeyType,
                     metadata.serializedValueType,
@@ -292,28 +305,28 @@ export function SerializeInternal<T>(
                 }
                 target[keyName] = val;
             }
-            else if ((flags & MetaDataFlag.SerializeObjectMap) !== 0) {
+            else if ((flags & PropMetaDataFlag.SerializeObjectMap) !== 0) {
                 const val = SerializeObjectMapInternal(source, metadata.serializedType);
                 if (isDefaultValue(metadata, source)) {
                     continue;
                 }
                 target[keyName] = val;
             }
-            else if ((flags & MetaDataFlag.SerializeSet) !== 0) {
+            else if ((flags & PropMetaDataFlag.SerializeSet) !== 0) {
                 const val = SerializeSetInternal(source, metadata.serializedKeyType);
                 if (isDefaultValue(metadata, source)) {
                     continue;
                 }
                 target[keyName] = val;
             }
-            else if ((flags & MetaDataFlag.SerializeArray) !== 0) {
+            else if ((flags & PropMetaDataFlag.SerializeArray) !== 0) {
                 const val = SerializeArrayInternal(source, metadata.serializedKeyType);
                 if (isDefaultValue(metadata, source)) {
                     continue;
                 }
                 target[keyName] = val;
             }
-            else if ((flags & MetaDataFlag.SerializePrimitive) !== 0) {
+            else if ((flags & PropMetaDataFlag.SerializePrimitive) !== 0) {
                 const val = SerializePrimitiveInternal(
                     source,
                     metadata.serializedType as () => SerializablePrimitiveType
@@ -323,24 +336,24 @@ export function SerializeInternal<T>(
                 }
                 target[keyName] = val;
             }
-            else if ((flags & MetaDataFlag.SerializeObject) !== 0) {
+            else if ((flags & PropMetaDataFlag.SerializeObject) !== 0) {
                 const val = SerializeInternal(source, metadata.serializedType as any);
                 if (isDefaultValue(metadata, source)) {
                     continue;
                 }
                 target[keyName] = val;
             }
-            else if ((flags & MetaDataFlag.SerializeJSON) !== 0) {
+            else if ((flags & PropMetaDataFlag.SerializeJSON) !== 0) {
                 const val = SerializeJSONInternal(
                     source,
-                    (flags & MetaDataFlag.SerializeJSONTransformKeys) !== 0
+                    (flags & PropMetaDataFlag.SerializeJSONTransformKeys) !== 0
                 );
                 if (isDefaultValue(metadata, source)) {
                     continue;
                 }
                 target[keyName] = val;
             }
-            else if ((flags & MetaDataFlag.SerializeUsing) !== 0) {
+            else if ((flags & PropMetaDataFlag.SerializeUsing) !== 0) {
                 const val = (metadata.serializedType as any)(source);
                 if (isDefaultValue(metadata, source)) {
                     continue;

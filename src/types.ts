@@ -88,9 +88,6 @@ export class ItIsAnArrayInternal {
 
 export const noDefaultValueSymbole = Symbol("No default value");
 
-/**
- * @template R type of reference stored in the serialized json
- */
 export interface IRefHandler {
     /** list of keywords to be ignored during deserialization */
     keyWord: string[];
@@ -117,4 +114,10 @@ export interface IRefHandler {
     init?(): void;
     /** called at the end of a (de)serialize function (not a decorator) */
     done?(): void;
+}
+
+export enum IsReference {
+    Default, /** use global setting */
+    True, /** will use reference handling regardless of global setting */
+    False /** will not use reference handling regardless of global setting */
 }

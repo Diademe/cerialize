@@ -1,4 +1,3 @@
-import { cycleBreaking } from "./cycle";
 import { getRefHandler } from "./ref";
 import {
     InstantiationMethod,

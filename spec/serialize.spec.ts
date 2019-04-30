@@ -8,6 +8,7 @@ import {
     defaultValue,
     emitDefaultValue,
     inheritSerialization,
+    isReference,
     serializeAs,
     serializeAsArray,
     serializeAsJson,
@@ -1245,6 +1246,57 @@ describe("Serializing", () => {
                 v: "hello"
             });
         });
+    });
+
+    describe("isReference", () => {
+        it("ReferenceCycle = true, is reference = false", () => {
+            @isReference(false)
+            class Test {
+                @serializeAs(() => Test) public next: Test;
+            }
+            const s = new Test();
+            s.next = new Test();
+            s.next.next = new Test();
+            s.next.next.next = undefined;
+
+            RefCycleDetectionEnable();
+            const json = Serialize(s, () => Test);
+            RefClean();
+            RefCycleDetectionDisable();
+            expect(json).toEqual({
+                next: {
+                    next: {
+                        next: undefined
+                    }
+                }
+            });
+
+        });
+
+        it("ReferenceCycle = false, is reference = true", () => {
+            @isReference(true)
+            class Test {
+                @serializeAs(() => Test) public next: Test;
+            }
+            const s = new Test();
+            s.next = new Test();
+            s.next.next = new Test();
+            s.next.next.next = undefined;
+
+            const json = Serialize(s, () => Test);
+            RefClean();
+            expect(json).toEqual({
+                $id: "1",
+                next: {
+                    $id: "2",
+                    next: {
+                        $id: "3",
+                        next: undefined
+                    }
+                }
+            });
+        });
+
     });
 
     describe("ReferenceCycle", () => {

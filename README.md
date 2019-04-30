@@ -649,6 +649,28 @@ RefCycleDetectionDisable();
 obj.value1 == obj.value0; /*true*/
 ```
 
+You can also override RefCycleDetection with the class decorator isReference.
+```typescript
+@isReference(true)
+class Test {
+    @deserializeAsJson() public value: number = 10;
+}
+
+class Test0 {
+    @deserializeAsJson() public value0: Test;
+    @deserializeAsJson() public value1: Test;
+}
+const json = {
+    value0: { $id: 2, value: 1 },
+    value1: { $ref: 2 }
+};
+RefCycleDetectionEnable();
+const instance = Deserialize(json, () => Test0);
+RefClean();
+RefCycleDetectionDisable();
+obj.value1 == obj.value0; /* true */
+```
+
 ### Note
 For architectural code choice, during deserialization, the parser must read the object id before any mention of it's reference. For example the following json would crash during deserialization :
 ```typescript
