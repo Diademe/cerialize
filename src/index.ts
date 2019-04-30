@@ -56,7 +56,9 @@ export {
     InstantiationMethod,
     ArrayHandling,
     IRefHandler,
-    JsonType
+    JsonType,
+    IJsonObject,
+    IJsonArray
 } from "./types";
 export {
     DeserializationOccurring,
