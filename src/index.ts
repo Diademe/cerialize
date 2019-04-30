@@ -32,7 +32,7 @@ import {
     InstantiationMethod,
     ItIsAnArrayInternal,
     JsonType,
-    SerializablePrimitiveType
+    SerializablePrimitiveType,
 } from "./types";
 import {
     deserializationContinuation,
@@ -51,7 +51,12 @@ export * from "./serialize";
 export * from "./deserialize";
 export * from "./decorators";
 export * from "./string_transforms";
-export { IIndexable as Indexable, InstantiationMethod, ArrayHandling } from "./types";
+export {
+    IIndexable as Indexable,
+    InstantiationMethod,
+    ArrayHandling,
+    IRefHandler
+} from "./types";
 export {
     DeserializationOccurring,
     parseNumber,
