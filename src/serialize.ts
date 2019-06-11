@@ -7,10 +7,11 @@ import {
 import { TypeString } from "./runtime_typing";
 import {
     ASerializableType,
-    ASerializableTypeOrArray,
+    ASerializableTypeOrArrayInternal,
     IIndexable,
     IJsonObject,
     ISerializableType,
+    isItAnArrayInternal,
     IsReference,
     ItIsAnArrayInternal,
     JsonType,
@@ -35,7 +36,7 @@ export function SelectiveSerialization(
 
 export function SerializeObjectMapInternal<T>(
     source: T,
-    type: ASerializableTypeOrArray<T>
+    type: ASerializableTypeOrArrayInternal<T>
 ): IIndexable<JsonType> {
     if (source === null || source === undefined) {
         return null;
@@ -57,7 +58,7 @@ export function SerializeObjectMapInternal<T>(
         }
     }
 
-    if (type instanceof ItIsAnArrayInternal) {
+    if (isItAnArrayInternal(type)) {
         if (TypeString.getRuntimeTyping()) {
             target.$type = TypeString.getStringFromType(source.constructor);
         }
@@ -83,8 +84,8 @@ export function SerializeObjectMapInternal<T>(
 
 export function SerializeMapInternal<K, V>(
     source: Map<K, V>,
-    keyType: ASerializableTypeOrArray<K>,
-    valueType: ASerializableTypeOrArray<V>,
+    keyType: ASerializableTypeOrArrayInternal<K>,
+    valueType: ASerializableTypeOrArrayInternal<V>,
 ): IIndexable<JsonType> {
     if (source === null || source === undefined) {
         return null;
@@ -114,7 +115,7 @@ export function SerializeMapInternal<K, V>(
         const value = source.get(key);
         if (value !== undefined) {
             let targetKey: string | K | JsonType[];
-            if (keyType instanceof ItIsAnArrayInternal) {
+            if (isItAnArrayInternal(keyType)) {
                 targetKey = SerializeArrayInternal(key as any, keyType.type);
             }
             else {
@@ -135,7 +136,7 @@ export function SerializeMapInternal<K, V>(
 
 export function SerializeArrayInternal<T>(
     source: T[],
-    type: ASerializableTypeOrArray<T>
+    type: ASerializableTypeOrArrayInternal<T>
 ): JsonType[] {
     if (source === null || source === undefined) {
         return null;
@@ -149,7 +150,7 @@ export function SerializeArrayInternal<T>(
 
 export function SerializeSetInternal<T>(
     source: T[],
-    type: ASerializableTypeOrArray<T>
+    type: ASerializableTypeOrArrayInternal<T>
 ): JsonType[] {
     return SerializeArrayInternal(Array.from(source.values()), type);
 }
@@ -234,7 +235,7 @@ export function SerializeInternal<T>(instance: T, type: ItIsAnArrayInternal): Js
 export function SerializeInternal<T>(instance: T, type: ASerializableType<T>): IJsonObject;
 export function SerializeInternal<T>(
     instance: T,
-    type: ASerializableTypeOrArray<T>
+    type: ASerializableTypeOrArrayInternal<T>
 ): null | JsonType[] | IJsonObject {
     if (instance === undefined || instance === null) {
         return null;
@@ -242,7 +243,7 @@ export function SerializeInternal<T>(
 
     const target: IIndexable<JsonType> = {};
 
-    if (type instanceof ItIsAnArrayInternal) {
+    if (isItAnArrayInternal(type)) {
         const a = SerializeArrayInternal(instance as any, type.type);
         return a;
     }

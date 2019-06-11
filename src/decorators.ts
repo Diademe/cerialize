@@ -5,11 +5,11 @@ import {
 } from "./meta_data";
 import {
     ArrayHandling,
-    ASerializableTypeOrArray,
+    ASerializableTypeOrArrayInternal,
     IConstructable,
     ISerializer,
+    isItAnArrayInternal,
     IsReference,
-    ItIsAnArrayInternal,
     SerializeFn
 } from "./types";
 import {
@@ -40,7 +40,7 @@ export function serializeUsing(serializer: SerializeFn, keyName?: string) {
     };
 }
 
-export function serializeAs(type: ASerializableTypeOrArray<any>, keyName?: string) {
+export function serializeAs(type: ASerializableTypeOrArrayInternal<any>, keyName?: string) {
     return (target: IConstructable, actualKeyName: string): void => {
         const metadata = PropMetaData.getMetaData(
             target.constructor,
@@ -52,13 +52,13 @@ export function serializeAs(type: ASerializableTypeOrArray<any>, keyName?: strin
         metadata.flags = setBitConditionally(
             metadata.flags,
             PropMetaDataFlag.SerializePrimitive,
-            type instanceof ItIsAnArrayInternal ? false : isPrimitiveAnonymousType(type)
+            isItAnArrayInternal(type) ? false : isPrimitiveAnonymousType(type)
         );
     };
 }
 
 export function serializeAsArray<T>(
-    type: ASerializableTypeOrArray<T>,
+    type: ASerializableTypeOrArrayInternal<T>,
     constructor?: () => IConstructable,
     keyName?: string
 ) {
@@ -74,12 +74,12 @@ export function serializeAsArray<T>(
         metadata.flags = setBitConditionally(
             metadata.flags,
             PropMetaDataFlag.SerializePrimitive,
-            type instanceof ItIsAnArrayInternal ? false : isPrimitiveAnonymousType(type)
+            isItAnArrayInternal(type) ? false : isPrimitiveAnonymousType(type)
         );
     };
 }
 
-export function serializeAsObjectMap<T>( type: ASerializableTypeOrArray<T>, keyName?: string) {
+export function serializeAsObjectMap<T>( type: ASerializableTypeOrArrayInternal<T>, keyName?: string) {
     return (target: any, actualKeyName: string): any  => {
         const metadata = PropMetaData.getMetaData(
             target.constructor,
@@ -91,13 +91,13 @@ export function serializeAsObjectMap<T>( type: ASerializableTypeOrArray<T>, keyN
         metadata.flags = setBitConditionally(
             metadata.flags,
             PropMetaDataFlag.SerializePrimitive,
-            type instanceof ItIsAnArrayInternal ? false : isPrimitiveAnonymousType(type)
+            isItAnArrayInternal(type) ? false : isPrimitiveAnonymousType(type)
         );
     };
 }
 
 export function serializeAsSet<T>(
-    type: ASerializableTypeOrArray<T>,
+    type: ASerializableTypeOrArrayInternal<T>,
     constructor?: () => IConstructable,
     keyName?: string) {
     return (target: any, actualKeyName: string): any  => {
@@ -112,14 +112,14 @@ export function serializeAsSet<T>(
         metadata.flags = setBitConditionally(
             metadata.flags,
             PropMetaDataFlag.SerializePrimitive,
-            type instanceof ItIsAnArrayInternal ? false : isPrimitiveAnonymousType(type)
+            isItAnArrayInternal(type) ? false : isPrimitiveAnonymousType(type)
         );
     };
 }
 
 export function serializeAsMap(
-    keyType: ASerializableTypeOrArray<any>,
-    valueType: ASerializableTypeOrArray<any>,
+    keyType: ASerializableTypeOrArrayInternal<any>,
+    valueType: ASerializableTypeOrArrayInternal<any>,
     constructor?: () => IConstructable,
     keyName?: string
 ) {
@@ -136,7 +136,7 @@ export function serializeAsMap(
         metadata.flags = setBitConditionally(
             metadata.flags,
             PropMetaDataFlag.SerializePrimitive,
-            valueType instanceof ItIsAnArrayInternal ? false : isPrimitiveAnonymousType(valueType)
+            isItAnArrayInternal(valueType) ? false : isPrimitiveAnonymousType(valueType)
         );
     };
 }
@@ -179,7 +179,7 @@ export function deserializeUsing(serializer: SerializeFn, keyName?: string) {
     };
 }
 
-export function deserializeAs(type: ASerializableTypeOrArray<any>, keyName?: string) {
+export function deserializeAs(type: ASerializableTypeOrArrayInternal<any>, keyName?: string) {
     return (target: IConstructable, actualKeyName: string): void  => {
         const metadata = PropMetaData.getMetaData(
             target.constructor,
@@ -191,13 +191,13 @@ export function deserializeAs(type: ASerializableTypeOrArray<any>, keyName?: str
         metadata.flags = setBitConditionally(
             metadata.flags,
             PropMetaDataFlag.DeserializePrimitive,
-            type instanceof ItIsAnArrayInternal ? false : isPrimitiveAnonymousType(type)
+            isItAnArrayInternal(type) ? false : isPrimitiveAnonymousType(type)
         );
     };
 }
 
 export function deserializeAsArray(
-    type: ASerializableTypeOrArray<any>,
+    type: ASerializableTypeOrArrayInternal<any>,
     constructor?: () => IConstructable,
     keyName?: string,
     handling: ArrayHandling = ArrayHandling.Into
@@ -215,13 +215,13 @@ export function deserializeAsArray(
         metadata.flags = setBitConditionally(
             metadata.flags,
             PropMetaDataFlag.DeserializePrimitive,
-            type instanceof ItIsAnArrayInternal ? false : isPrimitiveAnonymousType(type)
+            isItAnArrayInternal(type) ? false : isPrimitiveAnonymousType(type)
         );
     };
 }
 
 export function deserializeAsSet(
-    type: ASerializableTypeOrArray<any>,
+    type: ASerializableTypeOrArrayInternal<any>,
     constructor?: () => IConstructable,
     keyName?: string
 ) {
@@ -237,14 +237,14 @@ export function deserializeAsSet(
         metadata.flags = setBitConditionally(
             metadata.flags,
             PropMetaDataFlag.DeserializePrimitive,
-            type instanceof ItIsAnArrayInternal ? false : isPrimitiveAnonymousType(type)
+            isItAnArrayInternal(type) ? false : isPrimitiveAnonymousType(type)
         );
     };
 }
 
 export function deserializeAsMap(
-    keyType: ASerializableTypeOrArray<any>,
-    valueType: ASerializableTypeOrArray<any>,
+    keyType: ASerializableTypeOrArrayInternal<any>,
+    valueType: ASerializableTypeOrArrayInternal<any>,
     constructor?: () => IConstructable,
     keyName?: string
 ) {
@@ -261,13 +261,13 @@ export function deserializeAsMap(
         metadata.flags = setBitConditionally(
             metadata.flags,
             PropMetaDataFlag.DeserializePrimitive,
-            valueType instanceof ItIsAnArrayInternal ? false : isPrimitiveAnonymousType(valueType)
+            isItAnArrayInternal(valueType) ? false : isPrimitiveAnonymousType(valueType)
         );
     };
 }
 
 export function deserializeAsObjectMap(
-    valueType: ASerializableTypeOrArray<any>,
+    valueType: ASerializableTypeOrArrayInternal<any>,
     keyName?: string
 ) {
     return (target: IConstructable, actualKeyName: string): void  => {
@@ -281,7 +281,7 @@ export function deserializeAsObjectMap(
         metadata.flags = setBitConditionally(
             metadata.flags,
             PropMetaDataFlag.DeserializePrimitive,
-            valueType instanceof ItIsAnArrayInternal ? false : isPrimitiveAnonymousType(valueType)
+            isItAnArrayInternal(valueType) ? false : isPrimitiveAnonymousType(valueType)
         );
     };
 }
@@ -330,7 +330,7 @@ export function autoserializeUsing(
     };
 }
 
-export function autoserializeAs(type: ASerializableTypeOrArray<any>, keyName?: string) {
+export function autoserializeAs(type: ASerializableTypeOrArrayInternal<any>, keyName?: string) {
     return (target: IConstructable, actualKeyName: string): void  => {
         const metadata = PropMetaData.getMetaData(
             target.constructor,
@@ -346,13 +346,13 @@ export function autoserializeAs(type: ASerializableTypeOrArray<any>, keyName?: s
         metadata.flags = setBitConditionally(
             metadata.flags,
             PropMetaDataFlag.AutoPrimitive,
-            type instanceof ItIsAnArrayInternal ? false : isPrimitiveAnonymousType(type)
+            isItAnArrayInternal(type) ? false : isPrimitiveAnonymousType(type)
         );
     };
 }
 
 export function autoserializeAsArray(
-    type: ASerializableTypeOrArray<any>,
+    type: ASerializableTypeOrArrayInternal<any>,
     constructor?: () => IConstructable,
     keyName?: string,
     handling: ArrayHandling = ArrayHandling.Into
@@ -375,13 +375,13 @@ export function autoserializeAsArray(
         metadata.flags = setBitConditionally(
             metadata.flags,
             PropMetaDataFlag.AutoPrimitive,
-            type instanceof ItIsAnArrayInternal ? false : isPrimitiveAnonymousType(type)
+            isItAnArrayInternal(type) ? false : isPrimitiveAnonymousType(type)
         );
     };
 }
 
 export function autoserializeAsSet(
-    type: ASerializableTypeOrArray<any>,
+    type: ASerializableTypeOrArrayInternal<any>,
     constructor?: () => IConstructable,
     keyName?: string
 ) {
@@ -402,13 +402,13 @@ export function autoserializeAsSet(
         metadata.flags = setBitConditionally(
             metadata.flags,
             PropMetaDataFlag.AutoPrimitive,
-            type instanceof ItIsAnArrayInternal ? false : isPrimitiveAnonymousType(type)
+            isItAnArrayInternal(type) ? false : isPrimitiveAnonymousType(type)
         );
     };
 }
 
 export function autoserializeAsObjectMap(
-    type: ASerializableTypeOrArray<any>,
+    type: ASerializableTypeOrArrayInternal<any>,
     keyName?: string
 ) {
     return (target: IConstructable, actualKeyName: string): void  => {
@@ -426,14 +426,14 @@ export function autoserializeAsObjectMap(
         metadata.flags = setBitConditionally(
             metadata.flags,
             PropMetaDataFlag.AutoPrimitive,
-            type instanceof ItIsAnArrayInternal ? false : isPrimitiveAnonymousType(type)
+            isItAnArrayInternal(type) ? false : isPrimitiveAnonymousType(type)
         );
     };
 }
 
 export function autoserializeAsMap(
-    keyType: ASerializableTypeOrArray<any>,
-    valueType: ASerializableTypeOrArray<any>,
+    keyType: ASerializableTypeOrArrayInternal<any>,
+    valueType: ASerializableTypeOrArrayInternal<any>,
     constructor?: () => IConstructable,
     keyName?: string
 ) {
@@ -456,7 +456,7 @@ export function autoserializeAsMap(
         metadata.flags = setBitConditionally(
             metadata.flags,
             PropMetaDataFlag.AutoPrimitive,
-            valueType instanceof ItIsAnArrayInternal ? false : isPrimitiveAnonymousType(valueType)
+            isItAnArrayInternal(valueType) ? false : isPrimitiveAnonymousType(valueType)
         );
     };
 }

@@ -24,7 +24,7 @@ import { NoOp } from "./string_transforms";
 import {
     ArrayHandling,
     ASerializableType,
-    ASerializableTypeOrArray,
+    ASerializableTypeOrArrayInternal,
     IConstructable,
     IIndexable,
     IJsonArray,
@@ -105,11 +105,14 @@ export function RefCycleDetectionDisable() {
     ClassMetaData.refCycleDetection = false;
 }
 
-export function itIsAnArray(
-    type: ASerializableTypeOrArray<any>,
-    ctor?: () => IConstructable
+export function itIsAnArray<
+    Value = any,
+    T extends Value[] = Value[],
+    C extends new() => T = new() => T>(
+    type: ASerializableTypeOrArrayInternal<Value>,
+    ctor?: () => C
     ): ItIsAnArrayInternal {
-    return new ItIsAnArrayInternal(type, ctor);
+    return new ItIsAnArrayInternal<Value, T, C>(type, ctor);
 }
 
 /*
@@ -119,7 +122,7 @@ export function Serialize<T>(instance: T, type: ItIsAnArrayInternal): JsonType[]
 export function Serialize<T>(instance: T, type: ASerializableType<T>): IJsonObject;
 export function Serialize<T>(
     instance: T,
-    type: ASerializableTypeOrArray<T>
+    type: ASerializableTypeOrArrayInternal<T>
 ): null | JsonType[] | IJsonObject {
     return serializationContinuation(SerializeInternal, instance, type as any);
 }
@@ -137,29 +140,29 @@ export function SerializePrimitive<T>(
 
 export function SerializeSet<T>(
     source: T[],
-    type: ASerializableTypeOrArray<T>
+    type: ASerializableTypeOrArrayInternal<T>
 ): JsonType[] {
     return serializationContinuation(SerializeSetInternal, source, type);
 }
 
 export function SerializeArray<T>(
     source: T[],
-    type: ASerializableTypeOrArray<T>
+    type: ASerializableTypeOrArrayInternal<T>
 ): JsonType[] {
     return serializationContinuation(SerializeArrayInternal, source, type);
 }
 
 export function SerializeMap<K, V>(
     source: Map<K, V>,
-    keyType: ASerializableTypeOrArray<K>,
-    valueType: ASerializableTypeOrArray<V>,
+    keyType: ASerializableTypeOrArrayInternal<K>,
+    valueType: ASerializableTypeOrArrayInternal<V>,
 ): IIndexable<JsonType> {
     return serializationContinuation(SerializeMapInternal, source, keyType, valueType);
 }
 
 export function SerializeObjectMap<T>(
     source: T,
-    type: ASerializableTypeOrArray<T>
+    type: ASerializableTypeOrArrayInternal<T>
 ): IIndexable<JsonType> {
     return serializationContinuation(SerializeObjectMapInternal, source, type);
 }
@@ -170,7 +173,7 @@ Deserialization
 
 export function DeserializeObjectMap<T>(
     data: IJsonObject,
-    type: ASerializableTypeOrArray<T>,
+    type: ASerializableTypeOrArrayInternal<T>,
     target?: IIndexable<T>,
     instantiationMethod: InstantiationMethod = PropMetaData.deserializeInstantiationMethod
 ): IIndexable<T> {
@@ -181,8 +184,8 @@ export function DeserializeObjectMap<T>(
 
 export function DeserializeMap<K, V>(
     data: IJsonObject,
-    keyType: ASerializableTypeOrArray<K>,
-    valueType: ASerializableTypeOrArray<V>,
+    keyType: ASerializableTypeOrArrayInternal<K>,
+    valueType: ASerializableTypeOrArrayInternal<V>,
     target?: Map<K, V>,
     instantiationMethod: InstantiationMethod = PropMetaData.deserializeInstantiationMethod
 ): Map<K, V> {
@@ -193,7 +196,7 @@ export function DeserializeMap<K, V>(
 
 export function DeserializeArray<T, C extends T[]>(
     data: IJsonArray,
-    type: ASerializableTypeOrArray<T>,
+    type: ASerializableTypeOrArrayInternal<T>,
     constructor: () => IConstructable = () => Array,
     handling: ArrayHandling = ArrayHandling.Into,
     target?: C,
@@ -228,7 +231,7 @@ export function Deserialize<K, T extends K[]>(
 ): T | null;
 export function Deserialize<T extends IIndexable>(
     data: IJsonObject | IJsonArray,
-    type: ASerializableTypeOrArray<T>,
+    type: ASerializableTypeOrArrayInternal<T>,
     target?: T,
     instantiationMethod: InstantiationMethod = PropMetaData.deserializeInstantiationMethod
 ): T | null {

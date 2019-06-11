@@ -5,7 +5,7 @@
 import { NoOp } from "./string_transforms";
 import {
     ArrayHandling,
-    ASerializableTypeOrArray,
+    ASerializableTypeOrArrayInternal,
     IConstructable,
     InstantiationMethod,
     IsReference,
@@ -82,6 +82,10 @@ export class PropMetaData {
         return false;
     }
 
+    public static isMap(flags: PropMetaDataFlag, target: unknown): target is Map<any, any> {
+        return (flags & PropMetaDataFlag.DeserializeMap) !== 0;
+    }
+
     // clone a meta data instance, used for inheriting serialization properties
     public static clone(data: PropMetaData): PropMetaData {
         const metadata = new PropMetaData(data.keyName);
@@ -145,12 +149,16 @@ export class PropMetaData {
     public keyName: string; // the key name of the property this meta data describes
     public serializedKey: string; // the target keyName for serializing
     public deserializedKey: string; // the target keyName for deserializing
-    public serializedType: ASerializableTypeOrArray<any>; // the type to use when serializing this property
-    public deserializedType: ASerializableTypeOrArray<any>; //  the type to use when deserializing this property
-    public serializedKeyType: ASerializableTypeOrArray<any>; //  the type to use when deserializing the key of a map
-    public deserializedKeyType: ASerializableTypeOrArray<any>; //  the type to use when serializing the key of a map
-    public serializedValueType: ASerializableTypeOrArray<any>; //  the type to use when deserializing the value of a map
-    public deserializedValueType: ASerializableTypeOrArray<any>; //  the type to use when serializing the value of a map
+    public serializedType: ASerializableTypeOrArrayInternal<any>; // the type to use when serializing this property
+    public deserializedType: ASerializableTypeOrArrayInternal<any>; //  the type to use when deserializing this property
+    // the type to use when deserializing the key of a map
+    public serializedKeyType: ASerializableTypeOrArrayInternal<any>;
+    // the type to use when serializing the key of a map
+    public deserializedKeyType: ASerializableTypeOrArrayInternal<any>;
+    // the type to use when deserializing the value of a map
+    public serializedValueType: ASerializableTypeOrArrayInternal<any>;
+    // the type to use when serializing the value of a map
+    public deserializedValueType: ASerializableTypeOrArrayInternal<any>;
     public flags: PropMetaDataFlag;
     public bitMaskSerialize: number;
     public emitDefaultValue: boolean;

@@ -13,13 +13,15 @@ import {
 
 import {
     ArrayHandling,
-    ASerializableTypeOrArray,
+    ASerializableType,
+    ASerializableTypeOrArrayInternal,
     IConstructable,
     IIndexable,
     IJsonArray,
     IJsonObject,
     InstantiationMethod,
     ISerializableType,
+    isItAnArrayInternal,
     IsReference,
     ItIsAnArrayInternal,
     JsonType,
@@ -33,7 +35,7 @@ function notAKeyword(y: string) {
 
 export function DeserializeObjectMapInternal<T>(
     data: IJsonObject,
-    type: ASerializableTypeOrArray<T>,
+    type: ASerializableTypeOrArrayInternal<T>,
     target?: IIndexable<T>,
     instantiationMethod?: InstantiationMethod
 ): IIndexable<T> {
@@ -78,12 +80,12 @@ export function DeserializeObjectMapInternal<T>(
     return target;
 }
 
-export function DeserializeMapInternal<K, V, C extends Map<K, V>>(
+export function DeserializeMapInternal<K, V, T extends Map<K, V>, C extends new() => T>(
     data: IJsonObject,
-    keyType: ASerializableTypeOrArray<K>,
-    valueType: ASerializableTypeOrArray<V>,
+    keyType: ASerializableTypeOrArrayInternal<K>,
+    valueType: ASerializableTypeOrArrayInternal<V>,
     constructor: () => C,
-    target?: C,
+    target?: T,
     instantiationMethod?: InstantiationMethod
 ): Map<K, V> {
     if (typeof data !== "object") {
@@ -139,14 +141,17 @@ export function DeserializeMapInternal<K, V, C extends Map<K, V>>(
     return target;
 }
 
-export function DeserializeArrayInternal<T, C extends T[]>(
+export function DeserializeArrayInternal<
+    Value,
+    T extends Value[],
+    C extends new() => T[]>(
     data: IJsonArray,
-    type: ASerializableTypeOrArray<T>,
-    constructor: () => IConstructable,
+    type: ASerializableTypeOrArrayInternal<Value>,
+    constructor: () => C,
     handling: ArrayHandling,
-    target?: C,
+    target?: T,
     instantiationMethod?: InstantiationMethod,
-) {
+): T {
     if (!Array.isArray(data)) {
         throw new Error(
             "Expected input to be an array but received: " + typeof data
@@ -155,7 +160,7 @@ export function DeserializeArrayInternal<T, C extends T[]>(
     if (!Array.isArray(target)) {
         target = new (constructor() as any)();
     }
-    let offset;
+    let offset: number;
     switch (handling) {
         case ArrayHandling.Into:
             offset = 0;
@@ -170,12 +175,12 @@ export function DeserializeArrayInternal<T, C extends T[]>(
             break;
     }
     for (let i = 0; i < data.length; i++) {
-        target[offset + i] = DeserializeInternal(
+        target[offset + i] = DeserializeInternal<Value>(
             data[i] as any,
             type,
             target[offset + i],
             instantiationMethod
-        ) as T;
+        );
     }
 
     return target;
@@ -183,7 +188,7 @@ export function DeserializeArrayInternal<T, C extends T[]>(
 
 export function DeserializeSetInternal<K, C extends Set<K>>(
     data: IJsonArray,
-    keyType: ASerializableTypeOrArray<K>,
+    keyType: ASerializableTypeOrArrayInternal<K>,
     constructor: () => IConstructable,
     target?: C,
     instantiationMethod?: InstantiationMethod
@@ -224,7 +229,7 @@ export function DeserializeSetInternal<K, C extends Set<K>>(
 
 export function DeserializeSet<T, C extends Set<T>>(
     data: IJsonArray,
-    keyType: ASerializableTypeOrArray<T>,
+    keyType: ASerializableTypeOrArrayInternal<T>,
     constructor: () => IConstructable = () => Set,
     target?: C,
     instantiationMethod?: InstantiationMethod
@@ -314,13 +319,13 @@ export function DeserializeJSONInternal(
     // primitive case
     return data;
 }
-export function DeserializeInternal<T extends IIndexable>(
+export function DeserializeInternal<T, K extends keyof T = keyof T>(
     data: IJsonObject | IJsonArray,
-    type: ASerializableTypeOrArray<T>,
+    type: ItIsAnArrayInternal | ASerializableType<T>,
     target?: T,
     instantiationMethod?: InstantiationMethod
 ): T | null {
-    if (type instanceof ItIsAnArrayInternal) {
+    if (isItAnArrayInternal(type)) {
         target = DeserializeArrayInternal(
             data as IJsonArray,
             type.type,
@@ -402,7 +407,7 @@ export function DeserializeInternal<T extends IIndexable>(
             }
 
             const source: any = (data as IJsonObject)[metadata.getDeserializedKey()];
-            const keyName = metadata.keyName;
+            const keyName = metadata.keyName as K;
             const flags = metadata.flags;
 
             const defVal = getDefaultValue(metadata, source);
@@ -421,7 +426,7 @@ export function DeserializeInternal<T extends IIndexable>(
                     metadata.deserializedType,
                     target[keyName],
                     instantiationMethod
-                );
+                ) as T[K];
             }
     else if ((flags & PropMetaDataFlag.DeserializeMap) !== 0) {
                 target[keyName] = DeserializeMapInternal(
@@ -429,17 +434,17 @@ export function DeserializeInternal<T extends IIndexable>(
                     metadata.deserializedKeyType,
                     metadata.deserializedValueType,
                     metadata.deserializedType as (() => MapConstructor),
-                    target[keyName],
+                    target[keyName] as unknown as Map<any, any>,
                     instantiationMethod
-                );
+                ) as unknown as T[K];
             }
     else if ((flags & PropMetaDataFlag.DeserializeArray) !== 0) {
                 target[keyName] = DeserializeArrayInternal(
                     source,
                     metadata.deserializedKeyType,
-                    metadata.deserializedType as (() => IConstructable),
+                    metadata.deserializedType as (() => ArrayConstructor),
                     metadata.arrayHandling,
-                    target[keyName],
+                    target[keyName] as any,
                     instantiationMethod
                 );
             }
@@ -447,8 +452,8 @@ export function DeserializeInternal<T extends IIndexable>(
                 target[keyName] = DeserializeSetInternal(
                     source,
                     metadata.deserializedKeyType,
-                    metadata.deserializedType as (() => IConstructable),
-                    target[keyName],
+                    metadata.deserializedType as (() => SetConstructor),
+                    target[keyName] as any,
                     instantiationMethod
                 );
             }
@@ -456,7 +461,7 @@ export function DeserializeInternal<T extends IIndexable>(
                 target[keyName] = DeserializePrimitive(
                     source,
                     metadata.deserializedType as (() => SerializablePrimitiveType),
-                    target[keyName]
+                    target[keyName] as any
                 );
             }
     else if ((flags & PropMetaDataFlag.DeserializeObject) !== 0) {
@@ -472,7 +477,7 @@ export function DeserializeInternal<T extends IIndexable>(
                     source,
                     (flags & PropMetaDataFlag.DeserializeJSONTransformKeys) !== 0,
                     instantiationMethod
-                );
+                ) as any;
             }
     else if ((flags & PropMetaDataFlag.DeserializeUsing) !== 0) {
                 target[keyName] = (metadata.deserializedType as any)(
@@ -484,7 +489,7 @@ export function DeserializeInternal<T extends IIndexable>(
         }
 
         if (onDeserialized){
-            target[onDeserialized]();
+            (target as any)[onDeserialized]();
         }
     }
 

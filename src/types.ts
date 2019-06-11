@@ -57,7 +57,7 @@ export interface ISerializer<T> {
     Deserialize: Deserializer<T>;
 }
 
-export interface IIndexable<T = any | null> {
+export interface IIndexable<T = any> {
     [idx: string]: T;
 }
 
@@ -71,19 +71,24 @@ export interface ISerializableType<T> {
     new (...args: any[]): T;
 }
 export type ASerializableType<T> = () => ISerializableType<T>;
-export type ASerializableTypeOrArray<T> = ASerializableType<T> | ItIsAnArrayInternal;
+export type ASerializableTypeOrArrayInternal<T> = ASerializableType<T> | ItIsAnArrayInternal;
 export type Serialized<T> =
     T extends ItIsAnArrayInternal ? JsonType[] :
     IJsonObject;
 
-export class ItIsAnArrayInternal {
+export class ItIsAnArrayInternal<
+    Value = any,
+    T extends Value[] = Value[],
+    C extends (new() => T) = new() => T> {
     constructor(
-        public type: ASerializableTypeOrArray<any>,
-        public ctor?: () => IConstructable,
+        public type: ASerializableTypeOrArrayInternal<Value>,
+        public ctor: () => C = (() => Array as any),
         public handling: ArrayHandling = ArrayHandling.Into
-        ) {
-            this.ctor = ctor || (() => Array);
-        }
+        ) {}
+}
+
+export function isItAnArrayInternal(arg: unknown): arg is ItIsAnArrayInternal {
+    return arg instanceof ItIsAnArrayInternal;
 }
 
 export const noDefaultValueSymbole = Symbol("No default value");
