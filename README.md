@@ -98,7 +98,7 @@ Once you have annotated your class types, you can use the `Serialize*` and `Dese
         // when serializing our planet log we need to convert the timezone 
         // of the timeVisited value from local time to galactic time
         // (This could also be done via @serializeUsing(Time.toGalacticTime))
-        static onSerialized(instance : PlanetLog, json : JsonObject) {
+        static onSerialized(instance : PlanetLog, json : IJsonObject) {
             json["timeVisited"] = Time.toGalacticTime(instance.timeVisited);
         }
 
@@ -405,7 +405,7 @@ The default InstantiationMethod can be changed with `SetDefaultInstantiationMeth
 
 ## onSerialized Callback
 
-A callback can be provided for when a class is serialized. To define the callback, add a static method `onSerialized<T>(instance : T, json : JsonObject)` to the class that needs custom post processing. You can either return a new value from this function, or modify the `json` parameter.
+A callback can be provided for when a class is serialized. To define the callback, add a static method `onSerialized<T>(instance : T, json : IJsonObject)` to the class that needs custom post processing. You can either return a new value from this function, or modify the `json` parameter.
 
 ```typescript 
 class CrewMember {
@@ -413,7 +413,7 @@ class CrewMember {
     @autoserializeAs(() => String) firstName;
     @autoserializeAs(() => String) lastName;
 
-    static onSerialized(instance : CrewMember, json : JsonObject) {
+    static onSerialized(instance : CrewMember, json : IJsonObject) {
         json["employeeId"] = instance.lastName.toUpperCase() + ", " + instance.firstName.toUpperCase();
     }
 
