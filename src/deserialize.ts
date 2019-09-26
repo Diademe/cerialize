@@ -46,7 +46,7 @@ export function DeserializeObjectMapInternal<T>(
     }
 
     if (target === null || target === undefined) {
-        target = {};
+        target = {}; // we don't allow to create specify a constructor for the ObjectMap
     }
 
     if (data === null || data === undefined) {
@@ -84,7 +84,7 @@ export function DeserializeMapInternal<K, V, T extends Map<K, V>, C extends new(
     data: IJsonObject,
     keyType: ASerializableTypeOrArrayInternal<K>,
     valueType: ASerializableTypeOrArrayInternal<V>,
-    constructor: () => C,
+    mapConstructor: () => C,
     target?: T,
     instantiationMethod?: InstantiationMethod
 ): Map<K, V> {
@@ -95,7 +95,7 @@ export function DeserializeMapInternal<K, V, T extends Map<K, V>, C extends new(
     }
 
     if (target === null || target === undefined) {
-        target = new (constructor() as any)();
+        target = new (mapConstructor() as any)();
     }
 
     if (data === null || data === undefined) {
@@ -147,7 +147,7 @@ export function DeserializeArrayInternal<
     C extends new() => T[]>(
     data: IJsonArray,
     type: ASerializableTypeOrArrayInternal<Value>,
-    constructor: () => C,
+    arrayConstructor: () => C,
     handling: ArrayHandling,
     target?: T,
     instantiationMethod?: InstantiationMethod,
@@ -158,7 +158,7 @@ export function DeserializeArrayInternal<
         );
     }
     if (!Array.isArray(target)) {
-        target = new (constructor() as any)();
+        target = new (arrayConstructor() as any)();
     }
     let offset: number;
     switch (handling) {
@@ -189,7 +189,7 @@ export function DeserializeArrayInternal<
 export function DeserializeSetInternal<K, C extends Set<K>>(
     data: IJsonArray,
     keyType: ASerializableTypeOrArrayInternal<K>,
-    constructor: () => IConstructable,
+    setConstructor: () => IConstructable,
     target?: C,
     instantiationMethod?: InstantiationMethod
 ) {
@@ -211,7 +211,7 @@ export function DeserializeSetInternal<K, C extends Set<K>>(
         }
 
         if (!(target instanceof Set)){
-            target = new (constructor() as any)();
+            target = new (setConstructor() as any)();
         }
 
         for (const d of data) {
@@ -230,7 +230,7 @@ export function DeserializeSetInternal<K, C extends Set<K>>(
 export function DeserializeSet<T, C extends Set<T>>(
     data: IJsonArray,
     keyType: ASerializableTypeOrArrayInternal<T>,
-    constructor: () => IConstructable = () => Set,
+    setConstructor: () => IConstructable = () => Set,
     target?: C,
     instantiationMethod?: InstantiationMethod
 ) {
@@ -238,7 +238,7 @@ export function DeserializeSet<T, C extends Set<T>>(
         instantiationMethod = PropMetaData.deserializeInstantiationMethod;
     }
 
-    return DeserializeSetInternal(data, keyType, constructor, target, instantiationMethod);
+    return DeserializeSetInternal(data, keyType, setConstructor, target, instantiationMethod);
 }
 
 export function DeserializePrimitive(

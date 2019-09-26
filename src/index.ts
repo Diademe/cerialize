@@ -109,102 +109,110 @@ export function itIsAnArray<
     Value = any,
     T extends Value[] = Value[],
     C extends new() => T = new() => T>(
-    type: ASerializableTypeOrArrayInternal<Value>,
-    ctor?: () => C
+    arrayElementType: ASerializableTypeOrArrayInternal<Value>,
+    arrayConstructor?: () => C
     ): ItIsAnArrayInternal {
-    return new ItIsAnArrayInternal<Value, T, C>(type, ctor);
+    return new ItIsAnArrayInternal<Value, T, C>(arrayElementType, arrayConstructor);
 }
 
 /*
 Serialization
 */
-export function Serialize<T>(instance: T, type: ItIsAnArrayInternal): JsonType[];
-export function Serialize<T>(instance: T, type: ASerializableType<T>): IJsonObject;
+export function Serialize<T>(source: T, type: ItIsAnArrayInternal): JsonType[];
+export function Serialize<T>(source: T, type: ASerializableType<T>): IJsonObject;
 export function Serialize<T>(
-    instance: T,
+    source: T,
     type: ASerializableTypeOrArrayInternal<T>
 ): null | JsonType[] | IJsonObject {
-    return serializationContinuation(SerializeInternal, instance, type as any);
+    return serializationContinuation(SerializeInternal, source, type as any);
 }
 
-export function SerializeJSON(source: any, transformKeys = true): JsonType {
-    return serializationContinuation(SerializeJSONInternal, source, transformKeys);
+export function SerializeJSON(sourceJSON: any, transformKeys = true): JsonType {
+    return serializationContinuation(SerializeJSONInternal, sourceJSON, transformKeys);
 }
 
+// () => SerializablePrimitiveType  ==> ASerializablePrimitiveType
+// todo ASerializablePrimitiveTypeOrArrayInternal for type
+/**
+ * Serialize a primitive variable or an array of primitives variables
+ * with itIsAnArray :
+ *      SerializePrimitive([1], itIsAnArray(() => Number)))
+ * @param primitiveSource primitive variable for serialization
+ * @param type type of primitive (e.g. () => Number)
+ */
 export function SerializePrimitive<T>(
-    source: SerializablePrimitiveType,
+    primitiveSource: SerializablePrimitiveType,
     type: () => SerializablePrimitiveType
 ): JsonType {
-    return serializationContinuation(SerializePrimitiveInternal, source, type);
+    return serializationContinuation(SerializePrimitiveInternal, primitiveSource, type);
 }
 
 export function SerializeSet<T>(
-    source: T[],
-    type: ASerializableTypeOrArrayInternal<T>
+    setSource: T[],
+    setElementType: ASerializableTypeOrArrayInternal<T>
 ): JsonType[] {
-    return serializationContinuation(SerializeSetInternal, source, type);
+    return serializationContinuation(SerializeSetInternal, setSource, setElementType);
 }
 
+// todo split signature as in SerializeAs
 export function SerializeArray<T>(
-    source: T[],
-    type: ASerializableTypeOrArrayInternal<T>
+    sourceArray: T[],
+    arrayElementType: ASerializableTypeOrArrayInternal<T>
 ): JsonType[] {
-    return serializationContinuation(SerializeArrayInternal, source, type);
+    return serializationContinuation(SerializeArrayInternal, sourceArray, arrayElementType);
 }
 
 export function SerializeMap<K, V>(
-    source: Map<K, V>,
+    sourceMap: Map<K, V>,
     keyType: ASerializableTypeOrArrayInternal<K>,
     valueType: ASerializableTypeOrArrayInternal<V>,
 ): IIndexable<JsonType> {
-    return serializationContinuation(SerializeMapInternal, source, keyType, valueType);
+    return serializationContinuation(SerializeMapInternal, sourceMap, keyType, valueType);
 }
 
 export function SerializeObjectMap<T>(
-    source: T,
-    type: ASerializableTypeOrArrayInternal<T>
+    objectMapSource: T,
+    valueType: ASerializableTypeOrArrayInternal<T>
 ): IIndexable<JsonType> {
-    return serializationContinuation(SerializeObjectMapInternal, source, type);
+    return serializationContinuation(SerializeObjectMapInternal, objectMapSource, valueType);
 }
 
 /*
 Deserialization
 */
-
 export function DeserializeObjectMap<T>(
     data: IJsonObject,
-    type: ASerializableTypeOrArrayInternal<T>,
-    target?: IIndexable<T>,
+    valueType: ASerializableTypeOrArrayInternal<T>,
+    targetObjectMap?: IIndexable<T>,
     instantiationMethod: InstantiationMethod = PropMetaData.deserializeInstantiationMethod
 ): IIndexable<T> {
     return deserializationContinuation<IIndexable<T>>(
         DeserializeObjectMapInternal,
-        data, type, target, instantiationMethod);
+        data, valueType, targetObjectMap, instantiationMethod);
 }
 
 export function DeserializeMap<K, V>(
     data: IJsonObject,
     keyType: ASerializableTypeOrArrayInternal<K>,
     valueType: ASerializableTypeOrArrayInternal<V>,
-    target?: Map<K, V>,
+    targetMap?: Map<K, V>,
     instantiationMethod: InstantiationMethod = PropMetaData.deserializeInstantiationMethod
 ): Map<K, V> {
     return deserializationContinuation<Map<K, V>>(
         DeserializeMapInternal,
-        data, keyType, valueType, () => Map as any, target, instantiationMethod);
+        data, keyType, valueType, () => Map as any, targetMap, instantiationMethod);
 }
 
 export function DeserializeArray<T, C extends T[]>(
     data: IJsonArray,
-    type: ASerializableTypeOrArrayInternal<T>,
-    constructor: () => IConstructable = () => Array,
+    arrayType: ASerializableTypeOrArrayInternal<T>,
     handling: ArrayHandling = ArrayHandling.Into,
-    target?: C,
+    targetArray?: C,
     instantiationMethod: InstantiationMethod = PropMetaData.deserializeInstantiationMethod
 ) {
     return deserializationContinuation<C>(
         DeserializeArrayInternal,
-        data, type, constructor, handling, target, instantiationMethod);
+        data, arrayType, () => Array, handling, targetArray, instantiationMethod);
 }
 
 export function DeserializeJSON(
