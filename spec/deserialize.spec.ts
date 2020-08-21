@@ -25,7 +25,7 @@ import {
     RefCycleDetectionDisable,
     RefCycleDetectionEnable,
     SetDefaultInstantiationMethod,
-    SetDeserializeKeyTransform
+    SetDeserializeKeyTransform,
 } from "../src";
 import {
     RuntimeTypingDisable,
@@ -355,7 +355,7 @@ describe("Deserializing", () => {
         }
         function runTests(blockName: string,
                           arrayHandling: ArrayHandling,
-                          expected: Array<Partial<Element>>) {
+                          expected: Partial<Element>[]) {
 
             it(blockName, () => {
                     class Test {

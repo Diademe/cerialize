@@ -8,7 +8,7 @@ This is a library to make serializing and deserializing complex JS objects a bre
 
 This library works by processing annotations on class types. Annotations are provided for reading (deserializing) and writing (serializing) values to and from json.
 
-Once you have annotated your class types, you can use the `Serialize*` and `Deserialize*`functions to serialize and deserialize your data. 
+Once you have annotated your class types, you can use the `Serialize*` and `Deserialize*`functions to serialize and deserialize your data.
 
 ## Example
 
@@ -59,11 +59,13 @@ Once you have annotated your class types, you can use the `Serialize*` and `Dese
             containers: 4,
             contents: ["lots", "of", "stuff"]
         }
-     }    
+     }
     */
     const instance = Deserialize(json, () => Starship);
 ```
+
 ## Details
+
 ```typescript
     class CrewMember {
 
@@ -81,13 +83,13 @@ Once you have annotated your class types, you can use the `Serialize*` and `Dese
 
         //we only want to write our credit value, never deserialize it
         //we want to transform the value into a representation our server
-        //understands which is not a direct mapping of number values. 
+        //understands which is not a direct mapping of number values.
         //use a custom serialization function instead of a type.
         @serializeUsing(CreditSerializer) credits : number;
     }
 
     class PlanetLog {
-        
+
         // we handle the timeVisited field specially in our callbacks
         // we do not annotate it so that we can customize it ourselves
         timeVisited : Date;
@@ -95,15 +97,15 @@ Once you have annotated your class types, you can use the `Serialize*` and `Dese
         // serialize and deserialize description as a string
         @autoserializeAs(() => String) description : string;
 
-        // when serializing our planet log we need to convert the timezone 
+        // when serializing our planet log we need to convert the timezone
         // of the timeVisited value from local time to galactic time
         // (This could also be done via @serializeUsing(Time.toGalacticTime))
         static onSerialized(instance : PlanetLog, json : IJsonObject) {
             json["timeVisited"] = Time.toGalacticTime(instance.timeVisited);
         }
 
-        // when deserializing our planet log we need to convert the timezone 
-        // of the timeVisited value from galactic to local time  
+        // when deserializing our planet log we need to convert the timezone
+        // of the timeVisited value from galactic to local time
         // (This could also be done via @deserializeUsing(Time.toLocalTime))
         @onDeserialized
         static someFunction() {
@@ -116,10 +118,10 @@ Once you have annotated your class types, you can use the `Serialize*` and `Dese
 
         // when writing our fuel value to the server, we have a number but the server expects a string
         // when reading our fuel value from the server, we receive a string but we want a number
-        @serializeAs(() => String) 
-        @deserializeAs(() => Number) 
+        @serializeAs(() => String)
+        @deserializeAs(() => Number)
         remainingFuel : number;
-        
+
         // keys can be customized by providing a second argument to any of the annotations
         @autoserializeAs(() => CrewMember, "capt") captain : CrewMember;
 
@@ -130,7 +132,7 @@ Once you have annotated your class types, you can use the `Serialize*` and `Dese
         @autoserializeAsObjectMap(() => Planet) : planetsVisited : Indexable<PlanetLog>;
 
         // we don't have a specific format for cargo, so just serialize and deserialize it as normal json
-        @autoserializeAsJSON() cargo : any; 
+        @autoserializeAsJSON() cargo : any;
 
     }
 
@@ -144,14 +146,13 @@ Once you have annotated your class types, you can use the `Serialize*` and `Dese
 
 When annotating your classes you can declare which fields get treated as which kinds of values and how they are read and written to and from json format. To specify how fields are written to json, use `@serialize*` annotations. For writing, use `@deserialize*`.
 
-Most annotations take a class constructor. For primitives, use `String`, `Number`, `Boolean`, `Date`, or `RegExp`. For other types, provide the corresponding type constructor. All annotations take an optional argument `customKey` which will overwrite the corresponding key in the output. If no `customKey` is provided, the property key will be the same as defined in the class. For example, if our class has a field called `protons` but our server sends json with `particles` instead, we would use "particles" as the `customKey` value. If no `customKey` is provided, the property key will be the same as defined in the class. 
+Most annotations take a class constructor. For primitives, use `String`, `Number`, `Boolean`, `Date`, or `RegExp`. For other types, provide the corresponding type constructor. All annotations take an optional argument `customKey` which will overwrite the corresponding key in the output. If no `customKey` is provided, the property key will be the same as defined in the class. For example, if our class has a field called `protons` but our server sends json with `particles` instead, we would use "particles" as the `customKey` value. If no `customKey` is provided, the property key will be the same as defined in the class.
 
 If you want the same behavior for a property when serializing and deserializing, you can either tag that property with a `@serialize*` and `@deserialize*` or you can use `@autoserializeXXX` which will do this in a single annotation and behave exactly the same as `@serialize*` and `@deserialize*`. The only difference in behavior is that `@autoserializeUsing()` takes an argument of type `SerializeAndDeserializeFns` instead of a single function argument like it's siblings do.
 
 `@serializeAsMap` will convert an es6 [Map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map) to an map object (ie an object with keys and values). Due to the syntax of JSON, keys can only be int or string. `@deserializeAsMap` will correctly deserialize into a Map.
 
-
-##### Serialization
+### Serialization
 
 - `@serializeAs(type : () => ClassConstructor, customKey? : string)`
 - `@serializeAsObjectMap(type : () => ClassConstructor, customKey? : string)`
@@ -160,7 +161,7 @@ If you want the same behavior for a property when serializing and deserializing,
 - `@serializeAsJson(customKey? : string)`
 - `@serializeAsMap(keyType: SerializableType<any>, valueType: SerializableType<any>, constructor?: () => SerializableType<any>, keyName?: string)`
 
-##### Deserialization
+### Deserialization
 
 - `@deserializeAs(type : () => ClassConstructor, customKey? : string)`
 - `@deserializeAsArray(type : () => ClassConstructor, customKey? : string, handling?: ArrayHandling)`
@@ -169,7 +170,7 @@ If you want the same behavior for a property when serializing and deserializing,
 - `@deserializeAsJson(customKey? : string)`
 - `@deserializeAsMap(keyType: () => SerializableType<any>, valueType: () => SerializableType<any>, constructor?: () => SerializableType<any>, keyName?: string)`
 
-##### Serialization and Deserialization
+### Serialization and Deserialization
 
 - `@autoserializeAs(type : () => ClassConstructor, customKey? : string)`
 - `@autoserializeAsObjectMap(type : () => ClassConstructor, customKey? : string)`
@@ -178,44 +179,56 @@ If you want the same behavior for a property when serializing and deserializing,
 - `@autoserializeAsJson(customKey? : string)`
 - `@autoserializeAsMap(keyType: () => SerializableType<any>, valueType: () => SerializableType<any>, constructor?: () => SerializableType<any>, keyName?: string)`
 
-##### Array
+#### Array
 
 There is two way of serializing an array :
+
 ```typescript
 Deserialize([1], itIsAnArray(() => Number))
 ```
+
 ```typescript
 DeserializeAsArray([1], () => Number)
 ```
+
 Both are equivalent, but the former allow you to deserialize nested array
+
 ```typescript
 Deserialize([[1], [2]], itIsAnArray(itIsAnArray(() => Number)))
 ```
+
 Or Set/Map of array
+
 ```typescript
 deserializeAsMap({v1: [1], v2: [2]}, () => String, itIsAnArray(itIsAnArray(() => Number)))
 ```
+
 There is an optional second argument to itIsAnArray : a constructor used to deserialize into the correct type.
+
 ```typescript
 class MyArray<T> extends Array<T> {}
 const instance = Deserialize([1], itIsAnArray(() => Number, () => MyArray));
 assert(instance instanceof MyArray);
 ```
+
 There is an optional third argument to itIsAnArray : An enum that specify how the deserialization is done when deserializing into an existing object.
- - `ArrayHandling.Into`: deserialize into each cell, grow or shrink array to fit serialized array size.
- - `ArrayHandling.ConcatAtTheEnd`: keep previous array, add the deserialized one at the end.
- - `ArrayHandling.New`: empty the array before adding element to it.
+
+- `ArrayHandling.Into`: deserialize into each cell, grow or shrink array to fit serialized array size.
+- `ArrayHandling.ConcatAtTheEnd`: keep previous array, add the deserialized one at the end.
+- `ArrayHandling.New`: empty the array before adding element to it.
+
 ```typescript
 class MyArray<T> extends Array<T> {}
 const instance = Deserialize([1], itIsAnArray(() => Number, () => MyArray), ArrayHandling.Into);
 assert(instance instanceof MyArray);
 ```
-##### Types
+
+#### Types
 
 ```typescript
  type SerializationFn = <T>(target : T) => JsonType;
  type DeserializationFn = <T>(data : JsonType, target? : T, instantiationMethod? : InstantiationMethod) => T
- type SerializeAndDeserializeFns = { 
+ type SerializeAndDeserializeFns = {
      Serialize: SerializationFn,
      Deserialize: DeserializationFn
  }
@@ -225,32 +238,40 @@ assert(instance instanceof MyArray);
 
 Calling any of the `Serialize*` family of methods will convert the input object into json. The output is a plain javascript object that has not had `JSON.stringify` called on it.
 
-#### Functions for Serialization
-Depending on how your data is structured there are a few options for serialization. You can work with single objects, maps of objects, or arrays of objects. 
+### Functions for Serialization
 
-- `Serialize<T>(target : T, () => ClassConstructor<T>) => JsonObject` 
+Depending on how your data is structured there are a few options for serialization. You can work with single objects, maps of objects, or arrays of objects.
+
+- `Serialize<T>(target : T, () => ClassConstructor<T>) => JsonObject`
+
     ```typescript
         /* takes a single object and serializes it using the provided class type. */
         const ship = new Starship();
         const json = Serialize(ship, () => Starship);
     ```
+
 - `SerializeArray<T>(target : Array<T>, () => ClassConstructor<T>) => JsonArray`
+
     ```typescript
         /* takes an array of objects and serializes each entry using the provided class type */
         const ships : Array<Starship>;
         const json = SerializeArray(ships, () => Starship);
     ```
-- `SerializeAsObjectMap<T>(type: ASerializableType<T>, keyName?: string) => JsonObject` 
+
+- `SerializeAsObjectMap<T>(type: ASerializableType<T>, keyName?: string) => JsonObject`
+
     ```typescript
         /* takes an indexable object ie `<T>{ [idx: string] : T }` and for each key serializes
          the object using the provided class type. */
-        const ships : Indexable<Starship> = { 
+        const ships : Indexable<Starship> = {
             ship1: new Starship(),
-            ship2: new Starship() 
+            ship2: new Starship()
         };
         const json = SerializeObjectMap(ships, () => Starship);
     ```
-- `SerializeMap<T>(keyType: ASerializableType<any>, valueType: ASerializableType<any>, constructor?: () => IConstructable, keyName?: string) => JsonObject` 
+
+- `SerializeMap<T>(keyType: ASerializableType<any>, valueType: ASerializableType<any>, constructor?: () => IConstructable, keyName?: string) => JsonObject`
+
     ```typescript
         /* takes an es6 Map and for each (key, value) pair serializes the pair with the provided key and value type. */
         const ships : Map<string, Starship> = new Map([
@@ -259,7 +280,9 @@ Depending on how your data is structured there are a few options for serializati
             ]);
         const json = SerializeMap(ships, () => String, () => Starship);
     ```
+
 - `SerializeSet<T>( source: T[], type: ASerializableType<T> ) => JsonType[]`
+
     ```typescript
         /* takes an es6 Set and for each element serializes
          the object using the provided class type. */
@@ -267,9 +290,10 @@ Depending on how your data is structured there are a few options for serializati
         const json = SerializeSet(stars, () => Number);
     ```
 
-- `SerializeJson(target : any) => JsonType` 
+- `SerializeJson(target : any) => JsonType`
+
     ```typescript
-     /* takes any value and serializes it as json, no structure is assumed 
+     /* takes any value and serializes it as json, no structure is assumed
         and any serialization annotations on any processed objects are totally ignored. */
 
         const value = {}; /* anything that isn't a function */
@@ -277,6 +301,7 @@ Depending on how your data is structured there are a few options for serializati
     ```
 
 If a function has a `constructor` parameter, it can be used to declare a constructor that inherit of the base constructor. For instance:
+
 ```typescript
 class MySet<T> extends Set<T> {}
 class Test {
@@ -290,7 +315,7 @@ Calling any of the `Deserialize*` family of methods will convert the input json 
 
 The simplest way to deserialize a piece of JSON is to call `Deserialize(json, () => type)` on it. This function takes the provided type and pulls out all the properties you've tagged with `@deserializeXXX` or `@autoserializeXXX`. It will pump them (recursively) into a new instance of type which is returned. If your type marks a property for deserialization that is itself tagged with deserialization annotations, that property will be hydrated into it's type following the same deserialization algorithm.
 
-#### Deserializing Into Existing Instances
+### Deserializing Into Existing Instances
 
 It is also possible to re-use existing objects when deserializing with `Deserialize(json, () => Type, target)`. You might want to do this so that you can maintain references to things even after updating their properties. This is handled exactly the same way as `Deserialize(json, () => Type)` except that it takes one additional argument, the object you want to deserialize properties into. If the target instance you provide is null or undefined, this behaves identically to `Deserialize(json, () => Type)`, otherwise the deserialization will always use existing objects as write targets (if they are defined and of the expected type) instead of creating new ones.
 
@@ -300,7 +325,7 @@ const instance = Deserialize(json, () => Type, existingInstance);
 expect(existingInstance === instance).toBe(true);
 ```
 
-#### Deserializing Into Plain Objects
+### Deserializing Into Plain Objects
 
 The `instantiationMethod` parameter can be used to change the way in which instances of the input type are created. With `InstantiationMethod.New`, the constructor will be invoked when a new instance needs to be created. With `InstantiationMethod.ObjectCreate`, the object will be created without invoking its constructor, which is useful for systems where constructed objects immediately freeze themselves. With `InstantiationMethod.None`, the `deserializeXXX` functions will return a plain object instead, which can be useful for systems like Redux that expect / require plain objects and not class instances.
 
@@ -310,16 +335,16 @@ import {Deserialize, Instances} from 'dcerialize';
 class Immutable {
 
     public value : string;
-    
+
     constructor(value : string) {
         this.value = value;
         Object.freeze(this);
     }
-    
+
     public getValue() : string {
         return value;
     }
-    
+
 }
 
 Deserialize({value: 'example'}, Immutable, InstantiationMethod.New);          // Error because of Object.freeze
@@ -329,19 +354,22 @@ Deserialize({value: 'example'}, Immutable, InstantiationMethod.None);         //
 
 The default InstantiationMethod can be changed with `SetDefaultInstantiationMethod(instantiationMethod : InstantiationMethod)`
 
-##### Functions
+#### Functions
 
 - `Deserialize<T>(json : JsonObject, () => ClassConstructor<T>, target? : T) : T`
+
     ```typescript
         /* takes a single object and serializes it using the provided class type. */
 
         const json = {/* some values from server */};
-        const existingInstance = new Starship();        
+        const existingInstance = new Starship();
         const instance = Deserialize(json, () => Starship); // make a new instance
-        
+
         Deserialize(json, () => Starship, existing); // re-use our existing instance
     ```
+
 - `DeserializeArray<T>(json : JsonArray, () => ClassConstructor<T>, target? : Array<T>) : Array<T>`
+
     ```typescript
         const json = [
             {/* some values from server */},
@@ -350,13 +378,15 @@ The default InstantiationMethod can be changed with `SetDefaultInstantiationMeth
         ];
         const existingInstances = [ new Starship(), new Starship() ];
         const existingArray = [ new Starship() ];
-        
+
         const array = DeserializeArray(json, () => Starship); // make a new array of instances
-        
+
         /* re-use our existing array, if possible use existing instances in array, otherwise create new ones */
-        DeserializeArray(json, () => Starship, existingArray); 
+        DeserializeArray(json, () => Starship, existingArray);
     ```
+
 - `DeserializeObjectMap<T>(json : JsonObject, () => ClassConstructor<T>, target? : Indexable<T>) : Indexable<T>`
+
     ```typescript
         const json = {
             ship0: {/* some values from server */},
@@ -364,18 +394,20 @@ The default InstantiationMethod can be changed with `SetDefaultInstantiationMeth
             ship2: {/* some values from server */}
         };
         const existingMap = {
-            ship0: new Starship(), 
+            ship0: new Starship(),
             ship3: new Starship()
         };
-        
+
         const map = DeserializeObjectMap(json, () => Starship); // make a new map of instances
-        
-        /* re-use our existing map, in the case of key collision, 
+
+        /* re-use our existing map, in the case of key collision,
            write new property values into existing instance
            otherwise create new ones */
-        DeserializeObjectMap(json, () => Starship, existingMap); 
+        DeserializeObjectMap(json, () => Starship, existingMap);
     ```
+
 - `DeserializeMap<T>(json : JsonObject, () => ClassConstructor<T>, target? : Indexable<T>) : Indexable<T>`
+
     ```typescript
         const json = {
             ship0: {/* some values from server */},
@@ -383,20 +415,22 @@ The default InstantiationMethod can be changed with `SetDefaultInstantiationMeth
             ship2: {/* some values from server */}
         };
         const existingMap = {
-            ship0: new Starship(), 
+            ship0: new Starship(),
             ship3: new Starship()
         };
-        
+
         const map = DeserializeMap(json, () => String, () => Starship); // make a new map of instances
-        
-        /* re-use our existing map, in the case of key collision, 
+
+        /* re-use our existing map, in the case of key collision,
            write new property values into existing instance
            otherwise create new ones */
-        DeserializeMap(json, () => String, () => Starship, existingMap); 
+        DeserializeMap(json, () => String, () => Starship, existingMap);
     ```
+
 - `DeserializeJson(json : JsonType, target? : any) : any`
+
     ```typescript
-     /* takes any value and deserializes it from json, no structure is assumed 
+     /* takes any value and deserializes it from json, no structure is assumed
         and any deserialization annotations on any processed objects are totally ignored. */
 
         const value = { /* anything that isn't a function */ };
@@ -407,7 +441,7 @@ The default InstantiationMethod can be changed with `SetDefaultInstantiationMeth
 
 A callback can be provided for when a class is serialized. To define the callback, add a static method `onSerialized<T>(instance : T, json : IJsonObject)` to the class that needs custom post processing. You can either return a new value from this function, or modify the `json` parameter.
 
-```typescript 
+```typescript
 class CrewMember {
 
     @autoserializeAs(() => String) firstName;
@@ -424,7 +458,7 @@ class CrewMember {
 
 A callback can be provided for when a class is deserialized. Just add `@onDeserialized` on a function and it will be called on the instance after its class have been deserialized. You can add only one `@onDeserialized` callback to a class. The callback are inherited, but you have to call the callback of a parent yourself if the callback is overridden.
 
-```typescript 
+```typescript
 class CrewMember {
 
     @autoserializeAs(() => String) firstName;
@@ -457,16 +491,19 @@ Properties of parents are serialized before those of the children. Inside a clas
 
 ## Customizing key transforms
 
-Often your server and your client will have different property naming conventions. For instance, Rails / Ruby generally expects objects to have properties that are under_score_cased while most JS authors prefer camelCase. You can tell Dcerialize to use a certain key transform automatically when serializing and deserializing by calling `SetSerializeKeyTransform(fn : (str : string) => string)` and `SetDeserializeKeyTransform(fn : (str : string) => string)`. A handful of transform functions are provided in this package or you can define your own function conforming to `(key : string) => string`.  
+Often your server and your client will have different property naming conventions. For instance, Rails / Ruby generally expects objects to have properties that are under_score_cased while most JS authors prefer camelCase. You can tell Dcerialize to use a certain key transform automatically when serializing and deserializing by calling `SetSerializeKeyTransform(fn : (str : string) => string)` and `SetDeserializeKeyTransform(fn : (str : string) => string)`. A handful of transform functions are provided in this package or you can define your own function conforming to `(key : string) => string`.
+
 - The provided functions are:
-    - `CamelCase`
-    - `UnderscoreCase`
-    - `SnakeCase`
-    - `DashCase`
 
+  - `CamelCase`
+  - `UnderscoreCase`
+  - `SnakeCase`
+  - `DashCase`
 
-##### Note
+### Note
+
 When using `SetDeserializeKeyTransform(fn : (str : string) => string)` you need to provide a function that transforms the EXISTING keys to a format that allows indexing of the input object.
+
 ```typescript
 //in this example we expect the server to give us upper cased key names
 //we need to map our local camel cased key to match the server provided key
@@ -490,7 +527,9 @@ expect(instance).toEqual({
 ```
 
 ## Runtime Typing
+
 consider the following case :
+
 ```typescript
 class Living {
     whoIAm(): string{
@@ -515,8 +554,10 @@ class Fish extends Living {
 let animal: Living[] = [new Fish(), new Dog(), new Living()];
 let json = SerializeAsArray(animal, () => Living);
 ```
+
 At deserialization you end up with a bunch of Living, but no dog nor fish. The runtime serialization will detect at runtime that there are other types in the array (it also work with simple member). To do so, a ```$type``` attribute will be added to the serialized object. You have to provide the content of this attribute (this allows you to be compatible with [Newtonsoft](https://www.newtonsoft.com/) TypeNameHandling.Objects settings).
 The Runtime typing is enable as follow :
+
 ```typescript
 let animal: Living[] = [new Fish(), new Dog(), new Living()];
 RuntimeTypingEnable();
@@ -531,7 +572,9 @@ RuntimeTypingDisable();
 RuntimeTypingResetDictionary();
 
 ```
+
 Alternatively, you can decorate a class with the decorator `@typeString("It's a fish")` to specify the string for a class.
+
 ```typescript
 @typeString("every thing is fine as long as there are no collision")
 class Living {
@@ -542,9 +585,11 @@ class Living {
 ```
 
 ### Note
+
 In the previous case, nothing will enforce a class to be a subclass of `Living`.
-The last two line are not mandatory (if you want to serialize/deserialize more).  
+The last two line are not mandatory (if you want to serialize/deserialize more).
 Unfortunately, I didn't found a way to add Runtime Typing for Map (or object used as map). You can do the following (use a class that inherits form Map):
+
 ```typescript
 class Satellite {
     @serializeAs(() => String)
@@ -572,7 +617,9 @@ const json = Serialize(s, () => Test0);
 ```
 
 ## Default value
+
 ### `@emitDefaultValue`
+
 if this decorator has false in it's argument, the variable will not be serialized if it's value is the default.
 |   type  | default value |
 |:-------:|:-------------:|
@@ -582,7 +629,9 @@ if this decorator has false in it's argument, the variable will not be serialize
 | object  |      null     |
 
 ### `@defaultValue`
+
 This decorator permits to change the default value. Object are compared by references. It only works with emitDefaultValue set to false.
+
 ```typescript
 class Test {
     @emitDefaultValue(false)
@@ -606,11 +655,13 @@ const json = Serialize(t, () => Test);
 ```
 
 ### Note
+
 During deserialization, if a member decorated with `@emitDefaultValue(false)` is not in the parsed json, it will be initialized by its default value. Be careful if an object is the default value, the object will be inserted as it is during serialization. If it appears in multiple place (ie its a sigle object with multiple reference to it).
 
-
 ## Reference and circular reference
+
 Without this option, the following happens :
+
 ```typescript
 class Test {
     @autoserializeAs(() => Number) public value: number = 10;
@@ -627,7 +678,9 @@ const json = Serialize(t0, () => Test0); /* json = {"value0":{"value":10},"value
 const obj = Deserialize(json, () => Test0);
 obj.value1 == obj.value0; /* false */
 ```
+
 Even if ```t0.value0``` and ```t0.value1``` are the same, they are serialized as to separate object. Event worse, if the references form a loop, the serialization will crash. With SetRefCycleDetection, each object will have its own id, and will be referenced for any other references except the first one.
+
 ```typescript
 class Test {
     @deserializeAsJson() public value: number = 10;
@@ -650,6 +703,7 @@ obj.value1 == obj.value0; /*true*/
 ```
 
 You can also override RefCycleDetection with the class decorator isReference.
+
 ```typescript
 @isReference(true)
 class Test {
@@ -672,7 +726,9 @@ obj.value1 == obj.value0; /* true */
 ```
 
 ### Note
+
 For architectural code choice, during deserialization, the parser must read the object id before any mention of it's reference. For example the following json would crash during deserialization :
+
 ```typescript
 {
     $id: 1,
@@ -680,12 +736,15 @@ For architectural code choice, during deserialization, the parser must read the 
     value2: { $id: 2, value: 1 }
 }
 ```
+
 Because of the reference of object 2 would be read before its id.
 
 The generated json from SetRefCycleDetection is compatible with [PreserveReferencesHandling](https://www.newtonsoft.com/json/help/html/PreserveReferencesHandlingObject.htm) option form newtonsoft.
 
 ## Selective serialization
+
 You can serialize only some member and take this decision at runtime using bitmask : affect a bitmask to a member with `@serializeBitMask` (up to 2^53). Before serialization, you can set a global bitmask using `SelectiveSerialization`. If and only if the bitmask of the member AND the global bitmask evaluate to true, then the member will be serialized.
+
 ```typescript
 {
 class Test {
@@ -707,15 +766,19 @@ SelectiveSerialization(3);
 Serialize(s, () => Test); // {v1: 1, v2: 2, v3: 3}
 }
 ```
+
 To reset the selective serialization do a call of `SelectiveSerialization()` without any parameters.
 
 ## Serialize and deserialize Infinities and NaN
+
 By default, `JSON.stringify(Number.POSITIVE_INFINITY)` return null. But we can provide an helper function that will stringify these numbers (Infinities and NaN) to custom string. You can code your own, or use the one provided by this library : `stringifyNumber`. The call will be `JSON.stringify(my object with Infinities, stringifyNumber);`
 The same problem arise during parse. Use `JSON.parse('"Infinity"', parseNumber);`.
 These two functions are compatible with the [FloatFormatHandling](https://www.newtonsoft.com/json/help/html/T_Newtonsoft_Json_FloatFormatHandling.htm) Newtonsoft option.
 
 ## define your own module to deal with references
+
 you can set your own module to deal with references. see the source `ref.ts` for an example.
+
 ```typescript
 setRefHandler(new RefHandler());
 ```
@@ -723,51 +786,57 @@ setRefHandler(new RefHandler());
 ## Summary
 
 ### Decorator
-| serialize         | deserialize         | autoserialize         | 
-|-------------------|---------------------|-----------------------| 
-| serializeAs       | deserializeAs       | autoserializeAs       | 
-| serializeAsArray  | deserializeAsArray  | autoserializeAsArray  | 
-| serializeAsJson   | deserializeAsJson   | autoserializeAsJson   | 
-| serializeAsObjectMap    | deserializeAsObjectMap    | autoserializeAsObjectMap    | 
+
+| serialize         | deserialize         | autoserialize         |
+|-------------------|---------------------|-----------------------|
+| serializeAs       | deserializeAs       | autoserializeAs       |
+| serializeAsArray  | deserializeAsArray  | autoserializeAsArray  |
+| serializeAsJson   | deserializeAsJson   | autoserializeAsJson   |
+| serializeAsObjectMap    | deserializeAsObjectMap    | autoserializeAsObjectMap    |
 | serializeAsMap    | deserializeAsMap    | autoserializeAsMap    |
-| serializeAsSet    | deserializeAsSet    | autoserializeAsSet    | 
-| serializeUsing    | deserializeUsing    | autoserializeUsing    | 
+| serializeAsSet    | deserializeAsSet    | autoserializeAsSet    |
+| serializeUsing    | deserializeUsing    | autoserializeUsing    |
 
 Other decorators
-* inheritSerialization
-* serializeBitMask
-* emitDefaultValue
-* defaultValue
-* onDeserialized
-* typeString
+
+- inheritSerialization
+- serializeBitMask
+- emitDefaultValue
+- defaultValue
+- onDeserialized
+- typeString
 
 ### Setting Accessor
-* SetRefCycleDetection
-* RefClean
-* SetDefaultInstantiationMethod
-* SetDeserializeKeyTransform
-* SetSerializeKeyTransform
-* RuntimeTypingResetDictionary
-* RuntimeTypingSetTypeString
-* RuntimeTypingEnable
-* RuntimeTypingDisable
-* SelectiveSerialization
+
+- SetRefCycleDetection
+- RefClean
+- SetDefaultInstantiationMethod
+- SetDeserializeKeyTransform
+- SetSerializeKeyTransform
+- RuntimeTypingResetDictionary
+- RuntimeTypingSetTypeString
+- RuntimeTypingEnable
+- RuntimeTypingDisable
+- SelectiveSerialization
 
 ### Callback
-* onSerialized
+
+- onSerialized
 
 ### Good to know
-* You can serialize and deserialize an enum using `@serializeAsJson`. They will be converted using their integer representation.
-* To reset the selective serialization do `SelectiveSerialization()`.
-* You need to specify the type of each member that you want to (de)serialize. Use String, Number, Boolean, Date, or RegExp for primitives types
-* Serialization return an *object* that can be stringified (use JSON.stringify after a call to Serialize).
-* Deserialization expect an *object* (use JSON.parse before a call to Deserialize).
-* You must use the `@inheritSerialization` if you want to serialize object with inheritance.
-* Use RefClean if you want that `$id` start to one again.
-* You don't need to call `RuntimeTypingDisable` after a serialization if you want to use it again.
-* `@serializeAsArray` expect a non array type (ie if it's an array of `Boolean`, you should give `Boolean` as parameter). Same goes for `@serializeAsObjectMap`, `@serializeAsMap` and `@serializeAsSet`.
-* `@serializeAsMap` works on es6 [`Map` object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map).
-* if you create a loop between files by adding decorator, YOU MUST set the option `@emitDecoratorMetadata` to false in your tsconfig.json. Otherwise your project will fail to load.
+
+- You can serialize and deserialize an enum using `@serializeAsJson`. They will be converted using their integer representation.
+- To reset the selective serialization do `SelectiveSerialization()`.
+- You need to specify the type of each member that you want to (de)serialize. Use String, Number, Boolean, Date, or RegExp for primitives types
+- Serialization return an *object* that can be stringified (use JSON.stringify after a call to Serialize).
+- Deserialization expect an *object* (use JSON.parse before a call to Deserialize).
+- You must use the `@inheritSerialization` if you want to serialize object with inheritance.
+- Use RefClean if you want that `$id` start to one again.
+- You don't need to call `RuntimeTypingDisable` after a serialization if you want to use it again.
+- `@serializeAsArray` expect a non array type (ie if it's an array of `Boolean`, you should give `Boolean` as parameter). Same goes for `@serializeAsObjectMap`, `@serializeAsMap` and `@serializeAsSet`.
+- `@serializeAsMap` works on es6 [`Map` object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map).
+- if you create a loop between files by adding decorator, YOU MUST set the option `@emitDecoratorMetadata` to false in your tsconfig.json. Otherwise your project will fail to load.
 
 ## Contribute
+
 [Please follow this link for detailed explanations on how to contribute to the project](Contribute.md)

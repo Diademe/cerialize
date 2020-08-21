@@ -7,6 +7,8 @@
         "one-line": false,
         "max-classes-per-file": false,
         "curly": true,
+        "semicolon": true,
+        "eofline": true,
         "trailing-comma": [
             true,
             {
