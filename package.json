@@ -19,10 +19,10 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "tsc --project src/tsconfig.json",
-    "tslint": "tslint --config ./tslint.json -p src/tsconfig.json -p spec/tsconfig.json"
+    "build": "tsc --project src/tsconfig.app.json",
     "test": "jest  --config spec/jest.config.js --colors",
     "coverage": "jest --config spec/jest.config.js --coverage",
+    "tslint": "tslint --config ./tslint.json -p src/tsconfig.app.json -p spec/tsconfig.spec.json"
   },
   "devDependencies": {
     "@types/jest": "^24.0.13",
