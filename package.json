@@ -20,9 +20,9 @@
   "types": "./dist/index.d.ts",
   "scripts": {
     "build": "tsc --project src/tsconfig.json",
-    "test": "jest --colors",
-    "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
     "tslint": "tslint --config ./tslint.json -p src/tsconfig.json -p spec/tsconfig.json"
+    "test": "jest  --config spec/jest.config.js --colors",
+    "coverage": "jest --config spec/jest.config.js --coverage",
   },
   "devDependencies": {
     "@types/jest": "^24.0.13",
@@ -33,17 +33,5 @@
     "tslint": "^5.17.0",
     "tslint-eslint-rules": "^5.4.0",
     "typescript": "^3.5.1"
-  },
-  "jest": {
-    "testRegex": "/spec/.*\\.spec\\.([tj]sx?)$",
-    "transform": {
-      "^.+\\.[jt]sx?$": "ts-jest"
-    },
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js",
-      "jsx"
-    ]
   }
 }
