@@ -50,7 +50,7 @@ export interface IJsonObject {
     $type?: string;
 }
 
-export interface IJsonArray extends Array<JsonType> {}
+export interface IJsonArray extends Array<JsonType> { }
 
 export interface ISerializer<T> {
     Serialize: Serializer<T>;
@@ -68,7 +68,7 @@ export interface ISerializableType<T> {
         instance: T,
         instantiationMethod?: InstantiationMethod
     ) => T | void;
-    new (...args: any[]): T;
+    new(...args: any[]): T;
 }
 export type ASerializableType<T> = () => ISerializableType<T>;
 export type ASerializableTypeOrArrayInternal<T> = ASerializableType<T> | ItIsAnArrayInternal;
@@ -79,12 +79,12 @@ export type Serialized<T> =
 export class ItIsAnArrayInternal<
     Value = any,
     T extends Value[] = Value[],
-    C extends (new() => T) = new() => T> {
+    C extends (new () => T) = new () => T> {
     constructor(
         public type: ASerializableTypeOrArrayInternal<Value>,
         public ctor: () => C = (() => Array as any),
         public handling: ArrayHandling = ArrayHandling.Into
-        ) {}
+    ) { }
 }
 
 export function isItAnArrayInternal(arg: unknown): arg is ItIsAnArrayInternal {

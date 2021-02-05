@@ -1,7 +1,7 @@
 import {
     ClassMetaData,
     PropMetaData,
-    PropMetaDataFlag
+    PropMetaDataFlag,
 } from "./meta_data";
 import {
     ArrayHandling,
@@ -10,11 +10,11 @@ import {
     ISerializer,
     isItAnArrayInternal,
     IsReference,
-    SerializeFn
+    SerializeFn,
 } from "./types";
 import {
     isPrimitiveAnonymousType,
-    setBitConditionally
+    setBitConditionally,
 } from "./utils";
 
 /** set a bitmask B. during compilation, if B & x, then the member will be serialized */
@@ -62,7 +62,7 @@ export function serializeAsArray<T>(
     arrayConstructor?: () => IConstructable,
     keyName?: string
 ) {
-    return (target: any, actualKeyName: string): any  => {
+    return (target: any, actualKeyName: string): any => {
         const metadata = PropMetaData.getMetaData(
             target.constructor,
             actualKeyName
@@ -80,7 +80,7 @@ export function serializeAsArray<T>(
 }
 
 export function serializeAsObjectMap<T>(keyType: ASerializableTypeOrArrayInternal<T>, keyName?: string) {
-    return (target: any, actualKeyName: string): any  => {
+    return (target: any, actualKeyName: string): any => {
         const metadata = PropMetaData.getMetaData(
             target.constructor,
             actualKeyName
@@ -100,7 +100,7 @@ export function serializeAsSet<T>(
     valueType: ASerializableTypeOrArrayInternal<T>,
     setConstructor?: () => IConstructable,
     keyName?: string) {
-    return (target: any, actualKeyName: string): any  => {
+    return (target: any, actualKeyName: string): any => {
         const metadata = PropMetaData.getMetaData(
             target.constructor,
             actualKeyName
@@ -123,7 +123,7 @@ export function serializeAsMap(
     mapConstructor?: () => IConstructable,
     keyName?: string
 ) {
-    return (target: IConstructable, actualKeyName: string): void  => {
+    return (target: IConstructable, actualKeyName: string): void => {
         const metadata = PropMetaData.getMetaData(
             target.constructor,
             actualKeyName
@@ -145,7 +145,7 @@ export function serializeAsJson(
     keyNameOrTransformKeys?: boolean | string,
     transformKeys = true
 ) {
-    return (target: IConstructable, actualKeyName: string): void  => {
+    return (target: IConstructable, actualKeyName: string): void => {
         const metadata = PropMetaData.getMetaData(
             target.constructor,
             actualKeyName
@@ -168,7 +168,7 @@ export function serializeAsJson(
 }
 
 export function deserializeUsing(serializer: SerializeFn, keyName?: string) {
-    return (target: IConstructable, actualKeyName: string): void  => {
+    return (target: IConstructable, actualKeyName: string): void => {
         const metadata = PropMetaData.getMetaData(
             target.constructor,
             actualKeyName
@@ -180,7 +180,7 @@ export function deserializeUsing(serializer: SerializeFn, keyName?: string) {
 }
 
 export function deserializeAs(type: ASerializableTypeOrArrayInternal<any>, keyName?: string) {
-    return (target: IConstructable, actualKeyName: string): void  => {
+    return (target: IConstructable, actualKeyName: string): void => {
         const metadata = PropMetaData.getMetaData(
             target.constructor,
             actualKeyName
@@ -202,7 +202,7 @@ export function deserializeAsArray(
     keyName?: string,
     handling: ArrayHandling = ArrayHandling.Into
 ) {
-    return (target: IConstructable, actualKeyName: string): void  => {
+    return (target: IConstructable, actualKeyName: string): void => {
         const metadata = PropMetaData.getMetaData(
             target.constructor,
             actualKeyName
@@ -225,7 +225,7 @@ export function deserializeAsSet(
     setConstructor?: () => IConstructable,
     keyName?: string
 ) {
-    return (target: IConstructable, actualKeyName: string): void  => {
+    return (target: IConstructable, actualKeyName: string): void => {
         const metadata = PropMetaData.getMetaData(
             target.constructor,
             actualKeyName
@@ -248,7 +248,7 @@ export function deserializeAsMap(
     mapConstructor?: () => IConstructable,
     keyName?: string
 ) {
-    return (target: IConstructable, actualKeyName: string): void  => {
+    return (target: IConstructable, actualKeyName: string): void => {
         const metadata = PropMetaData.getMetaData(
             target.constructor,
             actualKeyName
@@ -270,7 +270,7 @@ export function deserializeAsObjectMap(
     valueType: ASerializableTypeOrArrayInternal<any>,
     keyType?: string
 ) {
-    return (target: IConstructable, actualKeyName: string): void  => {
+    return (target: IConstructable, actualKeyName: string): void => {
         const metadata = PropMetaData.getMetaData(
             target.constructor,
             actualKeyName
@@ -290,7 +290,7 @@ export function deserializeAsJson(
     keyNameOrTransformKeys?: boolean | string,
     transformKeys = true
 ) {
-    return (target: IConstructable, actualKeyName: string): void  => {
+    return (target: IConstructable, actualKeyName: string): void => {
         const metadata = PropMetaData.getMetaData(
             target.constructor,
             actualKeyName
@@ -316,7 +316,7 @@ export function autoserializeUsing(
     serializer: ISerializer<any>,
     keyName?: string
 ) {
-    return (target: IConstructable, actualKeyName: string): void  => {
+    return (target: IConstructable, actualKeyName: string): void => {
         const metadata = PropMetaData.getMetaData(
             target.constructor,
             actualKeyName
@@ -331,7 +331,7 @@ export function autoserializeUsing(
 }
 
 export function autoserializeAs(type: ASerializableTypeOrArrayInternal<any>, keyName?: string) {
-    return (target: IConstructable, actualKeyName: string): void  => {
+    return (target: IConstructable, actualKeyName: string): void => {
         const metadata = PropMetaData.getMetaData(
             target.constructor,
             actualKeyName
@@ -357,7 +357,7 @@ export function autoserializeAsArray(
     keyName?: string,
     handling: ArrayHandling = ArrayHandling.Into
 ) {
-    return (target: IConstructable, actualKeyName: string): void  => {
+    return (target: IConstructable, actualKeyName: string): void => {
         const metadata = PropMetaData.getMetaData(
             target.constructor,
             actualKeyName
@@ -385,7 +385,7 @@ export function autoserializeAsSet(
     setConstructor?: () => IConstructable,
     keyName?: string
 ) {
-    return (target: IConstructable, actualKeyName: string): void  => {
+    return (target: IConstructable, actualKeyName: string): void => {
         const metadata = PropMetaData.getMetaData(
             target.constructor,
             actualKeyName
@@ -411,7 +411,7 @@ export function autoserializeAsObjectMap(
     valueType: ASerializableTypeOrArrayInternal<any>,
     keyName?: string
 ) {
-    return (target: IConstructable, actualKeyName: string): void  => {
+    return (target: IConstructable, actualKeyName: string): void => {
         const metadata = PropMetaData.getMetaData(
             target.constructor,
             actualKeyName
@@ -437,7 +437,7 @@ export function autoserializeAsMap(
     mapConstructor?: () => IConstructable,
     keyName?: string
 ) {
-    return (target: IConstructable, actualKeyName: string): void  => {
+    return (target: IConstructable, actualKeyName: string): void => {
         const metadata = PropMetaData.getMetaData(
             target.constructor,
             actualKeyName
@@ -465,7 +465,7 @@ export function autoserializeAsJson(
     keyNameOrTransformKeys?: boolean | string,
     transformKeys = true
 ) {
-    return (target: IConstructable, actualKeyName: string): void  => {
+    return (target: IConstructable, actualKeyName: string): void => {
         const metadata = PropMetaData.getMetaData(
             target.constructor,
             actualKeyName
@@ -492,7 +492,7 @@ export function autoserializeAsJson(
 
 export function inheritSerialization(parentType: () => IConstructable) {
     return (childType: Function): void => {
-        if (parentType() === undefined){
+        if (parentType() === undefined) {
             throw new Error("@inheritSerialization called with undefined argument");
         }
         PropMetaData.inheritMetaData(parentType(), childType);
@@ -500,7 +500,7 @@ export function inheritSerialization(parentType: () => IConstructable) {
 }
 
 export function emitDefaultValue(DefaultValue: boolean) {
-    return (target: IConstructable, actualKeyName: string): void  => {
+    return (target: IConstructable, actualKeyName: string): void => {
         const metadata = PropMetaData.getMetaData(
             target.constructor,
             actualKeyName
@@ -510,15 +510,15 @@ export function emitDefaultValue(DefaultValue: boolean) {
 }
 
 export function onDeserialized(target: IConstructable, actualKeyName: string): void {
-        const metadata = PropMetaData.getMetaData(
-            target.constructor,
-            actualKeyName
-        );
-        metadata.flags = PropMetaDataFlag.onDeserialized;
+    const metadata = PropMetaData.getMetaData(
+        target.constructor,
+        actualKeyName
+    );
+    metadata.flags = PropMetaDataFlag.onDeserialized;
 }
 
 export function defaultValue(instance: Object) {
-    return (target: IConstructable, actualKeyName: string): void  => {
+    return (target: IConstructable, actualKeyName: string): void => {
         const metadata = PropMetaData.getMetaData(
             target.constructor,
             actualKeyName

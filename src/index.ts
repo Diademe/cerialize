@@ -1,16 +1,20 @@
-import { cleanCycleBreaking } from "./cycle";
+import {
+    cleanCycleBreaking,
+} from "./cycle";
 import {
     DeserializeArrayInternal,
     DeserializeInternal,
     DeserializeJSONInternal,
     DeserializeMapInternal,
-    DeserializeObjectMapInternal
+    DeserializeObjectMapInternal,
 } from "./deserialize";
 import {
     ClassMetaData,
-    PropMetaData
+    PropMetaData,
 } from "./meta_data";
-import { getRefHandler, } from "./ref";
+import {
+    getRefHandler,
+} from "./ref";
 import {
     SerializeArrayInternal,
     SerializeInternal,
@@ -18,9 +22,11 @@ import {
     SerializeMapInternal,
     SerializeObjectMapInternal,
     SerializePrimitiveInternal,
-    SerializeSetInternal
+    SerializeSetInternal,
 } from "./serialize";
-import { NoOp } from "./string_transforms";
+import {
+    NoOp,
+} from "./string_transforms";
 import {
     ArrayHandling,
     ASerializableType,
@@ -36,7 +42,7 @@ import {
 } from "./types";
 import {
     deserializationContinuation,
-    serializationContinuation
+    serializationContinuation,
 } from "./utils";
 
 export {
@@ -108,9 +114,9 @@ export function RefCycleDetectionDisable() {
 export function itIsAnArray<
     Value = any,
     T extends Value[] = Value[],
-    C extends new() => T = new() => T>(
-    arrayElementType: ASerializableTypeOrArrayInternal<Value>,
-    arrayConstructor?: () => C
+    C extends new () => T = new () => T>(
+        arrayElementType: ASerializableTypeOrArrayInternal<Value>,
+        arrayConstructor?: () => C
     ): ItIsAnArrayInternal {
     return new ItIsAnArrayInternal<Value, T, C>(arrayElementType, arrayConstructor);
 }

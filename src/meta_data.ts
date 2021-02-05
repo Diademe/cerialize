@@ -1,17 +1,22 @@
 // helper class to contain serialization meta data for a property, each property
 // in a type tagged with a serialization annotation will contain an array of these
 // objects each describing one property
-
-import { NoOp } from "./string_transforms";
+import {
+    NoOp,
+} from "./string_transforms";
 import {
     ArrayHandling,
     ASerializableTypeOrArrayInternal,
     IConstructable,
     InstantiationMethod,
     IsReference,
-    noDefaultValueSymbole
+    noDefaultValueSymbole,
 } from "./types";
-import { getConstructor, isPrimitiveAnonymousType } from "./utils";
+import {
+    getConstructor,
+    isPrimitiveAnonymousType,
+} from "./utils";
+
 
 class TypeMap<K, V> extends Map<K, V>{
     public get(key: K): V | undefined {
@@ -51,16 +56,16 @@ export const enum PropMetaDataFlag {
     AutoPrimitive = SerializePrimitive | DeserializePrimitive,
     AutoUsing = SerializeUsing | DeserializeUsing,
     AutoJSONTransformKeys = DeserializeJSONTransformKeys |
-        SerializeJSONTransformKeys,
+    SerializeJSONTransformKeys,
     Collection =
-          DeserializeArray
-        | SerializeArray
-        | DeserializeObjectMap
-        | SerializeObjectMap
-        | DeserializeMap
-        | SerializeMap
-        | SerializeSet
-        | DeserializeSet,
+      DeserializeArray
+    | SerializeArray
+    | DeserializeObjectMap
+    | SerializeObjectMap
+    | DeserializeMap
+    | SerializeMap
+    | SerializeSet
+    | DeserializeSet,
     PlainObject = DeserializeObject | SerializeObject
 }
 
@@ -229,10 +234,10 @@ export function getDefaultValue<T>(metadata: PropMetaData, val: T) {
         }
         // default value for primitive type wrapped or not
         else if (isPrimitiveAnonymousType(metadata.serializedType as any) ||
-                (val !== undefined && val !== null && val !== Object(val))) {
+            (val !== undefined && val !== null && val !== Object(val))) {
             return new ((metadata.serializedType as any)())().valueOf();
         }
-    else { // default value for Object, Date, Regex
+        else { // default value for Object, Date, Regex
             return null;
         }
     }

@@ -1,10 +1,18 @@
 import {
+    cycleBreaking,
+} from "./cycle";
+import {
     ClassMetaData,
     isDefaultValue,
     PropMetaData,
-    PropMetaDataFlag
+    PropMetaDataFlag,
 } from "./meta_data";
-import { TypeString } from "./runtime_typing";
+import {
+    getRefHandler,
+} from "./ref";
+import {
+    TypeString,
+} from "./runtime_typing";
 import {
     ASerializableType,
     ASerializableTypeOrArrayInternal,
@@ -16,14 +24,11 @@ import {
     ItIsAnArrayInternal,
     JsonType,
     primitive,
-    SerializablePrimitiveType
+    SerializablePrimitiveType,
 } from "./types";
-
-import { cycleBreaking } from "./cycle";
-import { getRefHandler } from "./ref";
 import {
     DowncastPrimitive,
-    isPrimitiveType
+    isPrimitiveType,
 } from "./utils";
 
 let serializeBitMaskPrivate = Number.MAX_SAFE_INTEGER;
@@ -48,7 +53,7 @@ export function SerializeObjectMapInternal<T>(
     if (
         ClassMetaData.refCycleDetection && isReference !== IsReference.False ||
         isReference === IsReference.True
-        ) {
+    ) {
         if (cycleBreaking.seen(source)) {
             getRefHandler().serializationSetRef(target, source);
             return target;
@@ -97,7 +102,7 @@ export function SerializeMapInternal<K, V>(
     if (
         ClassMetaData.refCycleDetection && isReference !== IsReference.False ||
         isReference === IsReference.True
-        ) {
+    ) {
         if (cycleBreaking.seen(source)) {
             getRefHandler().serializationSetRef(target, source);
             return target;
@@ -124,9 +129,9 @@ export function SerializeMapInternal<K, V>(
                 targetKey = isString ? PropMetaData.serializeKeyTransform(key as any) : key;
             }
             const targetValue = SerializeInternal(
-                    value,
-                    valueType as any
-                );
+                value,
+                valueType as any
+            );
             target[targetKey as any] = targetValue;
         }
     }
@@ -210,7 +215,7 @@ export function SerializeJSONInternal(source: any, transformKeys = true): JsonTy
         if (source instanceof Date || source instanceof RegExp) {
             return source.toString();
         }
-    else {
+        else {
             const returnValue: IIndexable<JsonType> = {};
             const keys = Object.keys(source);
             for (const key of keys) {
@@ -268,7 +273,7 @@ export function SerializeInternal<T>(
         if (
             ClassMetaData.refCycleDetection && isReference !== IsReference.False ||
             isReference === IsReference.True
-            ) {
+        ) {
             if (cycleBreaking.seen(instance)) {
                 getRefHandler().serializationSetRef(target, instance);
                 return target;

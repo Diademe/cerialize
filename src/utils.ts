@@ -1,9 +1,11 @@
-import { getRefHandler } from "./ref";
+import {
+    getRefHandler,
+} from "./ref";
 import {
     InstantiationMethod,
     ISerializableType,
     primitive,
-    SerializablePrimitiveType
+    SerializablePrimitiveType,
 } from "./types";
 
 export function getTarget<T>(
@@ -28,9 +30,9 @@ export function getTarget<T>(
     return {} as T;
 }
 
-export function getConstructor(type: any): new(...args: any[]) => any {
+export function getConstructor(type: any): new (...args: any[]) => any {
     return Object.getOwnPropertyDescriptor(type, "__originalConstructor__") ?
-            (type as any).__originalConstructor__ : type;
+        (type as any).__originalConstructor__ : type;
 }
 
 export function isPrimitiveType(type: Function): boolean {
