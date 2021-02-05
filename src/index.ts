@@ -159,7 +159,14 @@ export function SerializeSet<T>(
     return serializationContinuation(SerializeSetInternal, setSource, setElementType);
 }
 
-// todo split signature as in SerializeAs
+export function SerializeArray<T>(
+    sourceArray: T[],
+    arrayElementType: ItIsAnArrayInternal<T>
+): JsonType[] 
+export function SerializeArray<T>(
+    sourceArray: T[],
+    arrayElementType: ASerializableType<T>
+): JsonType[][]
 export function SerializeArray<T>(
     sourceArray: T[],
     arrayElementType: ASerializableTypeOrArrayInternal<T>
