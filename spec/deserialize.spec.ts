@@ -1131,8 +1131,29 @@ describe("Deserializing", () => {
                     });
                 });
 
-                xit("does not apply key transforms when set to false", () => {
+                it("does not apply key transforms when set to false", () => {
+                    SetDeserializeKeyTransform(null);
 
+                    class Test {
+                        @testDeserializeAsJson(true) public value0: string;
+                        @testDeserializeAsJson(true) public value1: boolean;
+                        @testDeserializeAsJson(true) public value2: number;
+                    }
+
+                    const json = {
+                        VALUE0: "strValue",
+                        VALUE1: true,
+                        VALUE2: 100
+                    };
+
+                    const target = createTarget(makeTarget, instantiationMethod, Test);
+                    const instance = Deserialize(json, () => Test, target, instantiationMethod);
+                    
+                    expect(instance).toEqual({
+                        value0: undefined,
+                        value1: undefined,
+                        value2: undefined
+                    });
                 });
 
             });
