@@ -122,9 +122,15 @@ export function DeserializeMapInternal<K, V, T extends Map<K, V>, C extends new 
     for (const key of keys) {
         const value = data[key];
         if (value !== undefined) {
-            const keyTypeF = keyType as () => Function;
-            const isString = keyTypeF() === String;
-            const keyName = (isString ?
+            if (isItAnArrayInternal(keyType)) {
+                throw new Error("a key can not be an array")
+            }
+            const keyTypeF = keyType() as Function;
+            const isString = keyTypeF === String;
+            if (keyTypeF !== String && keyTypeF !== Number) {
+                throw new Error("a key must be a primitive type")
+            }
+            const keyName = keyTypeF(isString ?
                 PropMetaData.deserializeKeyTransform(key) :
                 DeserializeInternal<K>(
                     JSON.parse(key),

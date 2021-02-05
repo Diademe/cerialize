@@ -1,7 +1,9 @@
 import {
     autoserializeUsing,
     Deserialize,
+    deserializeAsMap,
     Serialize,
+    serializeAsMap,
 } from "../src";
 import {
     ISerializer,
@@ -30,5 +32,21 @@ describe("Exemples", () => {
             const obj = Deserialize(json, () => Test);
             expect(obj.value).toBe(BigInt("18014398509481982"));
         });
+    });
+    it("dictionary with int key serialized as string key", () => {
+        class Test {
+            @serializeAsMap(() => String, () => String)
+            @deserializeAsMap(() => Number, () => String)
+            public value: Map<number, string>;
+        }
+
+        const s = new Test();
+        s.value = new Map();
+        s.value.set(1, "a");
+        const json = Serialize(s, () => Test);
+        expect(typeof Array.from(Object.keys(json.value))[0]).toBe("string");
+
+        const obj = Deserialize(json, () => Test);
+        expect(typeof Array.from(obj.value.keys())[0]).toBe("number");
     });
 });

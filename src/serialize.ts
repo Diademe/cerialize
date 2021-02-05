@@ -126,7 +126,7 @@ export function SerializeMapInternal<K, V>(
             else {
                 const keyTypeF = keyType() as Function;
                 const isString = keyTypeF === String;
-                targetKey = isString ? PropMetaData.serializeKeyTransform(key as any) : key;
+                targetKey = keyTypeF(isString ? PropMetaData.serializeKeyTransform(key as any) : key);
             }
             const targetValue = SerializeInternal(
                 value,
