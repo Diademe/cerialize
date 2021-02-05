@@ -16,3 +16,7 @@ spec
 .babelrc
 .gitignore
 Contribute.md
+
+converage
+
+dits/**/*.js.map
