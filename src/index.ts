@@ -138,7 +138,6 @@ export function SerializeJSON(sourceJSON: any, transformKeys = true): JsonType {
 }
 
 // () => SerializablePrimitiveType  ==> ASerializablePrimitiveType
-// todo ASerializablePrimitiveTypeOrArrayInternal for type
 /**
  * Serialize a primitive variable or an array of primitives variables
  * with itIsAnArray :

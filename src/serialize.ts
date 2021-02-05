@@ -260,7 +260,6 @@ export function SerializeInternal<T>(
 
         const metadataList = PropMetaData.getMetaDataForType(type());
 
-        // todo -- maybe move this to a Generic deserialize
         if (metadataList === null) {
             if (isPrimitiveType(type())) {
                 return SerializePrimitiveInternal(instance as any, type as any) as any;
