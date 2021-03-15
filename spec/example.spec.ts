@@ -7,6 +7,7 @@ import {
 } from "../src";
 import {
     ISerializer,
+    JsonType,
 } from "../src/types";
 
 
@@ -17,7 +18,7 @@ describe("Exemples", () => {
             const infinityTimeTowInString: string = "18014398509481982";
             const BigIntSerializer: ISerializer<BigInt> = {
                 Serialize: (myBigInt: BigInt) => myBigInt.toString(),
-                Deserialize: (myBigIntInJsonForm: string) => BigInt(myBigIntInJsonForm)
+                Deserialize: (myBigIntInJsonForm: JsonType) => BigInt(myBigIntInJsonForm)
             };
 
             class Test {
