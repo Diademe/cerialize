@@ -161,9 +161,9 @@ export class PropMetaData {
     // the type to use when serializing the key of a map
     public deserializedKeyType: ASerializableTypeOrArrayInternal<any>;
     // the type to use when deserializing the value of a map
-    public serializedValueType: ASerializableTypeOrArrayInternal<any>;
+    public serializedValueType: ASerializableTypeOrArrayInternal<any> | undefined;
     // the type to use when serializing the value of a map
-    public deserializedValueType: ASerializableTypeOrArrayInternal<any>;
+    public deserializedValueType: ASerializableTypeOrArrayInternal<any> | undefined;
     public flags: PropMetaDataFlag;
     public bitMaskSerialize: number;
     public emitDefaultValue: boolean;

@@ -36,7 +36,10 @@ import {
 import {
     ArrayHandling,
     IIndexable,
+    IJsonObject,
     InstantiationMethod,
+    IPlainObject,
+    JsonType,
 } from "../src/types";
 
 function expectInstance(
@@ -61,7 +64,11 @@ function expectTarget(target: any, instance: any, shouldMakeTarget: boolean) {
     expect(instance === target).toBe(shouldMakeTarget);
 }
 
-function createTarget(shouldMakeTarget: boolean, shouldInstantiationMethod: InstantiationMethod, type: any) {
+function createTarget<T>(
+    shouldMakeTarget: boolean,
+    shouldInstantiationMethod: InstantiationMethod,
+    type: new() => T
+): T | IPlainObject | null {
     if (!shouldMakeTarget) { return null; }
 
     switch (shouldInstantiationMethod) {
@@ -86,7 +93,7 @@ describe("Deserializing", () => {
                 public value: number = 1;
             }
 
-            const instance = Deserialize({ value: 2 }, () => Test);
+            const instance = Deserialize({ value: 2 }, () => Test)!;
             expect(instance.value).toBe(1);
             expect(instance instanceof Test).toBe(true);
 
@@ -98,7 +105,7 @@ describe("Deserializing", () => {
 
         function runTests(blockName: string,
                           instantiationMethod: InstantiationMethod,
-                          testDeserializeAs: any,
+                          testDeserializeAs: Function,
                           makeTarget: boolean) {
 
             describe(blockName, () => {
@@ -130,12 +137,12 @@ describe("Deserializing", () => {
                 it("deserializes a Date", () => {
                     class Test {
                         @testDeserializeAs(() => Date)
-                        public value0: Date;
+                        public value0!: Date;
                     }
 
                     const d = new Date().toString();
                     const target = createTarget(makeTarget, instantiationMethod, Test);
-                    const instance = Deserialize({ value0: d }, () => Test, target, instantiationMethod);
+                    const instance = Deserialize({ value0: d }, () => Test, target, instantiationMethod)!;
                     expect(instance.value0 instanceof Date).toBe(true);
                     expect(instance.value0.toString()).toBe(d);
                     expectTarget(target, instance, makeTarget);
@@ -144,12 +151,13 @@ describe("Deserializing", () => {
 
                 it("deserializes a RegExp", () => {
                     class Test {
-                        @testDeserializeAs(() => RegExp) public value0: RegExp;
+                        @testDeserializeAs(() => RegExp)
+                        public value0!: RegExp;
                     }
 
                     const d = (new RegExp("/[123]/g")).toString();
                     const target = createTarget(makeTarget, instantiationMethod, Test);
-                    const instance = Deserialize({ value0: d }, () => Test, target, instantiationMethod);
+                    const instance = Deserialize({ value0: d }, () => Test, target, instantiationMethod)!;
                     expect(instance.value0 instanceof RegExp).toBe(true);
                     expect(instance.value0.toString()).toBe(d);
                     expectTarget(instance, target, makeTarget);
@@ -159,16 +167,18 @@ describe("Deserializing", () => {
 
                 it("deserializes a non primitive value", () => {
                     class Thing {
-                        @testDeserializeAs(() => Number) public value: number = 1;
+                        @testDeserializeAs(() => Number)
+                        public value: number = 1;
                     }
 
                     class Test {
-                        @testDeserializeAs(() => Thing) public thing: Thing;
+                        @testDeserializeAs(() => Thing)
+                        public thing!: Thing;
                     }
 
                     const target = createTarget(makeTarget, instantiationMethod, Test);
                     if (target) { target.thing = createTarget(makeTarget, instantiationMethod, Thing); }
-                    const instance = Deserialize({ thing: { value: 2 } }, () => Test, target, instantiationMethod);
+                    const instance = Deserialize({ thing: { value: 2 } }, () => Test, target, instantiationMethod)!;
                     expect(instance.thing.value).toBe(2);
                     expectTarget(target, instance, makeTarget);
                     if (target) {
@@ -180,9 +190,12 @@ describe("Deserializing", () => {
 
                 it("deserializes non matching primitive types", () => {
                     class Test {
-                        @testDeserializeAs(() => Number) public value0: string;
-                        @testDeserializeAs(() => String) public value1: boolean;
-                        @testDeserializeAs(() => Boolean) public value2: number;
+                        @testDeserializeAs(() => Number)
+                        public value0!: string;
+                        @testDeserializeAs(() => String)
+                        public value1!: boolean;
+                        @testDeserializeAs(() => Boolean)
+                        public value2!: number;
                     }
 
                     const json = {
@@ -191,7 +204,7 @@ describe("Deserializing", () => {
                         value2: "100"
                     };
                     const target = createTarget(makeTarget, instantiationMethod, Test);
-                    const instance = Deserialize(json, () => Test, target, instantiationMethod);
+                    const instance = Deserialize(json, () => Test, target, instantiationMethod)!;
                     expect(instance.value0).toBe(100);
                     expect(instance.value1).toBe("true");
                     expect(instance.value2).toBe(true);
@@ -200,9 +213,12 @@ describe("Deserializing", () => {
 
                 it("deserializes with different keys", () => {
                     class Test {
-                        @testDeserializeAs(() => String, "str") public value0: string;
-                        @testDeserializeAs(() => Boolean, "bool") public value1: boolean;
-                        @testDeserializeAs(() => Number, "num") public value2: number;
+                        @testDeserializeAs(() => String, "str")
+                        public value0!: string;
+                        @testDeserializeAs(() => Boolean, "bool")
+                        public value1!: boolean;
+                        @testDeserializeAs(() => Number, "num")
+                        public value2!: number;
                     }
 
                     const json = {
@@ -211,7 +227,7 @@ describe("Deserializing", () => {
                         str: "strValue"
                     };
                     const target = createTarget(makeTarget, instantiationMethod, Test);
-                    const instance = Deserialize(json, () => Test, target, instantiationMethod);
+                    const instance = Deserialize(json, () => Test, target, instantiationMethod)!;
                     expect(instance.value0).toBe("strValue");
                     expect(instance.value1).toBe(true);
                     expect(instance.value2).toBe(100);
@@ -220,12 +236,15 @@ describe("Deserializing", () => {
 
                 it("skips undefined keys", () => {
                     class Test {
-                        @testDeserializeAs(() => String) public value0: string = "val";
-                        @testDeserializeAs(() => Boolean) public value1: boolean;
-                        @testDeserializeAs(() => Number) public value2: number;
+                        @testDeserializeAs(() => String)
+                        public value0: string = "val";
+                        @testDeserializeAs(() => Boolean)
+                        public value1!: boolean;
+                        @testDeserializeAs(() => Number)
+                        public value2!: number;
                     }
 
-                    const json: any = {
+                    const json: IJsonObject = {
                         value0: undefined,
                         value1: true,
                         value2: 100
@@ -244,18 +263,21 @@ describe("Deserializing", () => {
 
                 it("does not skip null keys", () => {
                     class Test {
-                        @testDeserializeAs(() => String) public value0: string = "val";
-                        @testDeserializeAs(() => Boolean) public value1: boolean;
-                        @testDeserializeAs(() => Number) public value2: number;
+                        @testDeserializeAs(() => String)
+                        public value0: string = "val";
+                        @testDeserializeAs(() => Boolean)
+                        public value1!: boolean;
+                        @testDeserializeAs(() => Number)
+                        public value2!: number;
                     }
 
-                    const json: any = {
+                    const json: IJsonObject = {
                         value0: null,
                         value1: true,
                         value2: 100
                     };
                     const target = createTarget(makeTarget, instantiationMethod, Test);
-                    const instance = Deserialize(json, () => Test, target, instantiationMethod);
+                    const instance = Deserialize(json, () => Test, target, instantiationMethod)!;
                     expect(instance.value0).toBe(null);
                     expect(instance.value1).toBe(true);
                     expect(instance.value2).toBe(100);
@@ -265,13 +287,17 @@ describe("Deserializing", () => {
 
                 it("deserializes nested types", () => {
                     class Test {
-                        @testDeserializeAs(() => String) public value0: string = "bad";
-                        @testDeserializeAs(() => Boolean) public value1: boolean = false;
-                        @testDeserializeAs(() => Number) public value2: number = 1;
+                        @testDeserializeAs(() => String)
+                        public value0: string = "bad";
+                        @testDeserializeAs(() => Boolean)
+                        public value1: boolean = false;
+                        @testDeserializeAs(() => Number)
+                        public value2: number = 1;
                     }
 
                     class Test0 {
-                        @testDeserializeAs(() => Test) public test: Test;
+                        @testDeserializeAs(() => Test)
+                        public test!: Test;
                     }
 
                     const json = {
@@ -279,7 +305,7 @@ describe("Deserializing", () => {
                     };
                     const target = createTarget(makeTarget, instantiationMethod, Test0);
                     if (target) { target.test = createTarget(makeTarget, instantiationMethod, Test); }
-                    const instance = Deserialize(json, () => Test0, target, instantiationMethod);
+                    const instance = Deserialize(json, () => Test0, target, instantiationMethod)!;
                     expectInstance(instance.test, Test, instantiationMethod);
                     if (target) { expectInstance(target.test, Test, instantiationMethod); }
                     expect(instance.test.value0).toBe("str");
@@ -289,17 +315,22 @@ describe("Deserializing", () => {
 
                 it("deserializes doubly nested types", () => {
                     class Test0 {
-                        @testDeserializeAs(() => String) public value0: string = "bad";
-                        @testDeserializeAs(() => Boolean) public value1: boolean = false;
-                        @testDeserializeAs(() => Number) public value2: number = 1;
+                        @testDeserializeAs(() => String)
+                        public value0: string = "bad";
+                        @testDeserializeAs(() => Boolean)
+                        public value1: boolean = false;
+                        @testDeserializeAs(() => Number)
+                        public value2: number = 1;
                     }
 
                     class Test1 {
-                        @testDeserializeAs(() => Test0) public test0: Test0;
+                        @testDeserializeAs(() => Test0)
+                        public test0!: Test0;
                     }
 
                     class Test2 {
-                        @testDeserializeAs(() => Test1) public test1: Test1;
+                        @testDeserializeAs(() => Test1)
+                        public test1!: Test1;
                     }
 
                     const json = {
@@ -313,7 +344,7 @@ describe("Deserializing", () => {
                             target.test1.test0 = createTarget(makeTarget, instantiationMethod, Test0);
                         }
                     }
-                    const instance = Deserialize(json, () => Test2, target, instantiationMethod);
+                    const instance = Deserialize(json, () => Test2, target, instantiationMethod)!;
                     expectInstance(instance.test1, Test1, instantiationMethod);
                     expectInstance(instance.test1.test0, Test0, instantiationMethod);
                     if (target) {
@@ -370,9 +401,9 @@ describe("Deserializing", () => {
                         }
                     }
 
-                    const json = { values: [{ name: "4" }, { name: "5", val: 25 }] };
+                    const json: IJsonObject = { values: [{ name: "4" }, { name: "5", val: 25 }] };
                     const target = new Test();
-                    const instance = Deserialize(json, () => Test, target);
+                    const instance = Deserialize(json, () => Test, target)!;
                     expect(instance.values).toEqual(expected);
             });
 
@@ -409,8 +440,8 @@ describe("Deserializing", () => {
 
         function runTests(blockName: string,
                           instantiationMethod: InstantiationMethod,
-                          testDeserializeAs: any,
-                          testDeserializeAsObjectMap: any,
+                          testDeserializeAs: Function,
+                          testDeserializeAsObjectMap: Function,
                           makeTarget: boolean) {
 
             describe(blockName, () => {
@@ -418,12 +449,13 @@ describe("Deserializing", () => {
                 it("deserializes a map of primitives", () => {
 
                     class Test {
-                        @testDeserializeAsObjectMap(() => Number) public values: IIndexable<number>;
+                        @testDeserializeAsObjectMap(() => Number)
+                        public values!: IIndexable<number>;
                     }
 
                     const json = { values: { v0: 0, v1: 1, v2: 2 } };
                     const target = createTarget(makeTarget, instantiationMethod, Test);
-                    const instance = Deserialize(json, () => Test, target, instantiationMethod);
+                    const instance = Deserialize(json, () => Test, target, instantiationMethod)!;
                     expect(instance.values).toEqual({ v0: 0, v1: 1, v2: 2 });
                     expectInstance(instance, Test, instantiationMethod);
                     expectTarget(target, instance, makeTarget);
@@ -432,7 +464,8 @@ describe("Deserializing", () => {
 
                 it("deserializes a map of non primitives", () => {
                     class TestType {
-                        @testDeserializeAs(() => Number) public value: number;
+                        @testDeserializeAs(() => Number)
+                        public value: number;
 
                         constructor(arg: number) {
                             this.value = arg;
@@ -440,7 +473,8 @@ describe("Deserializing", () => {
                     }
 
                     class Test {
-                        @testDeserializeAsObjectMap(() => TestType) public values: IIndexable<TestType>;
+                        @testDeserializeAsObjectMap(() => TestType)
+                        public values!: IIndexable<TestType>;
                     }
 
                     const json = {
@@ -452,7 +486,7 @@ describe("Deserializing", () => {
                     };
 
                     const target = createTarget(makeTarget, instantiationMethod, Test);
-                    const instance = Deserialize(json, () => Test, target, instantiationMethod);
+                    const instance = Deserialize(json, () => Test, target, instantiationMethod)!;
                     expect(instance.values.v0).toEqual({ value: 1 });
                     expect(instance.values.v1).toEqual({ value: 2 });
                     expect(instance.values.v2).toEqual({ value: 3 });
@@ -460,7 +494,8 @@ describe("Deserializing", () => {
 
                 it("deserializes a map of string to array of number", () => {
                     class TestType {
-                        @testDeserializeAs(() => Number) public value: number;
+                        @testDeserializeAs(() => Number)
+                        public value: number;
 
                         constructor(arg: number) {
                             this.value = arg;
@@ -469,7 +504,7 @@ describe("Deserializing", () => {
 
                     class Test {
                         @testDeserializeAsObjectMap(itIsAnArray(() => TestType))
-                        public values: IIndexable<TestType[]>;
+                        public values!: IIndexable<TestType[]>;
                     }
 
                     const json = {
@@ -481,7 +516,7 @@ describe("Deserializing", () => {
                     };
 
                     const target = createTarget(makeTarget, instantiationMethod, Test);
-                    const instance = Deserialize(json, () => Test, target, instantiationMethod);
+                    const instance = Deserialize(json, () => Test, target, instantiationMethod)!;
                     expect(instance.values).toEqual({
                         v1: [{ value: 11 }, { value: 12 }, { value: 13 }],
                         v2: [{ value: 21 }, { value: 22 }, { value: 23 }],
@@ -491,7 +526,8 @@ describe("Deserializing", () => {
 
                 it("deserializes nested maps", () => {
                     class TestType {
-                        @testDeserializeAsObjectMap(() => Number) public value: IIndexable<number>;
+                        @testDeserializeAsObjectMap(() => Number)
+                        public value: IIndexable<number>;
 
                         constructor(arg: IIndexable<number>) {
                             this.value = arg;
@@ -499,7 +535,8 @@ describe("Deserializing", () => {
                     }
 
                     class Test {
-                        @testDeserializeAsObjectMap(() => TestType) public values: IIndexable<TestType>;
+                        @testDeserializeAsObjectMap(() => TestType)
+                        public values!: IIndexable<TestType>;
                     }
 
                     const json = {
@@ -510,7 +547,7 @@ describe("Deserializing", () => {
                         }
                     };
                     const target = createTarget(makeTarget, instantiationMethod, Test);
-                    const instance = Deserialize(json, () => Test, target, instantiationMethod);
+                    const instance = Deserialize(json, () => Test, target, instantiationMethod)!;
                     expect(instance.values).toEqual({
                         v0: { value: { v00: 1, v01: 2 } },
                         v1: { value: { v10: 2, v11: 2 } },
@@ -520,10 +557,11 @@ describe("Deserializing", () => {
 
                 it("skips undefined keys", () => {
                     class Test {
-                        @testDeserializeAsObjectMap(() => Number) public values: IIndexable<number>;
+                        @testDeserializeAsObjectMap(() => Number)
+                        public values!: IIndexable<number>;
                     }
 
-                    const json: any = {
+                    const json: IJsonObject = {
                         values: {
                             v0: undefined,
                             v1: 1,
@@ -531,7 +569,7 @@ describe("Deserializing", () => {
                         }
                     };
                     const target = createTarget(makeTarget, instantiationMethod, Test);
-                    const instance = Deserialize(json, () => Test, target, instantiationMethod);
+                    const instance = Deserialize(json, () => Test, target, instantiationMethod)!;
                     expect(instance).toEqual({
                         values: {
                             v1: 1,
@@ -542,7 +580,8 @@ describe("Deserializing", () => {
 
                 it("deserializes a map with different key name", () => {
                     class TestType {
-                        @testDeserializeAs(() => Number) public value: number;
+                        @testDeserializeAs(() => Number)
+                        public value: number;
 
                         constructor(arg: number) {
                             this.value = arg;
@@ -550,14 +589,15 @@ describe("Deserializing", () => {
                     }
 
                     class Test {
-                        @testDeserializeAsObjectMap(() => TestType, "different") public values: IIndexable<TestType>;
+                        @testDeserializeAsObjectMap(() => TestType, "different")
+                        public values!: IIndexable<TestType>;
                     }
 
                     const json = {
                         different: { v0: { value: 1 }, v1: { value: 2 } }
                     };
                     const target = createTarget(makeTarget, instantiationMethod, Test);
-                    const instance = Deserialize(json, () => Test, target, instantiationMethod);
+                    const instance = Deserialize(json, () => Test, target, instantiationMethod)!;
                     expect(instance.values).toEqual({
                         v0: { value: 1 }, v1: { value: 2 }
                     });
@@ -566,25 +606,26 @@ describe("Deserializing", () => {
 
                 it("throws an exception if input is not a map type", () => {
                     class Test {
-                        @testDeserializeAsObjectMap(Number) public values: IIndexable<number>;
+                        @testDeserializeAsObjectMap(Number)
+                        public values!: IIndexable<number>;
                     }
 
                     expect(() => {
                         const json = { values: 1 };
                         const target = createTarget(makeTarget, instantiationMethod, Test);
-                        const instance = Deserialize(json, () => Test, target, instantiationMethod);
+                        const _ = Deserialize(json, () => Test, target, instantiationMethod)!;
                     }).toThrow("Expected input to be of type `object` but received: number");
 
                     expect(() => {
                         const json = { values: false };
                         const target = createTarget(makeTarget, instantiationMethod, Test);
-                        const instance = Deserialize(json, () => Test, target, instantiationMethod);
+                        const _ = Deserialize(json, () => Test, target, instantiationMethod)!;
                     }).toThrow("Expected input to be of type `object` but received: boolean");
 
                     expect(() => {
                         const json = { values: "str" };
                         const target = createTarget(makeTarget, instantiationMethod, Test);
-                        const instance = Deserialize(json, () => Test, target, instantiationMethod);
+                        const _ = Deserialize(json, () => Test, target, instantiationMethod)!;
                     }).toThrow("Expected input to be of type `object` but received: string");
 
                 });
@@ -592,12 +633,13 @@ describe("Deserializing", () => {
                 it("deserializes a null map", () => {
 
                     class Test {
-                        @testDeserializeAsObjectMap(Number) public values: IIndexable<number>;
+                        @testDeserializeAsObjectMap(Number)
+                        public values!: IIndexable<number>;
                     }
 
-                    const json: any = { values: null };
+                    const json: IJsonObject = { values: null };
                     const target = createTarget(makeTarget, instantiationMethod, Test);
-                    const instance = Deserialize(json, () => Test, target, instantiationMethod);
+                    const instance = Deserialize(json, () => Test, target, instantiationMethod)!;
                     expect(instance.values).toBeNull();
 
                 });
@@ -629,11 +671,12 @@ describe("Deserializing", () => {
                 it("deserializes a map of primitives", () => {
 
                     class Test {
-                        @deserializeAsMap(() => String, () => Number) public values: Map<string, number>;
+                        @deserializeAsMap(() => String, () => Number)
+                        public values!: Map<string, number>;
                     }
 
                     const json = { values: { v0: 0, v1: 1, v2: 2 } };
-                    const instance = Deserialize(json, () => Test);
+                    const instance = Deserialize(json, () => Test)!;
                     expect(instance.values.get("v0")).toEqual(0);
                     expect(instance.values.get("v1")).toEqual(1);
                     expect(instance.values.get("v2")).toEqual(2);
@@ -641,7 +684,8 @@ describe("Deserializing", () => {
 
                 it("deserializes nested maps", () => {
                     class TestType {
-                        @deserializeAsMap(() => String, () => Number) public value: Map<string, Number>;
+                        @deserializeAsMap(() => String, () => Number)
+                        public value: Map<string, Number>;
 
                         constructor(arg: Map<string, number>) {
                             this.value = arg;
@@ -649,7 +693,8 @@ describe("Deserializing", () => {
                     }
 
                     class Test {
-                        @deserializeAsMap(() => String, () => TestType) public values: Map<string, TestType>;
+                        @deserializeAsMap(() => String, () => TestType)
+                        public values!: Map<string, TestType>;
                     }
 
                     const json = {
@@ -659,34 +704,36 @@ describe("Deserializing", () => {
                             v2: { value: { v20: 3, v21: 2 } }
                         }
                     };
-                    const instance = Deserialize(json, () => Test);
-                    expect(instance.values.get("v0").value.get("v00")).toEqual(1);
-                    expect(instance.values.get("v0").value.get("v01")).toEqual(2);
-                    expect(instance.values.get("v1").value.get("v10")).toEqual(2);
-                    expect(instance.values.get("v1").value.get("v11")).toEqual(2);
-                    expect(instance.values.get("v2").value.get("v20")).toEqual(3);
-                    expect(instance.values.get("v2").value.get("v21")).toEqual(2);
+                    const instance = Deserialize(json, () => Test)!;
+                    expect(instance.values.get("v0")!.value.get("v00")).toEqual(1);
+                    expect(instance.values.get("v0")!.value.get("v01")).toEqual(2);
+                    expect(instance.values.get("v1")!.value.get("v10")).toEqual(2);
+                    expect(instance.values.get("v1")!.value.get("v11")).toEqual(2);
+                    expect(instance.values.get("v2")!.value.get("v20")).toEqual(3);
+                    expect(instance.values.get("v2")!.value.get("v21")).toEqual(2);
                 });
 
                 it("skips undefined keys", () => {
                     class Test {
-                        @deserializeAsMap(() => String, () => Number) public values: Map<string, number>;
+                        @deserializeAsMap(() => String, () => Number)
+                        public values!: Map<string, number>;
                     }
 
-                    const json: any = {
+                    const json: IJsonObject = {
                         values: {
                             v0: undefined,
                             v1: 1,
                             v2: 2
                         }
                     };
-                    const instance = Deserialize(json, () => Test);
+                    const instance = Deserialize(json, () => Test)!;
                     expect(instance.values.size).toEqual(2);
                 });
 
                 it("deserializes a map with different key name", () => {
                     class TestType {
-                        @deserializeAs(() => Number) public value: number;
+                        @deserializeAs(() => Number)
+                        public value: number;
 
                         constructor(arg: number) {
                             this.value = arg;
@@ -695,26 +742,27 @@ describe("Deserializing", () => {
 
                     class Test {
                         @deserializeAsMap(() => String, () => TestType, () => Map, "different")
-                        public values: Map<String, TestType>;
+                        public values!: Map<String, TestType>;
                     }
 
                     const json = {
                         different: { v0: { value: 1 }, v1: { value: 2 } }
                     };
-                    const instance = Deserialize(json, () => Test);
-                    expect(instance.values.get("v0").value).toEqual(1);
-                    expect(instance.values.get("v1").value).toEqual(2);
+                    const instance = Deserialize(json, () => Test)!;
+                    expect(instance.values.get("v0")!.value).toEqual(1);
+                    expect(instance.values.get("v1")!.value).toEqual(2);
 
                 });
 
                 it("deserializes a null map", () => {
 
                     class Test {
-                        @deserializeAsMap(() => Number, () => String) public values: Map<number, string>;
+                        @deserializeAsMap(() => Number, () => String)
+                        public values!: Map<number, string>;
                     }
 
-                    const json: any = { values: null };
-                    const instance = Deserialize(json, () => Test);
+                    const json: IJsonObject = { values: null };
+                    const instance = Deserialize(json, () => Test)!;
                     expect(instance.values).toBeNull();
 
                 });
@@ -723,11 +771,12 @@ describe("Deserializing", () => {
     describe("DeserializeAsSet", () => {
         it("deserializes a Set of primitives", () => {
             class Test {
-                @deserializeAsSet(() => Number, () => Set) public value: Set<number>;
+                @deserializeAsSet(() => Number, () => Set)
+                public value!: Set<number>;
             }
 
             const json = { value: [1, 2, 3] };
-            const instance = Deserialize(json, () => Test);
+            const instance = Deserialize(json, () => Test)!;
             expect(instance.value instanceof Set).toBeTruthy();
             expect(instance.value.size).toEqual(3);
             expect(instance.value.has(1)).toBe(true);
@@ -738,11 +787,12 @@ describe("Deserializing", () => {
         it("deserializes a custom Set of primitives", () => {
             class MySet<T> extends Set<T> {}
             class Test {
-                @deserializeAsSet(() => Number, () => MySet) public value: MySet<number>;
+                @deserializeAsSet(() => Number, () => MySet)
+                public value!: MySet<number>;
             }
 
             const json = { value: [1, 2, 3] };
-            const instance = Deserialize(json, () => Test);
+            const instance = Deserialize(json, () => Test)!;
             expect(instance.value instanceof MySet).toBeTruthy();
             expect(instance.value.size).toEqual(3);
             expect(instance.value.has(1)).toBe(true);
@@ -752,7 +802,8 @@ describe("Deserializing", () => {
 
         it("deserializes a Set of typed objects", () => {
             class TestType {
-                @deserializeAs(() => String) public strVal: string;
+                @deserializeAs(() => String)
+                public strVal: string;
 
                 constructor(val: string) {
                     this.strVal = val;
@@ -760,7 +811,8 @@ describe("Deserializing", () => {
             }
 
             class Test {
-                @deserializeAsSet(() => TestType) public value: Set<TestType>;
+                @deserializeAsSet(() => TestType)
+                public value!: Set<TestType>;
             }
 
             const json = {
@@ -771,7 +823,7 @@ describe("Deserializing", () => {
                 ]
             };
 
-            const instance = Deserialize(json, () => Test);
+            const instance = Deserialize(json, () => Test)!;
             const value = Array.from(instance.value.keys());
             expect(value[0] instanceof TestType).toBeTruthy();
             expect(value[1] instanceof TestType).toBeTruthy();
@@ -782,7 +834,8 @@ describe("Deserializing", () => {
 
         it("deserializes nested Sets", () => {
             class TestTypeL0 {
-                @deserializeAs(() => String) public strVal: string;
+                @deserializeAs(() => String)
+                public strVal: string;
 
                 constructor(val: string) {
                     this.strVal = val;
@@ -791,7 +844,8 @@ describe("Deserializing", () => {
             }
 
             class TestTypeL1 {
-                @deserializeAsSet(() => TestTypeL0) public l0List: Set<TestTypeL0>;
+                @deserializeAsSet(() => TestTypeL0)
+                public l0List: Set<TestTypeL0>;
 
                 constructor(l0List: Set<TestTypeL0>) {
                     this.l0List = l0List;
@@ -800,7 +854,8 @@ describe("Deserializing", () => {
             }
 
             class Test {
-                @deserializeAsSet(() => TestTypeL1) public value: Set<TestTypeL1>;
+                @deserializeAsSet(() => TestTypeL1)
+                public value!: Set<TestTypeL1>;
             }
 
             const json = {
@@ -817,7 +872,7 @@ describe("Deserializing", () => {
                 new TestTypeL1(new Set([new TestTypeL0("20"), new TestTypeL0("21")]))
             ];
 
-            const instance = Deserialize(json, () => Test);
+            const instance = Deserialize(json, () => Test)!;
             const value = Array.from(instance.value.keys());
             expect(value[0] instanceof TestTypeL1).toBeTruthy();
             expect(value[1] instanceof TestTypeL1).toBeTruthy();
@@ -828,12 +883,13 @@ describe("Deserializing", () => {
         it("deserializes a Set with a different key", () => {
 
             class Test {
-                @deserializeAsSet(() => Number, () => Set, "different") public value: Set<number>;
+                @deserializeAsSet(() => Number, () => Set, "different")
+                public value!: Set<number>;
             }
 
             const json = { different: [1, 2, 3] };
 
-            const instance = Deserialize(json, () => Test);
+            const instance = Deserialize(json, () => Test)!;
             expect(instance.value.has(1)).toBe(true);
             expect(instance.value.has(2)).toBe(true);
             expect(instance.value.has(3)).toBe(true);
@@ -842,27 +898,28 @@ describe("Deserializing", () => {
         it("throws an error if input type is not a Set", () => {
 
             class Test {
-                @deserializeAsSet(() => Number) public values: Set<number>;
+                @deserializeAsSet(() => Number)
+                public values!: Set<number>;
             }
 
             expect(() => {
                 const json = { values: 1 };
-                const instance = Deserialize(json, () => Test);
+                const instance = Deserialize(json, () => Test)!;
             }).toThrow("Expected input to be an array but received: number");
 
             expect(() => {
                 const json = { values: false };
-                const instance = Deserialize(json, () => Test);
+                const instance = Deserialize(json, () => Test)!;
             }).toThrow("Expected input to be an array but received: boolean");
 
             expect(() => {
                 const json = { values: "str" };
-                const instance = Deserialize(json, () => Test);
+                const instance = Deserialize(json, () => Test)!;
             }).toThrow("Expected input to be an array but received: string");
 
             expect(() => {
                 const json = { values: {} };
-                const instance = Deserialize(json, () => Test);
+                const instance = Deserialize(json, () => Test)!;
             }).toThrow("Expected input to be an array but received: object");
 
         });
@@ -872,7 +929,8 @@ describe("Deserializing", () => {
 
         function runTests(blockName: string,
                           instantiationMethod: InstantiationMethod,
-                          testDeserializeAs: any, testDeserializeAsJson: any,
+                          testDeserializeAs: Function,
+                          testDeserializeAsJson: Function,
                           makeTarget: boolean) {
 
             describe(blockName, () => {
@@ -880,9 +938,12 @@ describe("Deserializing", () => {
                 it("deserializes a primitive as json", () => {
 
                     class Test {
-                        @testDeserializeAsJson() public value0: string;
-                        @testDeserializeAsJson() public value1: boolean;
-                        @testDeserializeAsJson() public value2: number;
+                        @testDeserializeAsJson()
+                        public value0!: string;
+                        @testDeserializeAsJson()
+                        public value1!: boolean;
+                        @testDeserializeAsJson()
+                        public value2!: number;
                     }
 
                     const json = {
@@ -892,7 +953,7 @@ describe("Deserializing", () => {
                     };
 
                     const target = createTarget(makeTarget, instantiationMethod, Test);
-                    const instance = Deserialize(json, () => Test, target, instantiationMethod);
+                    const instance = Deserialize(json, () => Test, target, instantiationMethod)!;
                     expect(instance).toEqual({
                         value0: "strValue",
                         value1: true,
@@ -904,9 +965,12 @@ describe("Deserializing", () => {
                 it("deserializes an array of primitives as json", () => {
 
                     class Test {
-                        @testDeserializeAsJson() public value0: string[];
-                        @testDeserializeAsJson() public value1: boolean[];
-                        @testDeserializeAsJson() public value2: number;
+                        @testDeserializeAsJson()
+                        public value0!: string[];
+                        @testDeserializeAsJson()
+                        public value1!: boolean[];
+                        @testDeserializeAsJson()
+                        public value2!: number;
                     }
 
                     const json = {
@@ -915,7 +979,7 @@ describe("Deserializing", () => {
                         value2: 100
                     };
                     const target = createTarget(makeTarget, instantiationMethod, Test);
-                    const instance = Deserialize(json, () => Test, target, instantiationMethod);
+                    const instance = Deserialize(json, () => Test, target, instantiationMethod)!;
                     expect(instance).toEqual({
                         value0: ["strValue", "00"],
                         value1: [false, true],
@@ -926,10 +990,11 @@ describe("Deserializing", () => {
 
                 it("skips undefined keys", () => {
                     class Test {
-                        @testDeserializeAsJson() public value: IIndexable<number>;
+                        @testDeserializeAsJson()
+                        public value!: IIndexable<number>;
                     }
 
-                    const json: any = {
+                    const json: IJsonObject = {
                         value: {
                             v0: 1,
                             v1: undefined,
@@ -938,7 +1003,7 @@ describe("Deserializing", () => {
                     };
 
                     const target = createTarget(makeTarget, instantiationMethod, Test);
-                    const instance = Deserialize(json, () => Test, target, instantiationMethod);
+                    const instance = Deserialize(json, () => Test, target, instantiationMethod)!;
                     expect(instance).toEqual({
                         value: {
                             v0: 1,
@@ -951,8 +1016,8 @@ describe("Deserializing", () => {
                 it("deserializes an array of non primitives as json", () => {
 
                     class Test {
-                        @testDeserializeAsJson() public things: any[];
-
+                        @testDeserializeAsJson()
+                        public things!: { [idx: string]: number }[];
                     }
 
                     const json = {
@@ -963,7 +1028,7 @@ describe("Deserializing", () => {
                         ]
                     };
                     const target = createTarget(makeTarget, instantiationMethod, Test);
-                    const instance = Deserialize(json, () => Test, target, instantiationMethod);
+                    const instance = Deserialize(json, () => Test, target, instantiationMethod)!;
                     expect(instance).toEqual({
                         things: [
                             { x: 1, y: 3 },
@@ -975,7 +1040,8 @@ describe("Deserializing", () => {
 
                 it("deserializes a map of primitives as json", () => {
                     class Test {
-                        @testDeserializeAsJson() public things: any;
+                        @testDeserializeAsJson()
+                        public things!: { [idx: string]: number };
 
                     }
 
@@ -985,16 +1051,16 @@ describe("Deserializing", () => {
                         }
                     };
                     const target = createTarget(makeTarget, instantiationMethod, Test);
-                    const instance = Deserialize(json, () => Test, target, instantiationMethod);
+                    const instance = Deserialize(json, () => Test, target, instantiationMethod)!;
                     expect(instance).toEqual({
                         things: { x: 1, y: 2, z: 3 }
                     });
-                    expect(instance.things).not.toBe(json);
                 });
 
                 it("deserializes a map of non primitives as json", () => {
                     class Test {
-                        @testDeserializeAsJson() public things: any;
+                        @testDeserializeAsJson()
+                        public things!: { [idx: string]: number };
 
                     }
 
@@ -1006,7 +1072,7 @@ describe("Deserializing", () => {
                         }
                     };
                     const target = createTarget(makeTarget, instantiationMethod, Test);
-                    const instance = Deserialize(json, () => Test, target, instantiationMethod);
+                    const instance = Deserialize(json, () => Test, target, instantiationMethod)!;
                     expect(instance).toEqual({
                         things: {
                             v0: { x: 1, y: 3 },
@@ -1014,12 +1080,12 @@ describe("Deserializing", () => {
                             v2: { x: 3, y: 1 }
                         }
                     });
-                    expect(instance.things).not.toBe(json);
                 });
 
                 it("deserializes nested arrays", () => {
                     class Test {
-                        @testDeserializeAsJson() public things: any;
+                        @testDeserializeAsJson()
+                        public things!: { [idx: string]: number };
 
                     }
 
@@ -1030,38 +1096,38 @@ describe("Deserializing", () => {
                         ]
                     };
                     const target = createTarget(makeTarget, instantiationMethod, Test);
-                    const instance = Deserialize(json, () => Test, target, instantiationMethod);
+                    const instance = Deserialize(json, () => Test, target, instantiationMethod)!;
                     expect(instance).toEqual({
                         things: [
                             [1, 2, 3],
                             [4, 5, 6]
                         ]
                     });
-                    expect(instance.things).not.toBe(json);
                 });
 
                 it("does not deserialize functions", () => {
                     class Test {
-                        @testDeserializeAsJson() public things: any;
+                        @testDeserializeAsJson()
+                        public things!: { [idx: string]: number };
 
                     }
 
-                    const json: any = {
+                    const json: { [idx: string]: Function | JsonType } = {
                         things: [],
-                        fn() { }
+                        fn: () => { }
                     };
                     const target = createTarget(makeTarget, instantiationMethod, Test);
-                    const instance = Deserialize(json, () => Test, target, instantiationMethod);
+                    const instance = Deserialize(json as IJsonObject, () => Test, target, instantiationMethod)!;
                     expect(instance).toEqual({
                         things: []
                     });
-                    expect((instance as any).fn).toBeUndefined();
-                    expect(instance.things).not.toBe(json);
+                    expect((instance as typeof json).fn).toBeUndefined();
                 });
 
                 it("deserializes json with a different key", () => {
                     class Test {
-                        @testDeserializeAsJson("something") public things: any;
+                        @testDeserializeAsJson("something")
+                        public things!: { [idx: string]: number };
 
                     }
 
@@ -1071,7 +1137,7 @@ describe("Deserializing", () => {
                         }
                     };
                     const target = createTarget(makeTarget, instantiationMethod, Test);
-                    const instance = Deserialize(json, () => Test, target, instantiationMethod);
+                    const instance = Deserialize(json, () => Test, target, instantiationMethod)!;
                     expect(instance).toEqual({
                         things: { x: 1, y: 2, z: 3 }
                     });
@@ -1083,9 +1149,12 @@ describe("Deserializing", () => {
                     });
 
                     class Test {
-                        @testDeserializeAsJson() public value0: string;
-                        @testDeserializeAsJson() public value1: boolean;
-                        @testDeserializeAsJson() public value2: number;
+                        @testDeserializeAsJson()
+                        public value0!: string;
+                        @testDeserializeAsJson()
+                        public value1!: boolean;
+                        @testDeserializeAsJson()
+                        public value2!: number;
                     }
 
                     const json = {
@@ -1095,7 +1164,7 @@ describe("Deserializing", () => {
                     };
 
                     const target = createTarget(makeTarget, instantiationMethod, Test);
-                    const instance = Deserialize(json, () => Test, target, instantiationMethod);
+                    const instance = Deserialize(json, () => Test, target, instantiationMethod)!;
                     SetDeserializeKeyTransform(null);
                     expect(instance).toEqual({
                         value0: "strValue",
@@ -1110,9 +1179,12 @@ describe("Deserializing", () => {
                     });
 
                     class Test {
-                        @testDeserializeAsJson(true) public value0: string;
-                        @testDeserializeAsJson(true) public value1: boolean;
-                        @testDeserializeAsJson(true) public value2: number;
+                        @testDeserializeAsJson(true)
+                        public value0!: string;
+                        @testDeserializeAsJson(true)
+                        public value1!: boolean;
+                        @testDeserializeAsJson(true)
+                        public value2!: number;
                     }
 
                     const json = {
@@ -1122,7 +1194,7 @@ describe("Deserializing", () => {
                     };
 
                     const target = createTarget(makeTarget, instantiationMethod, Test);
-                    const instance = Deserialize(json, () => Test, target, instantiationMethod);
+                    const instance = Deserialize(json, () => Test, target, instantiationMethod)!;
                     SetDeserializeKeyTransform(null);
                     expect(instance).toEqual({
                         value0: "strValue",
@@ -1135,9 +1207,12 @@ describe("Deserializing", () => {
                     SetDeserializeKeyTransform(null);
 
                     class Test {
-                        @testDeserializeAsJson(true) public value0: string;
-                        @testDeserializeAsJson(true) public value1: boolean;
-                        @testDeserializeAsJson(true) public value2: number;
+                        @testDeserializeAsJson(true)
+                        public value0!: string;
+                        @testDeserializeAsJson(true)
+                        public value1!: boolean;
+                        @testDeserializeAsJson(true)
+                        public value2!: number;
                     }
 
                     const json = {
@@ -1147,8 +1222,8 @@ describe("Deserializing", () => {
                     };
 
                     const target = createTarget(makeTarget, instantiationMethod, Test);
-                    const instance = Deserialize(json, () => Test, target, instantiationMethod);
-                    
+                    const instance = Deserialize(json, () => Test, target, instantiationMethod)!;
+
                     expect(instance).toEqual({
                         value0: undefined,
                         value1: undefined,
@@ -1182,15 +1257,18 @@ describe("Deserializing", () => {
 
         function runTests(blockName: string,
                           instantiationMethod: InstantiationMethod,
-                          testDeserializeAs: any, testDeserializeUsing: any,
+                          testDeserializeAs: Function,
+                          testDeserializeUsing: Function,
                           makeTarget: boolean) {
 
             it("uses the provided function", () => {
-                function x(value: any) { return 1; }
+                function x() { return 1; }
 
                 class Test {
-                    @testDeserializeUsing(x) public value: number = 10;
-                    @autoserializeUsing({ Serialize: x, Deserialize: x }) public value1: string;
+                    @testDeserializeUsing(x)
+                    public value: number = 10;
+                    @autoserializeUsing({ Serialize: x, Deserialize: x })
+                    public value1!: string;
                 }
 
                 const json = {
@@ -1199,7 +1277,7 @@ describe("Deserializing", () => {
                 };
 
                 const target = createTarget(makeTarget, instantiationMethod, Test);
-                const instance = Deserialize(json, () => Test, target, instantiationMethod);
+                const instance = Deserialize(json, () => Test, target, instantiationMethod)!;
                 expectTarget(target, instance, makeTarget);
                 expectInstance(instance, Test, instantiationMethod);
                 expect(instance).toEqual({ value: 1, value1: 1 });
@@ -1224,19 +1302,18 @@ describe("Deserializing", () => {
         it("invokes the handler if provided", () => {
 
             class Test {
-
-                @deserializeAs(() => Number) public value: number = 1;
-                public something: string;
+                @deserializeAs(() => Number)
+                public value: number = 1;
+                public something!: string;
 
                 @onDeserialized
                 public someVoidFunction(): void {
                     this.something = "here";
                 }
-
             }
 
-            const json = { value: 100 };
-            const instance = Deserialize(json, () => Test, null, InstantiationMethod.New);
+            const json: IJsonObject = { value: 100 };
+            const instance = Deserialize(json, () => Test, null, InstantiationMethod.New)!;
             expect(instance).toEqual({
                 something: "here",
                 value: 100
@@ -1247,8 +1324,8 @@ describe("Deserializing", () => {
         it("accepts the return value of onDeserialized if provided", () => {
 
             class Test {
-                @deserializeAs(() => Number) public value: number = 1;
-                public something: string;
+                @deserializeAs(() => Number)
+                public value: number = 1;
 
                 @onDeserialized
                 public someVoidFunction(): void {
@@ -1265,7 +1342,7 @@ describe("Deserializing", () => {
             }
 
             const json = { value: 100 };
-            const instance = Deserialize(json, () => TestChild, null, InstantiationMethod.New);
+            const instance = Deserialize(json, () => TestChild, null, InstantiationMethod.New)!;
             expect(instance).toEqual({
                 value: 201
             });
@@ -1288,7 +1365,7 @@ describe("Deserializing", () => {
             }
 
             const json = {};
-            const instance = Deserialize(json, () => Test, null, InstantiationMethod.New);
+            const instance = Deserialize(json, () => Test, null, InstantiationMethod.New)!;
             expect(instance).toEqual({
                 constructed: true
             });
@@ -1308,7 +1385,7 @@ describe("Deserializing", () => {
             }
 
             const json = {};
-            const instance = Deserialize(json, () => Test, null, InstantiationMethod.ObjectCreate);
+            const instance = Deserialize(json, () => Test, null, InstantiationMethod.ObjectCreate)!;
             expect(instance.constructed).toBeUndefined();
 
         });
@@ -1319,7 +1396,7 @@ describe("Deserializing", () => {
             }
 
             const json = {};
-            const instance = Deserialize(json, () => Test, null, InstantiationMethod.None);
+            const instance = Deserialize(json, () => Test, null, InstantiationMethod.None)!;
             expect(typeof instance).toEqual("object");
             expect(instance instanceof Test).toEqual(false);
         });
@@ -1331,7 +1408,7 @@ describe("Deserializing", () => {
             }
 
             const json = {};
-            const instance = Deserialize(json, () => Test, null, InstantiationMethod.None);
+            const instance = Deserialize(json, () => Test, null, InstantiationMethod.None)!;
 
             SetDefaultInstantiationMethod(null); // Reset.
 
@@ -1346,12 +1423,15 @@ describe("Deserializing", () => {
         it("References", () => {
 
             class Test {
-                @deserializeAsJson() public value: number = 10;
+                @deserializeAsJson()
+                public value: number = 10;
             }
 
             class Test0 {
-                @deserializeAs(() => Test) public value0: Test;
-                @deserializeAs(() => Test) public value1: Test;
+                @deserializeAs(() => Test)
+                public value0!: Test;
+                @deserializeAs(() => Test)
+                public value1!: Test;
             }
             const json = {
                 $id: "1",
@@ -1359,7 +1439,7 @@ describe("Deserializing", () => {
                 value1: { $ref: "2" }
             };
             RefCycleDetectionEnable();
-            const instance = Deserialize(json, () => Test0);
+            const instance = Deserialize(json, () => Test0)!;
             RefClean();
             RefCycleDetectionDisable();
             expect(instance.value0).toBe(instance.value1);
@@ -1367,19 +1447,22 @@ describe("Deserializing", () => {
 
         it("ReferenceCycle = true, is reference = false", () => {
             class Test {
-                @deserializeAsJson() public value: number = 10;
+                @deserializeAsJson()
+                public value: number = 10;
             }
             @isReference(false)
             class Test0 {
-                @deserializeAs(() => Test) public value0: Test;
-                @deserializeAs(() => Test) public value1: Test;
+                @deserializeAs(() => Test)
+                public value0!: Test;
+                @deserializeAs(() => Test)
+                public value1!: Test;
             }
             const json = {
                 value0: { $id: "2", value: 1 },
                 value1: { $ref: "2" }
             };
             RefCycleDetectionEnable();
-            const instance = Deserialize(json, () => Test0);
+            const instance = Deserialize(json, () => Test0)!;
             RefClean();
             RefCycleDetectionDisable();
             expect(instance.value0).toBe(instance.value1);
@@ -1388,27 +1471,31 @@ describe("Deserializing", () => {
         it("ReferenceCycle = false, is reference = true", () => {
             @isReference(true)
             class Test {
-                @deserializeAsJson() public value: number = 10;
+                @deserializeAsJson()
+                public value: number = 10;
             }
 
             class Test0 {
-                @deserializeAs(() => Test) public value0: Test;
-                @deserializeAs(() => Test) public value1: Test;
+                @deserializeAs(() => Test)
+                public value0!: Test;
+                @deserializeAs(() => Test)
+                public value1!: Test;
             }
             const json = {
                 value0: { $id: "2", value: 1 },
                 value1: { $ref: "2" }
             };
-            const instance = Deserialize(json, () => Test0);
+            const instance = Deserialize(json, () => Test0)!;
             RefClean();
             expect(instance.value0).toBe(instance.value1);
         });
 
         it("Cycle length 3", () => {
             class Test {
-                @deserializeAs(() => Test) public next: Test;
+                @deserializeAs(() => Test)
+                public next!: Test | undefined;
             }
-            const json = {
+            const json: IJsonObject = {
                 $id: "1",
                 next: {
                     $id: "2",
@@ -1421,16 +1508,17 @@ describe("Deserializing", () => {
                 }
             };
             RefCycleDetectionEnable();
-            const instance = Deserialize(json, () => Test);
+            const instance = Deserialize(json, () => Test)!;
             RefClean();
             RefCycleDetectionDisable();
-            expect(instance).toBe(instance.next.next.next);
+            expect(instance).toBe(instance.next!.next!.next);
         });
 
         it("Cycle length 0", () => {
 
             class Test {
-                @deserializeAs(() => Test) public next: Test;
+                @deserializeAs(() => Test)
+                public next: Test | undefined;
             }
             const json = {
                 $id: "1",
@@ -1439,10 +1527,10 @@ describe("Deserializing", () => {
                 }
             };
             RefCycleDetectionEnable();
-            const instance = Deserialize(json, () => Test);
+            const instance = Deserialize(json, () => Test)!;
             RefClean();
             RefCycleDetectionDisable();
-            expect(instance).toBe(instance.next.next.next);
+            expect(instance).toBe(instance.next!.next!.next);
         });
 
     });
@@ -1547,9 +1635,9 @@ describe("Deserializing", () => {
             }
             class Test3 {
                 @deserializeAs(() => Object)
-                public m1: Test0;
+                public m1!: Test0;
                 @deserializeAs(() => Test2)
-                public m2: Test1;
+                public m2!: Test1;
             }
 
             const s = new Test3();
@@ -1586,9 +1674,9 @@ describe("Deserializing", () => {
             }
             class Test3 {
                 @deserializeAs(() => Object)
-                public m1: Test0;
+                public m1!: Test0;
                 @deserializeAs(() => Test2)
-                public m2: Test1;
+                public m2!: Test1;
             }
 
             const s = new Test3();
@@ -1643,17 +1731,17 @@ describe("Deserializing", () => {
             class Test {
                 @emitDefaultValue(false)
                 @autoserializeAs(() => Boolean)
-                public valueDefault: boolean; // no json value, default value not set
+                public valueDefault!: boolean; // no json value, default value not set
 
                 @emitDefaultValue(false)
                 @autoserializeAs(() => Boolean)
                 @defaultValue(true)
-                public shouldBeFalse: boolean; // no json value custom default value
+                public shouldBeFalse!: boolean; // no json value custom default value
 
                 @autoserializeAs(() => Boolean)
                 @defaultValue(true)
                 @emitDefaultValue(false)
-                public shouldBeTrue: boolean; // json value provided
+                public shouldBeTrue!: boolean; // json value provided
             }
 
             const json = {
@@ -1669,17 +1757,17 @@ describe("Deserializing", () => {
             class Test {
                 @emitDefaultValue(false)
                 @autoserializeAs(() => Number)
-                public shouldBeO: number; // no json value
+                public shouldBeO!: number; // no json value
 
                 @emitDefaultValue(false)
                 @autoserializeAs(() => Number)
                 @defaultValue(2)
-                public shouldBe2: number; // no json value, custom default value
+                public shouldBe2!: number; // no json value, custom default value
 
                 @emitDefaultValue(false)
                 @autoserializeAs(() => Number)
                 @defaultValue(2)
-                public shouldBe1: number; // json value provided
+                public shouldBe1!: number; // json value provided
             }
 
             const json = {
@@ -1695,7 +1783,7 @@ describe("Deserializing", () => {
             class Test {
                 @emitDefaultValue(false)
                 @autoserializeAsMap(() => String, () => Number)
-                public value: Map<string, number>;
+                public value!: Map<string, number>;
             }
 
             const json = {};
@@ -1707,11 +1795,11 @@ describe("Deserializing", () => {
             class Test {
                 @emitDefaultValue(false)
                 @autoserializeAsArray(() => String)
-                public value: string[];
+                public value!: string[];
             }
 
             const json = {
-                value: null as any
+                value: null
             };
             const test = Deserialize(json, () => Test);
             expect(test.value).toBeNull();
@@ -1727,20 +1815,20 @@ describe("Deserializing", () => {
             class Test {
                 @emitDefaultValue(false)
                 @autoserializeAs(() => Object)
-                public shouldBeNull: Object; // no value provided in JSON nor default value
+                public shouldBeNull!: Object; // no value provided in JSON nor default value
 
                 @autoserializeAs(() => Object)
-                public shouldBeUndefined: Object; // emitDefaultValue === true
+                public shouldBeUndefined!: Object; // emitDefaultValue === true
 
                 @emitDefaultValue(false)
                 @autoserializeAs(() => Object)
                 @defaultValue(elephant)
-                public shouldBeElephant: Object; // no value provided in JSON
+                public shouldBeElephant!: Object; // no value provided in JSON
 
                 @emitDefaultValue(false)
                 @autoserializeAsJson()
                 @defaultValue(elephant)
-                public shouldBeSnake: Object; // value provided in JSON
+                public shouldBeSnake!: Object; // value provided in JSON
             }
 
             const json = {

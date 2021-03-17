@@ -23,7 +23,7 @@ describe("Exemples", () => {
 
             class Test {
                 @autoserializeUsing(BigIntSerializer)
-                public value: BigInt;
+                public value!: BigInt;
             }
 
             const s = new Test();
@@ -38,14 +38,14 @@ describe("Exemples", () => {
         class Test {
             @serializeAsMap(() => String, () => String)
             @deserializeAsMap(() => Number, () => String)
-            public value: Map<number, string>;
+            public value!: Map<number, string>;
         }
 
         const s = new Test();
         s.value = new Map();
         s.value.set(1, "a");
         const json = Serialize(s, () => Test);
-        expect(typeof Array.from(Object.keys(json.value))[0]).toBe("string");
+        expect(typeof Array.from(Object.keys(json.value!))[0]).toBe("string");
 
         const obj = Deserialize(json, () => Test);
         expect(typeof Array.from(obj.value.keys())[0]).toBe("number");

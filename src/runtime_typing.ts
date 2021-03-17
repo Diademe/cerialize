@@ -1,8 +1,13 @@
-import { IConstructable } from "./types";
-import { getConstructor } from "./utils";
+import {
+    IConstructable,
+} from "./types";
+import {
+    getConstructor,
+} from "./utils";
+
 export { TypeString };
 // throw an exception if dic doesn't have key
-function lousyGet(dic: any, key: any) {
+function lousyGet<K, V>(dic: Map<K, V>, key: K) {
     const res = dic.get(key);
     if (res === undefined) {
         throw new Error(`The dictionary doesn't have the key ${key}`);
@@ -13,8 +18,8 @@ function lousyGet(dic: any, key: any) {
 }
 
 export class TypeStringDictionary {
-    private type2string: Map<IConstructable, string>;
-    private string2type: Map<string, IConstructable>;
+    private type2string!: Map<IConstructable, string>;
+    private string2type!: Map<string, IConstructable>;
     private runtimeTyping: boolean = false;
 
     public constructor() {
@@ -24,11 +29,11 @@ export class TypeStringDictionary {
         this.type2string.set(getConstructor(t), s);
         this.string2type.set(s, getConstructor(t));
     }
-    public getStringFromType(instance: IConstructable): string {
-        return lousyGet(this.type2string, getConstructor(instance));
+    public getStringFromType(constructor: Function): string {
+        return lousyGet(this.type2string, getConstructor(constructor));
     }
-    public hasStringFromType(instance: IConstructable): boolean {
-        return this.type2string.has(getConstructor(instance));
+    public hasStringFromType(constructor: Function): boolean {
+        return this.type2string.has(getConstructor(constructor));
     }
     public getTypeFromString(s: string): IConstructable {
         return lousyGet(this.string2type, s);

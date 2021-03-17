@@ -305,7 +305,8 @@ If a function has a `constructor` parameter, it can be used to declare a constru
 ```typescript
 class MySet<T> extends Set<T> {}
 class Test {
-    @serializeAsSet(() => Number, () => MySet) public value: MySet<number>;
+    @serializeAsSet(() => Number, () => MySet)
+    public value: MySet<number>;
 }
 ```
 
@@ -602,7 +603,8 @@ class Satellite {
 class Moon extends Satellite {}
 class MyDico extends Map<string, Satellite> {}
 class Test0 {
-    @serializeAsMap(() => String, () => Satellite, () => MyDico) public dico1: MyDico;
+    @serializeAsMap(() => String, () => Satellite, () => MyDico)
+    public dico1: MyDico;
 }
 const s = new Test0();
 s.dico1 = new MyDico([["1", new Moon("Europa")], ["2", new Satellite("Adrastea")]]);
@@ -664,12 +666,15 @@ Without this option, the following happens :
 
 ```typescript
 class Test {
-    @autoserializeAs(() => Number) public value: number = 10;
+    @autoserializeAs(() => Number)
+    public value: number = 10;
 }
 
 class Test0 {
-    @autoserializeAs(() => Test) public value0: Test;
-    @autoserializeAs(() => Test) public value1: Test;
+    @autoserializeAs(() => Test)
+    public value0: Test;
+    @autoserializeAs(() => Test)
+    public value1: Test;
 }
 const t = new Test();
 const t0 = new Test0();
@@ -683,12 +688,15 @@ Even if ```t0.value0``` and ```t0.value1``` are the same, they are serialized as
 
 ```typescript
 class Test {
-    @deserializeAsJson() public value: number = 10;
+    @deserializeAsJson()
+    public value: number = 10;
 }
 
 class Test0 {
-    @deserializeAsJson() public value0: Test;
-    @deserializeAsJson() public value1: Test;
+    @deserializeAsJson()
+    public value0: Test;
+    @deserializeAsJson()
+    public value1: Test;
 }
 const json = {
     $id: 1,
@@ -707,12 +715,15 @@ You can also override RefCycleDetection with the class decorator isReference.
 ```typescript
 @isReference(true)
 class Test {
-    @deserializeAsJson() public value: number = 10;
+    @deserializeAsJson()
+    public value: number = 10;
 }
 
 class Test0 {
-    @deserializeAsJson() public value0: Test;
-    @deserializeAsJson() public value1: Test;
+    @deserializeAsJson()
+    public value0: Test;
+    @deserializeAsJson()
+    public value1: Test;
 }
 const json = {
     value0: { $id: 2, value: 1 },

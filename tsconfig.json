@@ -9,13 +9,12 @@
     "target": "es6",
     "module": "ES2020",
     "stripInternal": true,
-    "strictNullChecks": false,
     "experimentalDecorators": true,
     "noEmitHelpers": false,
     "declaration": true,
     "esModuleInterop": true,
     "sourceMap": true,
     "moduleResolution": "node",
-    "strict": true
+    "strict": true,
   }
 }

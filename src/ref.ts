@@ -1,4 +1,8 @@
-﻿import { IRefHandler, JsonType } from "./types";
+﻿import {
+    IIndexable,
+    IRefHandler,
+    JsonType,
+} from "./types";
 
 // cycle references
 class Cycle {
@@ -33,7 +37,7 @@ export class RefHandler implements IRefHandler {
     }
 
     public deserializationGetObject(json: JsonType): any {
-        if (json.hasOwnProperty("$ref")) {
+        if (json?.hasOwnProperty("$ref")) {
             const ref = parseInt((json as any).$ref, 10);
             if (!this.cycle.ref2obj.has(ref)) {
                 throw new Error("Reference found before its definition");
@@ -44,17 +48,17 @@ export class RefHandler implements IRefHandler {
     }
 
     public deserializationRegisterObject(json: JsonType, obj: any): void {
-        if (json.hasOwnProperty("$id")) {
+        if (json?.hasOwnProperty("$id")) {
             this.cycle.ref2obj.set(parseInt((json as any).$id, 10), obj);
         }
     }
 
-    public serializationSetID(json: JsonType, obj: any): void {
+    public serializationSetID(json: IIndexable<JsonType>, obj: any): void {
         (json as any).$id = this.cycle.setObject(obj);
     }
 
-    public serializationSetRef(json: JsonType, obj: any): void {
-        (json as any).$ref = this.cycle.obj2ref.get(obj).toString();
+    public serializationSetRef(json: IIndexable<JsonType>, obj: any): void {
+        (json as any).$ref = this.cycle.obj2ref.get(obj)!.toString();
     }
 }
 

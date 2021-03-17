@@ -9,7 +9,7 @@ import {
 } from "./types";
 
 export function getTarget<T>(
-    type: ISerializableType<T>,
+    type: new(...args: any[]) => T,
     target: T,
     instantiationMethod: InstantiationMethod
 ): T {
@@ -35,7 +35,7 @@ export function getConstructor(type: any): new (...args: any[]) => any {
         (type as any).__originalConstructor__ : type;
 }
 
-export function isPrimitiveType(type: Function): boolean {
+export function isPrimitiveType(type: Function): type is SerializablePrimitiveType {
     return (
         type === String ||
         type === Boolean ||
@@ -81,7 +81,7 @@ export function DefaultPrimitiveValue(value: any) {
     return null;
 }
 
-export function DowncastPrimitive(value: SerializablePrimitiveType): primitive {
+export function DowncastPrimitive(value: Date | RegExp | String | Number | Boolean): primitive {
     if (value instanceof String
         || value instanceof Boolean
         || value instanceof Number
@@ -138,11 +138,11 @@ export function serializationContinuation<T>(func: (...args: any[]) => T, ...arg
     try {
         NbSerialization++;
         if (getRefHandler().init) {
-            getRefHandler().init();
+            getRefHandler().init!();
         }
         ret = func.apply(null, args);
         if (getRefHandler().done) {
-            getRefHandler().done();
+            getRefHandler().done!();
         }
     }
     finally {
@@ -156,11 +156,11 @@ export function deserializationContinuation<T>(func: (...args: any[]) => T, ...a
     try {
         NbDeserialization++;
         if (getRefHandler().init) {
-            getRefHandler().init();
+            getRefHandler().init!();
         }
         ret = func.apply(null, args);
         if (getRefHandler().done) {
-            getRefHandler().done();
+            getRefHandler().done!();
         }
     }
     finally {

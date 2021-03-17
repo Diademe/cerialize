@@ -1,8 +1,21 @@
 export type primitive =
-    | null
     | string
     | number
     | boolean;
+
+export type allPrimitives =
+    | Date
+    | RegExp
+    | string
+    | number
+    | boolean;
+
+export type allObjectPrimitives =
+    | Date
+    | RegExp
+    | String
+    | Number
+    | Boolean;
 
 export type JsonType =
     | null
@@ -16,7 +29,7 @@ export type Serializer<T> = (target: T) => JsonType;
 
 export type Deserializer<T> = (
     data: JsonType,
-    target?: T,
+    target?: T | null,
     instantiationMethod?: InstantiationMethod
 ) => T;
 
@@ -46,7 +59,7 @@ export enum ArrayHandling {
 }
 
 export interface IJsonObject {
-    [idx: string]: JsonType | IJsonObject;
+    [idx: string]: JsonType | IJsonObject | undefined;
     $type?: string;
 }
 
@@ -57,18 +70,22 @@ export interface ISerializer<T> {
     Deserialize: Deserializer<T>;
 }
 
+// result of serialization
 export interface IIndexable<T = any> {
+    [idx: string]: T;
+}
+
+export interface IObjectMap<T> {
     [idx: string]: T;
 }
 
 export interface ISerializableType<T> {
     onSerialized?: (data: IJsonObject, instance: T) => IJsonObject | void;
-    onDeserialized?: (
-        data: IJsonObject,
-        instance: T,
-        instantiationMethod?: InstantiationMethod
-    ) => T | void;
     new(...args: any[]): T;
+}
+
+export interface IPlainObject {
+    [idx: string]: any;
 }
 export type ASerializableType<T> = () => ISerializableType<T>;
 export type ASerializableTypeOrArrayInternal<T> = ASerializableType<T> | ItIsAnArrayInternal;
@@ -101,16 +118,16 @@ export interface IRefHandler {
      * @param json the data resulting of the serialization (ie where to store the ref)
      * @param obj the object being serialized
      */
-    serializationSetID(json: JsonType, obj: any): void;
+    serializationSetID(json: IIndexable<JsonType>, obj: any): void;
     /**
      * @param json where to store the ref
      * @param obj the object from which we get the ref
      */
-    serializationSetRef(json: JsonType, obj: any): void;
+    serializationSetRef(json: IIndexable<JsonType>, obj: any): void;
     /** get the object corresponding to the reference carried by json */
-    deserializationGetObject(json: JsonType): any;
+    deserializationGetObject(json: IJsonObject): any;
     /** associate the ref carried by json to the object obj */
-    deserializationRegisterObject(json: JsonType, obj: any): void;
+    deserializationRegisterObject(json: IJsonObject, obj: any): void;
     /** cleanup function. called at the end of serialization. may be used to remove unnecessary ID */
     removeID?(obj: any): void;
     /** called when user want to start over the ref (refHandler may be used from nested serialization) */

@@ -14,14 +14,17 @@ import {
     TypeString,
 } from "./runtime_typing";
 import {
-    ASerializableType,
+    allObjectPrimitives,
+    allPrimitives,
     ASerializableTypeOrArrayInternal,
+    IConstructable,
     IIndexable,
+    IJsonArray,
     IJsonObject,
+    IObjectMap,
     ISerializableType,
     isItAnArrayInternal,
     IsReference,
-    ItIsAnArrayInternal,
     JsonType,
     primitive,
     SerializablePrimitiveType,
@@ -40,14 +43,22 @@ export function SelectiveSerialization(
 }
 
 export function SerializeObjectMapInternal<T>(
-    source: T,
+    source: null,
     type: ASerializableTypeOrArrayInternal<T>
-): IIndexable<JsonType> {
-    if (source === null || source === undefined) {
+): null;
+export function SerializeObjectMapInternal<T>(
+    source: IObjectMap<T> & IConstructable,
+    type: ASerializableTypeOrArrayInternal<T>
+): IIndexable<JsonType>;
+export function SerializeObjectMapInternal<T>(
+    source: IObjectMap<T> & IConstructable | null,
+    type: ASerializableTypeOrArrayInternal<T>
+): IIndexable<JsonType> | null {
+    if (source === null) {
         return null;
     }
     const target: IIndexable<JsonType> = {};
-    const keys = Object.keys(source);
+    const keys: string[] = Object.keys(source);
 
     const isReference = ClassMetaData.getMetaData(source.constructor).isReference;
     if (
@@ -74,7 +85,7 @@ export function SerializeObjectMapInternal<T>(
         }
 
         for (const key of keys) {
-            const value = (source as any)[key];
+            const value: T = source[key];
             if (value !== undefined) {
                 target[PropMetaData.serializeKeyTransform(key)] = SerializeInternal(
                     value,
@@ -87,12 +98,22 @@ export function SerializeObjectMapInternal<T>(
     return target;
 }
 
-export function SerializeMapInternal<K, V>(
-    source: Map<K, V>,
-    keyType: ASerializableTypeOrArrayInternal<K>,
+export function SerializeMapInternal<K extends string | number, V>(
+    source: null,
+    keyType: () => StringConstructor | NumberConstructor,
     valueType: ASerializableTypeOrArrayInternal<V>,
-): IIndexable<JsonType> {
-    if (source === null || source === undefined) {
+): null;
+export function SerializeMapInternal<K extends string | number, V>(
+    source: Map<K, V>,
+    keyType: () => StringConstructor | NumberConstructor,
+    valueType: ASerializableTypeOrArrayInternal<V>,
+): IIndexable<JsonType>;
+export function SerializeMapInternal<K extends string | number, V>(
+    source: Map<K, V> | null,
+    keyType: () => StringConstructor | NumberConstructor,
+    valueType: ASerializableTypeOrArrayInternal<V>,
+): IIndexable<JsonType> | null {
+    if (source === null) {
         return null;
     }
     const target: IIndexable<JsonType> = {};
@@ -117,33 +138,39 @@ export function SerializeMapInternal<K, V>(
     }
 
     for (const key of keys) {
-        const value = source.get(key);
+        const value = source.get(key)!;
         if (value !== undefined) {
-            let targetKey: string | K | JsonType[];
-            if (isItAnArrayInternal(keyType)) {
-                targetKey = SerializeArrayInternal(key as any, keyType.type);
+            let targetKey: string | number;
+            const keyTypeF = keyType();
+            function isStringConstructor(value: string | number): value is string {
+                return keyTypeF === String;
             }
-            else {
-                const keyTypeF = keyType() as Function;
-                const isString = keyTypeF === String;
-                targetKey = keyTypeF(isString ? PropMetaData.serializeKeyTransform(key as any) : key);
-            }
+            targetKey = keyTypeF(isStringConstructor(key) ? PropMetaData.serializeKeyTransform(key) : key);
             const targetValue = SerializeInternal(
                 value,
-                valueType as any
+                valueType
             );
-            target[targetKey as any] = targetValue;
+            target[targetKey] = targetValue;
         }
     }
 
     return target;
 }
 
+
+export function SerializeArrayInternal<T>(
+    source: null,
+    type: ASerializableTypeOrArrayInternal<T>
+): null
 export function SerializeArrayInternal<T>(
     source: T[],
     type: ASerializableTypeOrArrayInternal<T>
-): JsonType[] {
-    if (source === null || source === undefined) {
+): JsonType[]
+export function SerializeArrayInternal<T>(
+    source: T[] | null,
+    type: ASerializableTypeOrArrayInternal<T>
+): JsonType[] | null {
+    if (source === null) {
         return null;
     }
     const returnValue = new Array<JsonType>(source.length);
@@ -154,22 +181,46 @@ export function SerializeArrayInternal<T>(
 }
 
 export function SerializeSetInternal<T>(
+    source: null,
+    type: ASerializableTypeOrArrayInternal<T>
+): null
+export function SerializeSetInternal<T>(
     source: T[],
     type: ASerializableTypeOrArrayInternal<T>
-): JsonType[] {
+): JsonType[]
+export function SerializeSetInternal<T>(
+    source: T[] | null,
+    type: ASerializableTypeOrArrayInternal<T>
+): JsonType[] | null {
+    if (source === null) {
+        return null;
+    }
     return SerializeArrayInternal(Array.from(source.values()), type);
 }
 
-export function SerializePrimitiveInternal<T>(
-    source: SerializablePrimitiveType,
+export function SerializePrimitiveInternal(
+    source: null,
+    type: () => SerializablePrimitiveType
+): null;
+export function SerializePrimitiveInternal(
+    source: allPrimitives | Date | RegExp | String | Number | Boolean,
+    type: () => SerializablePrimitiveType
+): string | number | boolean | IJsonObject | IJsonArray;
+export function SerializePrimitiveInternal(
+    source: allPrimitives | Date | RegExp | String | Number | Boolean | null,
     type: () => SerializablePrimitiveType
 ): JsonType {
-    if (source === null || source === undefined) {
+    if (source === null) {
         return null;
     }
 
-    const primitiveSource: primitive =
-        source instanceof Object ? DowncastPrimitive(source) : source as primitive;
+    function isObjectPrimitive(
+        value: string | number | boolean | Date | RegExp | String | Number | Boolean
+    ): value is Date | RegExp | String | Number | Boolean {
+           return source instanceof Object;
+    }
+    const primitiveSource: string | number | boolean = 
+        isObjectPrimitive(source) ? DowncastPrimitive(source) : source as primitive;
 
     if (type() === String) {
         return String(primitiveSource);
@@ -196,13 +247,16 @@ export function SerializePrimitiveInternal<T>(
     return primitiveSource.toString();
 }
 
-export function SerializeJSONInternal(source: any, transformKeys = true): JsonType {
-    if (source === null || source === undefined) {
+export function SerializeJSONInternal(
+    source: any,
+    transformKeys = true
+): JsonType {
+    if (source === null) {
         return null;
     }
 
     if (Array.isArray(source)) {
-        const array = new Array<any>(source.length);
+        const array: IJsonArray = new Array(source.length);
         for (let i = 0; i < source.length; i++) {
             array[i] = SerializeJSONInternal(source[i], transformKeys);
         }
@@ -236,12 +290,22 @@ export function SerializeJSONInternal(source: any, transformKeys = true): JsonTy
 
     return source;
 }
-export function SerializeInternal<T>(instance: T, type: ItIsAnArrayInternal): JsonType[];
-export function SerializeInternal<T>(instance: T, type: ASerializableType<T>): IJsonObject;
 export function SerializeInternal<T>(
-    instance: T,
+    instance: null,
     type: ASerializableTypeOrArrayInternal<T>
-): null | JsonType[] | IJsonObject {
+): null;
+export function SerializeInternal<T>(
+    instance: allPrimitives | allObjectPrimitives,
+    type: () => SerializablePrimitiveType
+): string | number | boolean | IJsonObject | IJsonArray;
+export function SerializeInternal<T>(
+    instance: T & Partial<IConstructable>,
+    type: ASerializableTypeOrArrayInternal<T>
+): IJsonObject | JsonType[];
+export function SerializeInternal<T>(
+    instance: T & Partial<IConstructable> | allPrimitives | allObjectPrimitives | null,
+    type: ASerializableTypeOrArrayInternal<T> | (() => SerializablePrimitiveType)
+): null | JsonType[] | string | number | boolean | IJsonObject | IJsonArray {
     if (instance === undefined || instance === null) {
         return null;
     }
@@ -254,7 +318,7 @@ export function SerializeInternal<T>(
     }
     else {
         if (TypeString.getRuntimeTyping() && !isPrimitiveType(type())) {
-            target.$type = TypeString.getStringFromType(instance.constructor);
+            target.$type = TypeString.getStringFromType(instance.constructor!);
             type = () => (instance.constructor as ISerializableType<T>);
         }
 
@@ -262,18 +326,21 @@ export function SerializeInternal<T>(
 
         if (metadataList === null) {
             if (isPrimitiveType(type())) {
-                return SerializePrimitiveInternal(instance as any, type as any) as any;
+                return SerializePrimitiveInternal(
+                    instance as allPrimitives | Date | RegExp | String | Number | Boolean,
+                    type as () => SerializablePrimitiveType
+                );
             }
             else {
                 return target;
             }
         }
-        const isReference = ClassMetaData.getMetaData(instance.constructor).isReference;
+        const isReference = ClassMetaData.getMetaData(instance.constructor!).isReference;
         if (
             ClassMetaData.refCycleDetection && isReference !== IsReference.False ||
             isReference === IsReference.True
         ) {
-            if (cycleBreaking.seen(instance)) {
+            if (cycleBreaking.seen(instance as T & Partial<IConstructable>)) {
                 getRefHandler().serializationSetRef(target, instance);
                 return target;
             }
@@ -301,9 +368,10 @@ export function SerializeInternal<T>(
             const flags = metadata.flags;
 
             if ((flags & PropMetaDataFlag.SerializeMap) !== 0) {
-                const val = SerializeMapInternal(source,
-                    metadata.serializedKeyType,
-                    metadata.serializedValueType,
+                const val = SerializeMapInternal(
+                    source,
+                    metadata.serializedKeyType as () => StringConstructor | NumberConstructor,
+                    metadata.serializedValueType!,
                 );
                 if (isDefaultValue(metadata, source)) {
                     continue;
@@ -367,8 +435,8 @@ export function SerializeInternal<T>(
             }
         }
 
-        if (typeof type().onSerialized === "function") {
-            const value = type().onSerialized(target, instance);
+        if (typeof (type() as ISerializableType<T>).onSerialized === "function") {
+            const value = (type() as ISerializableType<T>).onSerialized!(target, instance as T);
             if (value !== undefined) {
                 return value as IJsonObject;
             }

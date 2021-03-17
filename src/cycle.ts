@@ -1,11 +1,11 @@
 ﻿
 class CycleBreaking {
-    private readonly seenSet = new WeakSet<any>();
+    private readonly seenSet = new WeakSet<object>();
     /**
      * add the object to the seen list
      * @returns true if the object as been seen previously during serialization
      */
-    public seen(obj: any): boolean {
+    public seen(obj: object): boolean {
         const res = this.seenSet.has(obj);
         if (!res) {
             this.seenSet.add(obj);

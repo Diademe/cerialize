@@ -1,4 +1,13 @@
 import {
+    itIsAnArray,
+    RefClean,
+    RefCycleDetectionDisable,
+    RefCycleDetectionEnable,
+    Serialize,
+    SerializeArray,
+    SetSerializeKeyTransform,
+} from "../src";
+import {
     autoserializeAs,
     autoserializeAsArray,
     autoserializeAsJson,
@@ -16,25 +25,21 @@ import {
     serializeAsObjectMap,
     serializeAsSet,
     serializeBitMask,
-    serializeUsing
+    serializeUsing,
 } from "../src/decorators";
-import {
-    itIsAnArray,
-    RefClean,
-    RefCycleDetectionDisable,
-    RefCycleDetectionEnable,
-    Serialize,
-    SerializeArray,
-    SetSerializeKeyTransform
-} from "../src/index";
 import {
     RuntimeTypingDisable,
     RuntimeTypingEnable,
     RuntimeTypingResetDictionary,
-    RuntimeTypingSetTypeString
+    RuntimeTypingSetTypeString,
 } from "../src/runtime_typing";
-import { SelectiveSerialization } from "../src/serialize";
-import { IIndexable, IJsonObject } from "../src/types";
+import {
+    SelectiveSerialization,
+} from "../src/serialize";
+import {
+    IIndexable,
+    IJsonObject,
+} from "../src/types";
 
 describe("Serializing", () => {
     describe("Unannotated", () => {
@@ -52,14 +57,17 @@ describe("Serializing", () => {
     describe("SerializeAs", () => {
         function runTests(
             blockName: string,
-            testSerializeAs: any
+            testSerializeAs: Function
         ) {
             describe(blockName, () => {
                 it("serializes basic primitives", () => {
                     class Test {
-                        @testSerializeAs(() => String) public value0: string;
-                        @testSerializeAs(() => Boolean) public value1: boolean;
-                        @testSerializeAs(() => Number) public value2: number;
+                        @testSerializeAs(() => String)
+                        public value0!: string;
+                        @testSerializeAs(() => Boolean)
+                        public value1!: boolean;
+                        @testSerializeAs(() => Number)
+                        public value2!: number;
                     }
 
                     const s = new Test();
@@ -74,7 +82,8 @@ describe("Serializing", () => {
 
                 it("serializes a Date", () => {
                     class Test {
-                        @testSerializeAs(() => Date) public value0: Date;
+                        @testSerializeAs(() => Date)
+                        public value0!: Date;
                     }
 
                     const d = new Date();
@@ -88,7 +97,8 @@ describe("Serializing", () => {
 
                 it("serializes a RegExp", () => {
                     class Test {
-                        @testSerializeAs(() => RegExp) public value0: RegExp;
+                        @testSerializeAs(() => RegExp)
+                        public value0!: RegExp;
                     }
 
                     const s = new Test();
@@ -101,9 +111,12 @@ describe("Serializing", () => {
 
                 it("serializes non matching primitive type", () => {
                     class Test {
-                        @testSerializeAs(() => Number) public value0: string;
-                        @testSerializeAs(() => String) public value1: boolean;
-                        @testSerializeAs(() => Boolean) public value2: number;
+                        @testSerializeAs(() => Number)
+                        public value0!: string;
+                        @testSerializeAs(() => String)
+                        public value1!: boolean;
+                        @testSerializeAs(() => Boolean)
+                        public value2!: number;
                     }
 
                     const s = new Test();
@@ -119,10 +132,11 @@ describe("Serializing", () => {
                 it("serializes with different keys", () => {
                     class Test {
                         @testSerializeAs(() => String, "v0")
-                        public value0: string;
+                        public value0!: string;
                         @testSerializeAs(() => Boolean, "v1")
-                        public value1: boolean;
-                        @testSerializeAs(() => Number) public value2: number;
+                        public value1!: boolean;
+                        @testSerializeAs(() => Number)
+                        public value2!: number;
                     }
 
                     const s = new Test();
@@ -137,9 +151,12 @@ describe("Serializing", () => {
 
                 it("skips undefined keys", () => {
                     class Test {
-                        @testSerializeAs(() => String) public value0: string;
-                        @testSerializeAs(() => Boolean) public value1: boolean;
-                        @testSerializeAs(() => Number) public value2: number;
+                        @testSerializeAs(() => String)
+                        public value0!: string | undefined;
+                        @testSerializeAs(() => Boolean)
+                        public value1!: boolean;
+                        @testSerializeAs(() => Number)
+                        public value2!: number;
                     }
 
                     const s = new Test();
@@ -154,9 +171,12 @@ describe("Serializing", () => {
 
                 it("does not skip null keys", () => {
                     class Test {
-                        @testSerializeAs(() => String) public value0: string;
-                        @testSerializeAs(() => Boolean) public value1: boolean;
-                        @testSerializeAs(() => Number) public value2: number;
+                        @testSerializeAs(() => String)
+                        public value0!: string | null;
+                        @testSerializeAs(() => Boolean)
+                        public value1!: boolean;
+                        @testSerializeAs(() => Number)
+                        public value2!: number;
                     }
 
                     const s = new Test();
@@ -171,13 +191,17 @@ describe("Serializing", () => {
 
                 it("serializes nested types", () => {
                     class Test {
-                        @testSerializeAs(() => String) public value0: string;
-                        @testSerializeAs(() => Boolean) public value1: boolean;
-                        @testSerializeAs(() => Number) public value2: number;
+                        @testSerializeAs(() => String)
+                        public value0!: string | null;
+                        @testSerializeAs(() => Boolean)
+                        public value1!: boolean;
+                        @testSerializeAs(() => Number)
+                        public value2!: number;
                     }
 
                     class Test0 {
-                        @testSerializeAs(() => Test) public test: Test;
+                        @testSerializeAs(() => Test)
+                        public test!: Test;
                     }
 
                     const x = new Test0();
@@ -196,17 +220,22 @@ describe("Serializing", () => {
 
                 it("serializes doubly nested types", () => {
                     class Test {
-                        @testSerializeAs(() => String) public value0: string;
-                        @testSerializeAs(() => Boolean) public value1: boolean;
-                        @testSerializeAs(() => Number) public value2: number;
+                        @testSerializeAs(() => String)
+                        public value0!: string | null;
+                        @testSerializeAs(() => Boolean)
+                        public value1!: boolean;
+                        @testSerializeAs(() => Number)
+                        public value2!: number;
                     }
 
                     class Test0 {
-                        @testSerializeAs(() => Test) public test: Test;
+                        @testSerializeAs(() => Test)
+                        public test!: Test;
                     }
 
                     class Test1 {
-                        @testSerializeAs(() => Test0) public test: Test0;
+                        @testSerializeAs(() => Test0)
+                        public test!: Test0;
                     }
 
                     const z = new Test1();
@@ -243,7 +272,7 @@ describe("Serializing", () => {
         it("serializes a map string to array", () => {
             class Test {
                 @serializeAsMap(() => String, itIsAnArray(() => Number))
-                public values: Map<string, number[]>;
+                public values!: Map<string, number[]>;
             }
 
             const t = new Test();
@@ -263,7 +292,7 @@ describe("Serializing", () => {
         it("serializes a map of primitives", () => {
             class Test {
                 @serializeAsMap(() => String, () => Number)
-                public values: Map<string, number>;
+                public values!: Map<string, number>;
             }
 
             const t = new Test();
@@ -283,7 +312,7 @@ describe("Serializing", () => {
         it("serializes a custom Map of primitives 1", () => {
             class Test {
                 @serializeAsMap(() => String, () => Number)
-                public values: Map<string, number>;
+                public values!: Map<string, number>;
             }
 
             const t = new Test();
@@ -304,7 +333,7 @@ describe("Serializing", () => {
             class MyMap extends Map<string, number> {}
             class Test {
                 @autoserializeAsMap(() => String, () => Number, () => MyMap)
-                public values: MyMap;
+                public values!: MyMap;
             }
 
             const t = new Test();
@@ -323,7 +352,8 @@ describe("Serializing", () => {
 
         it("serializes a map of typed objects", () => {
             class TestType {
-                @serializeAs(() => Number) public value: number;
+                @serializeAs(() => Number)
+                public value: number;
 
                 constructor(arg: number) {
                     this.value = arg;
@@ -332,7 +362,7 @@ describe("Serializing", () => {
 
             class Test {
                 @serializeAsMap(() => String, () => TestType)
-                public values: Map<string, TestType>;
+                public values!: Map<string, TestType>;
             }
 
             const t = new Test();
@@ -351,7 +381,8 @@ describe("Serializing", () => {
 
         it("serializes a map with a different key name", () => {
             class TestType {
-                @serializeAs(() => Number) public value: number;
+                @serializeAs(() => Number)
+                public value: number;
 
                 constructor(arg: number) {
                     this.value = arg;
@@ -360,7 +391,7 @@ describe("Serializing", () => {
 
             class Test {
                 @serializeAsMap(() => String, () => TestType, () => Map, "different")
-                public values: Map<string, TestType>;
+                public values!: Map<string, TestType>;
             }
 
             const t = new Test();
@@ -390,7 +421,7 @@ describe("Serializing", () => {
 
             class Test {
                 @serializeAsMap(() => String, () => TestType)
-                public values: Map<String, TestType>;
+                public values!: Map<String, TestType>;
             }
 
             const t = new Test();
@@ -409,7 +440,8 @@ describe("Serializing", () => {
 
         it("skips undefined keys", () => {
             class Test {
-                @serializeAsMap(() => String, () => Number) public values: Map<string, number>;
+                @serializeAsMap(() => String, () => Number)
+                public values!: Map<string, number | undefined>;
             }
 
             const t = new Test();
@@ -431,14 +463,14 @@ describe("Serializing", () => {
     describe("SerializeAsObjectMap", () => {
         function runTests(
             blockName: string,
-            testSerializeAs: any,
-            testSerializeAsObjectMap: any
+            testSerializeAs: Function,
+            testSerializeAsObjectMap: Function
         ) {
             describe(blockName, () => {
                 it("serializes a map of primitives", () => {
                     class Test {
                         @testSerializeAsObjectMap(() => Number)
-                        public values: IIndexable<number>;
+                        public values!: IIndexable<number>;
                     }
 
                     const t = new Test();
@@ -457,7 +489,8 @@ describe("Serializing", () => {
 
                 it("serializes a map of typed objects", () => {
                     class TestType {
-                        @testSerializeAs(() => Number) public value: number;
+                        @testSerializeAs(() => Number)
+                        public value: number;
 
                         constructor(arg: number) {
                             this.value = arg;
@@ -466,7 +499,7 @@ describe("Serializing", () => {
 
                     class Test {
                         @testSerializeAsObjectMap(() => TestType)
-                        public values: IIndexable<TestType>;
+                        public values!: IIndexable<TestType>;
                     }
 
                     const t = new Test();
@@ -485,7 +518,8 @@ describe("Serializing", () => {
 
                 it("serializes a map with a different key name", () => {
                     class TestType {
-                        @testSerializeAs(() => Number) public value: number;
+                        @testSerializeAs(() => Number)
+                        public value: number;
 
                         constructor(arg: number) {
                             this.value = arg;
@@ -494,7 +528,7 @@ describe("Serializing", () => {
 
                     class Test {
                         @testSerializeAsObjectMap(() => TestType, "different")
-                        public values: IIndexable<TestType>;
+                        public values!: IIndexable<TestType>;
                     }
 
                     const t = new Test();
@@ -524,7 +558,7 @@ describe("Serializing", () => {
 
                     class Test {
                         @testSerializeAsObjectMap(() => TestType)
-                        public values: IIndexable<TestType>;
+                        public values!: IIndexable<TestType>;
                     }
 
                     const t = new Test();
@@ -544,7 +578,8 @@ describe("Serializing", () => {
 
             it("skips undefined keys", () => {
                 class Test {
-                    @testSerializeAsObjectMap(() => Number) public values: IIndexable<number>;
+                    @testSerializeAsObjectMap(() => Number)
+                    public values!: IIndexable<number | undefined>;
                 }
 
                 const t = new Test();
@@ -578,13 +613,14 @@ describe("Serializing", () => {
     describe("SerializeAsArray", () => {
         function runTests(
             blockName: string,
-            testSerializeAs: any,
-            testSerializeAsArray: any,
+            testSerializeAs: Function,
+            testSerializeAsArray: Function,
         ) {
             describe(blockName, () => {
                 it("serializes an array of primitives 1", () => {
                     class Test {
-                        @testSerializeAsArray(() => Number) public value: number[];
+                        @testSerializeAsArray(() => Number)
+                        public value!: number[];
                     }
 
                     const t = new Test();
@@ -596,7 +632,7 @@ describe("Serializing", () => {
                 it("serializes an array of primitives 2", () => {
                     class Test {
                         @testSerializeAs(itIsAnArray(() => Number))
-                        public value: number[];
+                        public value!: number[];
                     }
 
                     const t = new Test();
@@ -612,7 +648,8 @@ describe("Serializing", () => {
 
                 it("serializes an array of typed objects", () => {
                     class TestType {
-                        @testSerializeAs(() => String) public strVal: string;
+                        @testSerializeAs(() => String)
+                        public strVal: string;
 
                         constructor(val: string) {
                             this.strVal = val;
@@ -620,7 +657,8 @@ describe("Serializing", () => {
                     }
 
                     class Test {
-                        @testSerializeAsArray(() => TestType) public value: TestType[];
+                        @testSerializeAsArray(() => TestType)
+                        public value!: TestType[];
                     }
 
                     const t = new Test();
@@ -639,7 +677,8 @@ describe("Serializing", () => {
 
                 it("serializes nested arrays 1", () => {
                     class TestTypeL0 {
-                        @testSerializeAs(() => String) public strVal: string;
+                        @testSerializeAs(() => String)
+                        public strVal: string;
 
                         constructor(val: string) {
                             this.strVal = val;
@@ -657,7 +696,7 @@ describe("Serializing", () => {
 
                     class Test {
                         @testSerializeAsArray(() => TestTypeL1)
-                        public value: TestTypeL1[];
+                        public value!: TestTypeL1[];
                     }
 
                     const t = new Test();
@@ -692,7 +731,7 @@ describe("Serializing", () => {
                 it("serializes an array with a different key", () => {
                     class Test {
                         @testSerializeAsArray(() => Number, () => Array, "different")
-                        public value: number[];
+                        public value!: number[];
                     }
 
                     const t = new Test();
@@ -720,7 +759,8 @@ describe("Serializing", () => {
         it("serializes a Set of primitives", () => {
             class MySet<T> extends Set<T> {}
             class Test {
-                @serializeAsSet(() => Number, () => MySet) public value: MySet<number>;
+                @serializeAsSet(() => Number, () => MySet)
+                public value!: MySet<number>;
             }
 
             const t = new Test();
@@ -731,7 +771,8 @@ describe("Serializing", () => {
 
         it("serializes a Set of primitives", () => {
             class Test {
-                @serializeAsSet(() => Number) public value: Set<number>;
+                @serializeAsSet(() => Number)
+                public value!: Set<number>;
             }
 
             const t = new Test();
@@ -741,7 +782,8 @@ describe("Serializing", () => {
         });
         it("serializes an array of typed objects", () => {
             class TestType {
-                @serializeAs(() => String) public strVal: string;
+                @serializeAs(() => String)
+                public strVal: string;
 
                 constructor(val: string) {
                     this.strVal = val;
@@ -749,7 +791,8 @@ describe("Serializing", () => {
             }
 
             class Test {
-                @serializeAsSet(() => TestType) public value: Set<TestType>;
+                @serializeAsSet(() => TestType)
+                public value!: Set<TestType>;
             }
 
             const t = new Test();
@@ -768,7 +811,8 @@ describe("Serializing", () => {
 
         it("serializes nested arrays", () => {
             class TestTypeL0 {
-                @serializeAs(() => String) public strVal: string;
+                @serializeAs(() => String)
+                public strVal: string;
 
                 constructor(val: string) {
                     this.strVal = val;
@@ -786,7 +830,7 @@ describe("Serializing", () => {
 
             class Test {
                 @serializeAsSet(() => TestTypeL1)
-                public value: Set<TestTypeL1>;
+                public value!: Set<TestTypeL1>;
             }
 
             const t = new Test();
@@ -815,7 +859,7 @@ describe("Serializing", () => {
         it("serializes an array with a different key", () => {
             class Test {
                 @serializeAsSet(() => Number, () => Set, "different")
-                public value: Set<number>;
+                public value!: Set<number>;
             }
 
             const t = new Test();
@@ -829,8 +873,8 @@ describe("Serializing", () => {
     describe("SerializeJSON", () => {
         function runTests(
             blockName: string,
-            testSerializeAs: any,
-            testSerializeAsJson: any
+            testSerializeAs: Function,
+            testSerializeAsJson: Function
         ) {
             describe(blockName, () => {
                 it("serializes a typed map", () => {
@@ -845,7 +889,8 @@ describe("Serializing", () => {
                     class Moon extends Satellite {}
                     class MyDico extends Map<string, Satellite> {}
                     class Test0 {
-                        @serializeAsMap(() => String, () => Satellite, () => MyDico) public dico1: MyDico;
+                        @serializeAsMap(() => String, () => Satellite, () => MyDico)
+                        public dico1!: MyDico;
                     }
                     const s = new Test0();
                     s.dico1 = new MyDico([["1", new Moon("Europa")], ["2", new Satellite("Adrastea")]]);
@@ -858,17 +903,20 @@ describe("Serializing", () => {
                     const json = Serialize(s, () => Test0);
                     RuntimeTypingDisable();
                     RuntimeTypingResetDictionary();
-                    expect((json.dico1 as any)["1"]).toEqual({$type: "my Moon type", name: "Europa"});
-                    expect((json.dico1 as any)["2"]).toEqual({$type: "my Satellite type", name: "Adrastea"});
-                    expect((json.dico1 as any)["3"]).toEqual({$type: "my Moon type", name: "Callisto"});
-                    expect((json.dico1 as any).$type).toBe("my MyDico type");
+                    expect((json.dico1 as IJsonObject)["1"]).toEqual({$type: "my Moon type", name: "Europa"});
+                    expect((json.dico1 as IJsonObject)["2"]).toEqual({$type: "my Satellite type", name: "Adrastea"});
+                    expect((json.dico1 as IJsonObject)["3"]).toEqual({$type: "my Moon type", name: "Callisto"});
+                    expect((json.dico1 as IJsonObject).$type).toBe("my MyDico type");
                 });
 
                 it("serializes a primitive as json", () => {
                     class Test {
-                        @testSerializeAsJson() public value0: string;
-                        @testSerializeAsJson() public value1: boolean;
-                        @testSerializeAsJson() public value2: number;
+                        @testSerializeAsJson()
+                        public value0!: string;
+                        @testSerializeAsJson()
+                        public value1!: boolean;
+                        @testSerializeAsJson()
+                        public value2!: number;
                     }
 
                     const s = new Test();
@@ -883,9 +931,12 @@ describe("Serializing", () => {
 
                 it("serializes an array of primitives as json", () => {
                     class Test {
-                        @testSerializeAsJson() public value0: string[];
-                        @testSerializeAsJson() public value1: boolean[];
-                        @testSerializeAsJson() public value2: number;
+                        @testSerializeAsJson()
+                        public value0!: string[];
+                        @testSerializeAsJson()
+                        public value1!: boolean[];
+                        @testSerializeAsJson()
+                        public value2!: number;
                     }
 
                     const s = new Test();
@@ -900,7 +951,8 @@ describe("Serializing", () => {
 
                 it("skips undefined keys", () => {
                     class Test {
-                        @testSerializeAsJson() public value: IIndexable<number>;
+                        @testSerializeAsJson()
+                        public value!: IIndexable<number | undefined>;
                     }
 
                     const s = new Test();
@@ -916,13 +968,14 @@ describe("Serializing", () => {
 
                 it("serializes an array of non primitives as json", () => {
                     class TestL0 {
-                        public value0: string;
-                        public value1: boolean;
-                        public value2: number;
+                        public value0!: string;
+                        public value1!: boolean;
+                        public value2!: number;
                     }
 
                     class Test {
-                        @testSerializeAsJson() public values: TestL0[];
+                        @testSerializeAsJson()
+                        public values!: TestL0[];
                     }
 
                     const s = new Test();
@@ -954,13 +1007,14 @@ describe("Serializing", () => {
 
                 it("serializes a map of primitives as json", () => {
                     class TestL0 {
-                        public value0: string;
-                        public value1: boolean;
-                        public value2: number;
+                        public value0!: string;
+                        public value1!: boolean;
+                        public value2!: number;
                     }
 
                     class Test {
-                        @testSerializeAsJson() public value0: TestL0;
+                        @testSerializeAsJson()
+                        public value0!: TestL0;
                     }
 
                     const s = new Test();
@@ -981,13 +1035,14 @@ describe("Serializing", () => {
 
                 it("serializes a map of non primitives as json", () => {
                     class TestL0 {
-                        public value0: string;
-                        public value1: boolean;
-                        public value2: number;
+                        public value0!: string;
+                        public value1!: boolean;
+                        public value2!: number;
                     }
 
                     class Test {
-                        @testSerializeAsJson() public values: IIndexable<TestL0>;
+                        @testSerializeAsJson()
+                        public values!: IIndexable<TestL0>;
                     }
 
                     const s = new Test();
@@ -1019,13 +1074,14 @@ describe("Serializing", () => {
 
                 it("serializes an array of non primitives as json", () => {
                     class TestL0 {
-                        public value0: string;
-                        public value1: boolean;
-                        public value2: number;
+                        public value0!: string;
+                        public value1!: boolean;
+                        public value2!: number;
                     }
 
                     class Test {
-                        @testSerializeAsJson() public values: TestL0[];
+                        @testSerializeAsJson()
+                        public values!: TestL0[];
                     }
 
                     const s = new Test();
@@ -1057,7 +1113,8 @@ describe("Serializing", () => {
 
                 it("does not serialize functions", () => {
                     class Test {
-                        @testSerializeAsJson() public value0: () => void;
+                        @testSerializeAsJson()
+                        public value0!: () => void;
                     }
 
                     const s = new Test();
@@ -1070,7 +1127,8 @@ describe("Serializing", () => {
 
                 it("serializes json with a different key", () => {
                     class Test {
-                        @testSerializeAsJson("different") public value0: string;
+                        @testSerializeAsJson("different")
+                        public value0!: string;
                     }
 
                     const s = new Test();
@@ -1083,11 +1141,13 @@ describe("Serializing", () => {
 
                 it("ignores nested serialization annotations", () => {
                     class Sub {
-                        @testSerializeAs(() => Number) public n: string = "100";
+                        @testSerializeAs(() => Number)
+                        public n: string = "100";
                     }
 
                     class Test {
-                        @testSerializeAsJson() public value0: Sub;
+                        @testSerializeAsJson()
+                        public value0!: Sub;
                     }
 
                     const s = new Test();
@@ -1104,9 +1164,12 @@ describe("Serializing", () => {
                     });
 
                     class Test {
-                        @testSerializeAsJson() public value0: string;
-                        @testSerializeAsJson() public value1: boolean;
-                        @testSerializeAsJson() public value2: number;
+                        @testSerializeAsJson()
+                        public value0!: string;
+                        @testSerializeAsJson()
+                        public value1!: boolean;
+                        @testSerializeAsJson()
+                        public value2!: number;
                     }
 
                     const s = new Test();
@@ -1129,11 +1192,11 @@ describe("Serializing", () => {
 
                     class Test {
                         @testSerializeAsJson(true)
-                        public value0: string;
+                        public value0!: string;
                         @testSerializeAsJson(true)
-                        public value1: boolean;
+                        public value1!: boolean;
                         @testSerializeAsJson(true)
-                        public value2: number;
+                        public value2!: number;
                     }
 
                     const s = new Test();
@@ -1190,12 +1253,13 @@ describe("Serializing", () => {
 
     describe("SerializeUsing", () => {
        it("uses the provided function", () => {
-            function x(value: any) {
+            function x() {
                 return "yes";
             }
 
             class Test {
-                @serializeUsing(x) public value: number = 1;
+                @serializeUsing(x)
+                public value: number = 1;
                 @autoserializeUsing({ Serialize: x, Deserialize: x })
                 public value1: number = 1;
             }
@@ -1220,7 +1284,8 @@ describe("Serializing", () => {
                     expect(instance instanceof Test).toBeTruthy();
                 }
 
-                @serializeAs(() => Number) public value: number = 1;
+                @serializeAs(() => Number)
+                public value: number = 1;
 
             }
 
@@ -1237,7 +1302,8 @@ describe("Serializing", () => {
                 public static onSerialized(jsonObject: IJsonObject, instance: Test) {
                     return { v: "hello" };
                 }
-                @serializeAs(() => Number) public value: number = 1;
+                @serializeAs(() => Number)
+                public value: number = 1;
             }
 
             const s = new Test();
@@ -1252,7 +1318,8 @@ describe("Serializing", () => {
         it("ReferenceCycle = true, is reference = false", () => {
             @isReference(false)
             class Test {
-                @serializeAs(() => Test) public next: Test;
+                @serializeAs(() => Test)
+                public next: Test | undefined;
             }
             const s = new Test();
             s.next = new Test();
@@ -1276,7 +1343,8 @@ describe("Serializing", () => {
         it("ReferenceCycle = false, is reference = true", () => {
             @isReference(true)
             class Test {
-                @serializeAs(() => Test) public next: Test;
+                @serializeAs(() => Test)
+                public next: Test | undefined;
             }
             const s = new Test();
             s.next = new Test();
@@ -1302,7 +1370,8 @@ describe("Serializing", () => {
     describe("ReferenceCycle", () => {
         it("Cycle length 3", () => {
             class Test {
-                @serializeAs(() => Test) public next: Test;
+                @serializeAs(() => Test)
+                public next: Test | undefined;
             }
 
             const s = new Test();
@@ -1329,7 +1398,8 @@ describe("Serializing", () => {
 
         it("Cycle length 0", () => {
             class Test {
-                @serializeAs(() => Test) public next: Test;
+                @serializeAs(() => Test)
+                public next: Test | undefined;
             }
 
             const s = new Test();
@@ -1389,19 +1459,23 @@ describe("Serializing", () => {
 
         it("Array 1", () => {
             class Test0 {
-                @serializeAs(() => Number) public valueA: number = 0;
+                @serializeAs(() => Number)
+                public valueA: number = 0;
             }
             @inheritSerialization(() => Test0)
             class Test1 extends Test0 {
-                @serializeAs(() => Number) public valueB: number = 1;
+                @serializeAs(() => Number)
+                public valueB: number = 1;
             }
             @inheritSerialization(() => Test1)
             class Test2 extends Test1 {
-                @serializeAs(() => Number) public valueC: number = 2;
+                @serializeAs(() => Number)
+                public valueC: number = 2;
             }
             @inheritSerialization(() => Test1)
             class Test3 extends Test1 {
-                @serializeAs(() => Number) public valueD: number = 3;
+                @serializeAs(() => Number)
+                public valueD: number = 3;
             }
 
             const s = Array<Test0>();
@@ -1447,16 +1521,20 @@ describe("Serializing", () => {
 
         it("Object", () => {
             class Test0 {
-                @serializeAs(() => Boolean) public valueA: boolean = true;
+                @serializeAs(() => Boolean)
+                public valueA: boolean = true;
             }
             class Test1 {
-                @serializeAs(() => Boolean) public valueB: boolean = true;
+                @serializeAs(() => Boolean)
+                public valueB: boolean = true;
             }
             @inheritSerialization(() => Test1)
             class Test2 extends Test1 {}
             class Test3 {
-                @serializeAs(() => Object) public m1: Test0;
-                @serializeAs(() => Test2) public m2: Test1;
+                @serializeAs(() => Object)
+                public m1!: Test0;
+                @serializeAs(() => Test2)
+                public m2!: Test1;
             }
 
             const s = new Test3();
@@ -1541,12 +1619,12 @@ describe("Serializing", () => {
                 @emitDefaultValue(false)
                 @autoserializeAs(() => Object)
                 @defaultValue(elephant)
-                public shouldNotBeSerialized: Object; // default value
+                public shouldNotBeSerialized!: Object; // default value
 
                 @emitDefaultValue(false)
                 @autoserializeAsJson()
                 @defaultValue(elephant)
-                public shouldBeSerialized: Object; // not default value
+                public shouldBeSerialized!: Object; // not default value
             }
 
             const test = new Test();
