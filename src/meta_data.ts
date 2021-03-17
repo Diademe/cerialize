@@ -13,17 +13,16 @@ import {
     noDefaultValueSymbole,
 } from "./types";
 import {
-    getConstructor,
     isPrimitiveAnonymousType,
 } from "./utils";
 
 
 class TypeMap<K, V> extends Map<K, V>{
     public get(key: K): V | undefined {
-        return super.get(getConstructor(key) as any);
+        return super.get(key);
     }
     public set(key: K, value: V): this {
-        return super.set(getConstructor(key) as any, value);
+        return super.set(key, value);
     }
 }
 

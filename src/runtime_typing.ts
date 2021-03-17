@@ -1,9 +1,6 @@
 import {
     IConstructable,
 } from "./types";
-import {
-    getConstructor,
-} from "./utils";
 
 export { TypeString };
 // throw an exception if dic doesn't have key
@@ -26,14 +23,14 @@ export class TypeStringDictionary {
         this.init();
     }
     public setTypeString(t: any, s: string): void {
-        this.type2string.set(getConstructor(t), s);
-        this.string2type.set(s, getConstructor(t));
+        this.type2string.set(t, s);
+        this.string2type.set(s, t);
     }
     public getStringFromType(constructor: Function): string {
-        return lousyGet(this.type2string, getConstructor(constructor));
+        return lousyGet(this.type2string, constructor);
     }
     public hasStringFromType(constructor: Function): boolean {
-        return this.type2string.has(getConstructor(constructor));
+        return this.type2string.has(constructor);
     }
     public getTypeFromString(s: string): IConstructable {
         return lousyGet(this.string2type, s);
@@ -76,6 +73,6 @@ export function RuntimeTypingDisable(): void {
 
 export function typeString(type: string) {
     return (classType: Function) => {
-        TypeString.setTypeString(getConstructor(classType), type);
+        TypeString.setTypeString(classType, type);
     };
 }

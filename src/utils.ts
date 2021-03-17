@@ -30,11 +30,6 @@ export function getTarget<T>(
     return {} as T;
 }
 
-export function getConstructor(type: any): new (...args: any[]) => any {
-    return Object.getOwnPropertyDescriptor(type, "__originalConstructor__") ?
-        (type as any).__originalConstructor__ : type;
-}
-
 export function isPrimitiveType(type: Function): type is SerializablePrimitiveType {
     return (
         type === String ||
