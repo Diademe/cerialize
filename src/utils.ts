@@ -3,7 +3,6 @@ import {
 } from "./ref";
 import {
     InstantiationMethod,
-    ISerializableType,
     primitive,
     SerializablePrimitiveType,
 } from "./types";
@@ -58,22 +57,6 @@ export function isPrimitiveAnonymousType(type: () => Function): boolean {
             throw error;
         }
     }
-}
-
-export function DefaultPrimitiveValue(value: any) {
-    if (value instanceof String) {
-        return String();
-    }
-    if (value instanceof Boolean) {
-        return Boolean();
-    }
-    if (value instanceof Number) {
-        return Number();
-    }
-    if (value instanceof Date) {
-        return Date();
-    }
-    return null;
 }
 
 export function DowncastPrimitive(value: Date | RegExp | String | Number | Boolean): primitive {
