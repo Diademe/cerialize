@@ -15,6 +15,8 @@ import {
     allPrimitives,
     ArrayHandling,
     ASerializableTypeOrArrayInternal,
+    deserializedCallback,
+    Deserializer,
     IConstructable,
     IIndexable,
     IJsonArray,
@@ -72,7 +74,7 @@ export function DeserializeObjectMapInternal<T>(
         target = {}; // we don't allow to create specify a constructor for the ObjectMap
     }
 
-    const isReference = ClassMetaData.getMetaData(target.constructor).isReference;
+    const isReference: IsReference = ClassMetaData.getMetaDataOrDefault(target.constructor).isReference;
     if (
         ClassMetaData.refCycleDetection && isReference !== IsReference.False ||
         isReference === IsReference.True
@@ -151,14 +153,14 @@ export function DeserializeMapInternal<
     }
 
     // if we detect references, then if the reference is defined, return the corresponding object
-    const isReference = ClassMetaData.getMetaData(target.constructor).isReference;
+    const isReference: IsReference = ClassMetaData.getMetaDataOrDefault(target.constructor).isReference;
     if (
         ClassMetaData.refCycleDetection && isReference !== IsReference.False ||
         isReference === IsReference.True
     ) {
         const refObject = getRefHandler().deserializationGetObject(data);
         if (refObject !== undefined) {
-            return refObject;
+            return refObject as T;
         }
         getRefHandler().deserializationRegisterObject(data, target);
     }
@@ -168,18 +170,18 @@ export function DeserializeMapInternal<
         const value = data[key];
         if (value !== undefined) {
             if (isItAnArrayInternal(keyType)) {
-                throw new Error("a key can not be an array")
+                throw new Error("a key can not be an array");
             }
             const keyTypeF = keyType() as StringConstructor | NumberConstructor;
             const isString = keyTypeF === String;
             if (keyTypeF !== String && keyTypeF !== Number) {
-                throw new Error("a key must be a primitive type")
+                throw new Error("a key must be a primitive type");
             }
             const keyName = keyTypeF(
                 isString ?
                 PropMetaData.deserializeKeyTransform(key) :
                 key
-            ) as string | number;
+            );
             target.set(keyName, DeserializeInternal<V>(
                 data[key] as IJsonObject,
                 valueType,
@@ -200,7 +202,7 @@ export function DeserializeArrayInternal<
         arrayConstructor: () => C,
         handling: ArrayHandling,
         target?: T,
-        instantiationMethod?: InstantiationMethod,
+        instantiationMethod?: InstantiationMethod
 ): null;
 export function DeserializeArrayInternal<
     Value,
@@ -211,7 +213,7 @@ export function DeserializeArrayInternal<
         arrayConstructor: () => C,
         handling: ArrayHandling,
         target?: T,
-        instantiationMethod?: InstantiationMethod,
+        instantiationMethod?: InstantiationMethod
 ): T;
 export function DeserializeArrayInternal<
     Value,
@@ -222,7 +224,7 @@ export function DeserializeArrayInternal<
         arrayConstructor: () => C,
         handling: ArrayHandling,
         target?: T,
-        instantiationMethod?: InstantiationMethod,
+        instantiationMethod?: InstantiationMethod
 ): T | null {
     if (data === null) {
         return null;
@@ -364,7 +366,7 @@ export function DeserializePrimitive(
     data: allPrimitives | allObjectPrimitives,
     type: () => SerializablePrimitiveType,
     target?: Date
-): allPrimitives
+): allPrimitives;
 export function DeserializePrimitive(
     data: allPrimitives | allObjectPrimitives | null,
     type: () => SerializablePrimitiveType,
@@ -384,7 +386,7 @@ export function DeserializePrimitive(
         }
     }
     else if (type() === RegExp) {
-        const fragments = (data as string).match(/\/(.*?)\/([gimy])?$/)!;
+        const fragments = /\/(.*?)\/([gimy])?$/.exec(data as string) as RegExpExecArray;
         return new RegExp(fragments[1], fragments[2] || "");
     }
     else {
@@ -446,25 +448,25 @@ export function DeserializeJSONInternal(
 }
 
 
-export function DeserializeInternal<T, K extends keyof T = keyof T>(
+export function DeserializeInternal<T>(
     data: null,
     type: ASerializableTypeOrArrayInternal<T>,
     target?: T & Partial<IConstructable>,
     instantiationMethod?: InstantiationMethod
 ): null;
-export function DeserializeInternal<T, K extends keyof T = keyof T>(
+export function DeserializeInternal<T>(
     data: IJsonObject | IJsonArray,
     type: ASerializableTypeOrArrayInternal<T>,
     target?: (T & Partial<IConstructable>) | (T & Partial<IConstructable>)[],
     instantiationMethod?: InstantiationMethod
 ): T | T[];
-export function DeserializeInternal<T, K extends keyof T = keyof T>(
+export function DeserializeInternal<T>(
     data: allPrimitives | allObjectPrimitives,
     type: () => SerializablePrimitiveType,
     target?: (T & Partial<IConstructable>),
     instantiationMethod?: InstantiationMethod
 ): Date | RegExp | string | number | boolean;
-export function DeserializeInternal<T, K extends keyof T = keyof T>(
+export function DeserializeInternal<T, K extends keyof T>(
     data: IJsonObject | IJsonArray | allPrimitives | allObjectPrimitives | null,
     type: ASerializableTypeOrArrayInternal<T> | (() => SerializablePrimitiveType),
     target?: (T & Partial<IConstructable>) | (T & Partial<IConstructable>)[],
@@ -497,9 +499,9 @@ export function DeserializeInternal<T, K extends keyof T = keyof T>(
             classType = target.constructor;
         }
         else {
-            throw new Error("Can not infer the type of the class deserialized");
+            throw new Error("Can not guess the type of the class deserialized");
         }
-        let isReference = ClassMetaData.getMetaData(classType).isReference;
+        let isReference: IsReference = ClassMetaData.getMetaDataOrDefault(classType).isReference;
         if (
             ClassMetaData.refCycleDetection && isReference !== IsReference.False ||
             isReference === IsReference.True
@@ -526,7 +528,7 @@ export function DeserializeInternal<T, K extends keyof T = keyof T>(
                         return new (type() as ISerializableType<T>)();
 
                     case InstantiationMethod.ObjectCreate:
-                        return Object.create(type().prototype);
+                        return Object.create(type().prototype) as T;
 
                     default:
                         return {} as T;
@@ -536,7 +538,7 @@ export function DeserializeInternal<T, K extends keyof T = keyof T>(
         }
 
         target = getTarget(type() as ISerializableType<T>, target, instantiationMethod) as T;
-        isReference = ClassMetaData.getMetaData(target.constructor!).isReference;
+        isReference = ClassMetaData.getMetaDataOrDefault(classType).isReference;
         if (
             ClassMetaData.refCycleDetection && isReference !== IsReference.False ||
             isReference === IsReference.True
@@ -544,10 +546,10 @@ export function DeserializeInternal<T, K extends keyof T = keyof T>(
             getRefHandler().deserializationRegisterObject(data as IJsonObject, target);
         }
 
-        let onDeserialized = "";
+        let onDeserializedCallbackName: K | null = null;
         for (const metadata of metadataList) {
             if (metadata.flags === PropMetaDataFlag.onDeserialized) {
-                onDeserialized = metadata.keyName;
+                onDeserializedCallbackName = metadata.keyName as K;
                 continue;
             }
 
@@ -559,9 +561,9 @@ export function DeserializeInternal<T, K extends keyof T = keyof T>(
             const keyName = metadata.keyName as K;
             const flags = metadata.flags;
 
-            const defVal = getDefaultValue(metadata, source);
+            const defVal: unknown = getDefaultValue(metadata, source);
             if (metadata.emitDefaultValue === false && (source === undefined || source === defVal)) {
-                target[keyName] = defVal;
+                target[keyName] = defVal as T[K];
                 continue;
             }
 
@@ -581,7 +583,7 @@ export function DeserializeInternal<T, K extends keyof T = keyof T>(
                 target[keyName] = DeserializeMapInternal(
                     source as IJsonObject,
                     metadata.deserializedKeyType as () => (StringConstructor | NumberConstructor),
-                    metadata.deserializedValueType!,
+                    metadata.deserializedValueType as ASerializableTypeOrArrayInternal<unknown>,
                     metadata.deserializedType as (() => MapConstructor),
                     target[keyName] as unknown as Map<string | number, unknown>,
                     instantiationMethod
@@ -629,16 +631,20 @@ export function DeserializeInternal<T, K extends keyof T = keyof T>(
                 ) as unknown as T[K];
             }
             else if ((flags & PropMetaDataFlag.DeserializeUsing) !== 0) {
-                target[keyName] = (metadata.deserializedType as any)(
-                    source,
+                target[keyName] = (metadata.deserializedType as unknown as Deserializer<T[K]>)(
+                    source as JsonType,
                     target[keyName],
                     instantiationMethod
                 ) as unknown as T[K];
             }
         }
 
-        if (onDeserialized) {
-            (target as any)[onDeserialized]();
+        if (onDeserializedCallbackName !== null) {
+            (target[onDeserializedCallbackName] as unknown as deserializedCallback<T>) (
+                data as IJsonObject,
+                target,
+                instantiationMethod
+            );
         }
     }
 

@@ -5,7 +5,10 @@ import {
     NoOp,
 } from "./string_transforms";
 import {
+    allObjectPrimitives,
+    allPrimitives,
     ArrayHandling,
+    ASerializableType,
     ASerializableTypeOrArrayInternal,
     IConstructable,
     InstantiationMethod,
@@ -131,7 +134,7 @@ export class PropMetaData {
     public static inheritMetaData(
         parentType: IConstructable,
         childType: IConstructable
-    ) {
+    ): void {
         let childMetaData: PropMetaData[] = TypeMapProp.get(childType) || [];
         const parentMetaDataCloned: PropMetaData[] =
             (TypeMapProp.get(parentType) || [])
@@ -143,9 +146,9 @@ export class PropMetaData {
         TypeMapProp.set(childType, childMetaData);
     }
 
-    public static getMetaDataForType(type: IConstructable) {
+    public static getMetaDataForType(type: IConstructable): PropMetaData[] | null {
         if (type !== null && type !== undefined) {
-            return TypeMapProp.get(type) || null;
+            return TypeMapProp.get(type) ?? null;
         }
         return null;
     }
@@ -202,7 +205,7 @@ export class PropMetaData {
     }
 }
 
-export function isDefaultValue<T>(metadata: PropMetaData, val: T) {
+export function isDefaultValue<T>(metadata: PropMetaData, val: T): boolean {
     if (metadata.emitDefaultValue === false) {
         const defVal = getDefaultValue(metadata, val);
         return defVal === val;
@@ -214,27 +217,32 @@ export function isDefaultValue<T>(metadata: PropMetaData, val: T) {
 export class ClassMetaData {
     public static refCycleDetection = false;
 
-    public static getMetaData(target: Function): ClassMetaData {
-        let classMetaData = TypeMapClass.get(target);
-        if (classMetaData === undefined) {
-            classMetaData = new ClassMetaData();
-            TypeMapClass.set(target, classMetaData);
+    public static getMetaDataOrDefault(target: Function | undefined): ClassMetaData {
+        if (target === undefined) {
+            return new ClassMetaData();
         }
-        return classMetaData;
+        else {
+            let classMetaData = TypeMapClass.get(target);
+            if (classMetaData === undefined) {
+                classMetaData = new ClassMetaData();
+                TypeMapClass.set(target, classMetaData);
+            }
+            return classMetaData;
+        }
     }
 
-    public isReference = IsReference.Default;
+    public isReference: IsReference = IsReference.Default;
 }
 
-export function getDefaultValue<T>(metadata: PropMetaData, val: T) {
+export function getDefaultValue<T>(metadata: PropMetaData, val: T | allObjectPrimitives): unknown {
     if (metadata.emitDefaultValue === false) {
         if (metadata.defaultValue !== noDefaultValueSymbole) { // custom default value
             return metadata.defaultValue;
         }
         // default value for primitive type wrapped or not
-        else if (isPrimitiveAnonymousType(metadata.serializedType as any) ||
+        else if (isPrimitiveAnonymousType(metadata.serializedType as ASerializableType<T | allObjectPrimitives>) ||
             (val !== undefined && val !== null && val !== Object(val))) {
-            return new ((metadata.serializedType as any)())().valueOf();
+            return new ((metadata.serializedType as ASerializableType<allPrimitives>)())().valueOf();
         }
         else { // default value for Object, Date, Regex
             return null;

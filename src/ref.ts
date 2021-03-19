@@ -1,20 +1,21 @@
 ﻿import {
     IIndexable,
+    IJsonObject,
     IRefHandler,
     JsonType,
 } from "./types";
 
 // cycle references
 class Cycle {
-    public ref2obj: Map<number, any>;
-    public obj2ref: Map<any, number>;
+    public ref2obj: Map<number, unknown>;
+    public obj2ref: Map<unknown, number>;
     private refIndex: number;
     public constructor() {
         this.refIndex = 1;
-        this.ref2obj = new Map<number, any>();
-        this.obj2ref = new Map<any, number>();
+        this.ref2obj = new Map<number, unknown>();
+        this.obj2ref = new Map<unknown, number>();
     }
-    public setObject(obj: any): string {
+    public setObject(obj: unknown): string {
         this.obj2ref.set(obj, this.refIndex);
         return (this.refIndex++).toString();
     }
@@ -32,13 +33,13 @@ export class RefHandler implements IRefHandler {
         this.cycle = new Cycle();
     }
 
-    public clean() {
+    public clean(): void {
         this.cycle = new Cycle();
     }
 
-    public deserializationGetObject(json: JsonType): any {
+    public deserializationGetObject(json: IJsonObject): unknown {
         if (json?.hasOwnProperty("$ref")) {
-            const ref = parseInt((json as any).$ref, 10);
+            const ref = parseInt(json.$ref as string, 10);
             if (!this.cycle.ref2obj.has(ref)) {
                 throw new Error("Reference found before its definition");
             }
@@ -47,18 +48,18 @@ export class RefHandler implements IRefHandler {
         return undefined;
     }
 
-    public deserializationRegisterObject(json: JsonType, obj: any): void {
+    public deserializationRegisterObject(json: IJsonObject, obj: unknown): void {
         if (json?.hasOwnProperty("$id")) {
-            this.cycle.ref2obj.set(parseInt((json as any).$id, 10), obj);
+            this.cycle.ref2obj.set(parseInt(json.$id as string, 10), obj);
         }
     }
 
-    public serializationSetID(json: IIndexable<JsonType>, obj: any): void {
-        (json as any).$id = this.cycle.setObject(obj);
+    public serializationSetID(json: IIndexable<JsonType>, obj: unknown): void {
+        json.$id = this.cycle.setObject(obj);
     }
 
-    public serializationSetRef(json: IIndexable<JsonType>, obj: any): void {
-        (json as any).$ref = this.cycle.obj2ref.get(obj)!.toString();
+    public serializationSetRef(json: IIndexable<JsonType>, obj: unknown): void {
+        json.$ref = (this.cycle.obj2ref.get(obj) as number).toString();
     }
 }
 

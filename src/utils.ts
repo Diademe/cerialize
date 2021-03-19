@@ -22,7 +22,7 @@ export function getTarget<T>(
                 return new type();
 
             case InstantiationMethod.ObjectCreate:
-                return Object.create(type.prototype);
+                return Object.create(type.prototype) as T;
         }
     }
 
@@ -67,6 +67,7 @@ export function DowncastPrimitive(value: Date | RegExp | String | Number | Boole
         || value instanceof Date) {
         return value.valueOf() as primitive;
     }
+    // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
     throw new Error("DowncastPrimitive failed on " + value);
 }
 
@@ -83,7 +84,7 @@ export function setBitConditionally(
     }
 }
 
-export function parseNumber(key: any, value: any) {
+export function parseNumber<T>(key: string, value: T | string): number | string | T {
     switch (value) {
         case "NaN":
             return Number.NaN;
@@ -96,7 +97,7 @@ export function parseNumber(key: any, value: any) {
     }
 }
 
-export function stringifyNumber(key: string, value: any) {
+export function stringifyNumber<T>(key: string, value: T): string | T {
     if (typeof value === "number") {
         if (Number.isNaN(value) || isNaN(value)) {
             return "NaN";
@@ -111,16 +112,17 @@ export function stringifyNumber(key: string, value: any) {
 let NbDeserialization = 0;
 let NbSerialization = 0;
 
-export function serializationContinuation<T>(func: (...args: any[]) => T, ...args: any[]): T {
+export function serializationContinuation<T>(func: (...argsFunc: any[]) => T, ...args: any[]): T {
     let ret: T;
     try {
         NbSerialization++;
-        if (getRefHandler().init) {
-            getRefHandler().init!();
+        const handler = getRefHandler();
+        if (handler.init) {
+            handler.init();
         }
-        ret = func.apply(null, args);
-        if (getRefHandler().done) {
-            getRefHandler().done!();
+        ret = func(...args);
+        if (handler.done) {
+            handler.done();
         }
     }
     finally {
@@ -129,16 +131,17 @@ export function serializationContinuation<T>(func: (...args: any[]) => T, ...arg
     return ret;
 }
 
-export function deserializationContinuation<T>(func: (...args: any[]) => T, ...args: any[]): T {
+export function deserializationContinuation<T>(func: (...argsFunc: any[]) => T, ...args: any[]): T {
     let ret: T;
     try {
         NbDeserialization++;
-        if (getRefHandler().init) {
-            getRefHandler().init!();
+        const handler = getRefHandler();
+        if (handler.init) {
+            handler.init();
         }
-        ret = func.apply(null, args);
-        if (getRefHandler().done) {
-            getRefHandler().done!();
+        ret = func(...args);
+        if (handler.done) {
+            handler.done();
         }
     }
     finally {
@@ -150,13 +153,13 @@ export function deserializationContinuation<T>(func: (...args: any[]) => T, ...a
 /**
  * return true if there is we are deserializing
  */
-export function DeserializationOccurring() {
+export function DeserializationOccurring(): boolean {
     return NbDeserialization > 0;
 }
 
 /**
  * return true if there is we are serializing
  */
-export function SerializationOccurring() {
+export function SerializationOccurring(): boolean {
     return NbSerialization > 0;
 }

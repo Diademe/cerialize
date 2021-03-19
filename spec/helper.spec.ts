@@ -1,4 +1,7 @@
-import { parseNumber, stringifyNumber } from "../src";
+import {
+    parseNumber,
+    stringifyNumber,
+} from "../src";
 
 describe("Number", () => {
 

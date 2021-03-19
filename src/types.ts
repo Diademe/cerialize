@@ -61,6 +61,8 @@ export enum ArrayHandling {
 export interface IJsonObject {
     [idx: string]: JsonType | IJsonObject | undefined;
     $type?: string;
+    $ref?: string;
+    $id?: string;
 }
 
 export interface IJsonArray extends Array<JsonType> { }
@@ -79,9 +81,18 @@ export interface IObjectMap<T> {
     [idx: string]: T;
 }
 
-export interface ISerializableType<T> {
-    onSerialized?: (data: IJsonObject, instance: T) => IJsonObject | void;
-    new(...args: any[]): T;
+export type ISerializableType<T> = new(...args: any[]) => T;
+
+export type deserializedCallback<T> = (
+    data: IJsonObject,
+    instance: T,
+    instantiationMethod?: InstantiationMethod
+) => T | void;
+
+export type serializedCallback<T> = (data: IJsonObject, instance: T) => IJsonObject | void;
+
+export interface onSerialized<T> {
+    onSerialized?: serializedCallback<T>;
 }
 
 export interface IPlainObject {
@@ -99,7 +110,7 @@ export class ItIsAnArrayInternal<
     C extends (new () => T) = new () => T> {
     constructor(
         public type: ASerializableTypeOrArrayInternal<Value>,
-        public ctor: () => C = (() => Array as any),
+        public ctor: () => C = (() => Array as unknown as C),
         public handling: ArrayHandling = ArrayHandling.Into
     ) { }
 }
@@ -125,7 +136,7 @@ export interface IRefHandler {
      */
     serializationSetRef(json: IIndexable<JsonType>, obj: any): void;
     /** get the object corresponding to the reference carried by json */
-    deserializationGetObject(json: IJsonObject): any;
+    deserializationGetObject(json: IJsonObject): unknown;
     /** associate the ref carried by json to the object obj */
     deserializationRegisterObject(json: IJsonObject, obj: any): void;
     /** cleanup function. called at the end of serialization. may be used to remove unnecessary ID */

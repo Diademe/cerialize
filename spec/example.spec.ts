@@ -6,6 +6,7 @@ import {
     serializeAsMap,
 } from "../src";
 import {
+    IJsonObject,
     ISerializer,
     JsonType,
 } from "../src/types";
@@ -28,7 +29,7 @@ describe("Exemples", () => {
 
             const s = new Test();
             s.value = infinityTimeTwo;
-            const json = Serialize(s, () => Test);
+            const json: IJsonObject = Serialize(s, () => Test);
             expect(json.value).toBe(infinityTimeTowInString);
             const obj = Deserialize(json, () => Test);
             expect(obj.value).toBe(BigInt("18014398509481982"));
@@ -42,10 +43,10 @@ describe("Exemples", () => {
         }
 
         const s = new Test();
-        s.value = new Map();
+        s.value = new Map<number, string>();
         s.value.set(1, "a");
         const json = Serialize(s, () => Test);
-        expect(typeof Array.from(Object.keys(json.value!))[0]).toBe("string");
+        expect(typeof Array.from(Object.keys(json.value as IJsonObject))[0]).toBe("string");
 
         const obj = Deserialize(json, () => Test);
         expect(typeof Array.from(obj.value.keys())[0]).toBe("number");

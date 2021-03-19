@@ -74,8 +74,9 @@ export {
 } from "./utils";
 
 export function RefClean(): void {
-    if (getRefHandler().clean) {
-        getRefHandler().clean!();
+    const handler = getRefHandler();
+    if (handler.clean) {
+        handler.clean();
     }
     cleanCycleBreaking();
 }
@@ -100,14 +101,14 @@ export function SetDefaultInstantiationMethod(
 /**
  * Enable references and cyclic references detection
  */
-export function RefCycleDetectionEnable() {
+export function RefCycleDetectionEnable(): void {
     ClassMetaData.refCycleDetection = true;
 }
 
 /**
  * Enable references and cyclic references detection
  */
-export function RefCycleDetectionDisable() {
+export function RefCycleDetectionDisable(): void {
     ClassMetaData.refCycleDetection = false;
 }
 
@@ -124,16 +125,26 @@ export function itIsAnArray<
 /*
 Serialization
 */
-export function Serialize<T>(source: T, type: ItIsAnArrayInternal): JsonType[];
-export function Serialize<T>(source: T, type: ASerializableType<T>): IJsonObject;
 export function Serialize<T>(
-    source: T,
+    source: null,
     type: ASerializableTypeOrArrayInternal<T>
-): null | JsonType[] | IJsonObject {
-    return serializationContinuation(SerializeInternal, source, type as ASerializableType<T>);
+): null;
+export function Serialize<T>(
+    source: T & Partial<IConstructable>,
+    type: ItIsAnArrayInternal
+):  (IJsonObject | IJsonArray)[];
+export function Serialize<T>(
+    source: T & Partial<IConstructable>,
+    type: ASerializableType<T>
+):  IJsonObject;
+export function Serialize<T>(
+    source: T & Partial<IConstructable>,
+    type: ASerializableTypeOrArrayInternal<T>
+): (IJsonObject | IJsonArray)[] | IJsonObject | null {
+    return serializationContinuation(SerializeInternal, source, type) as (IJsonObject | IJsonArray)[] | IJsonObject | null;
 }
 
-export function SerializeJSON(sourceJSON: any, transformKeys = true): JsonType {
+export function SerializeJSON(sourceJSON: unknown, transformKeys: boolean = true): JsonType | null {
     return serializationContinuation(SerializeJSONInternal, sourceJSON, transformKeys);
 }
 
@@ -141,11 +152,11 @@ export function SerializeJSON(sourceJSON: any, transformKeys = true): JsonType {
 /**
  * Serialize a primitive variable or an array of primitives variables
  * with itIsAnArray :
- *      SerializePrimitive([1], itIsAnArray(() => Number)))
+ * SerializePrimitive([1], itIsAnArray(() => Number)))
  * @param primitiveSource primitive variable for serialization
  * @param type type of primitive (e.g. () => Number)
  */
-export function SerializePrimitive<T>(
+export function SerializePrimitive(
     primitiveSource: SerializablePrimitiveType,
     type: () => SerializablePrimitiveType
 ): JsonType {
@@ -162,11 +173,11 @@ export function SerializeSet<T>(
 export function SerializeArray<T>(
     sourceArray: T[],
     arrayElementType: ItIsAnArrayInternal<T>
-): IJsonArray
+): IJsonArray;
 export function SerializeArray<T>(
     sourceArray: T[],
     arrayElementType: ASerializableType<T>
-): IJsonArray[]
+): IJsonArray[];
 export function SerializeArray<T>(
     sourceArray: T[],
     arrayElementType: ASerializableTypeOrArrayInternal<T>
@@ -177,7 +188,7 @@ export function SerializeArray<T>(
 export function SerializeMap<K, V>(
     sourceMap: Map<K, V>,
     keyType: ASerializableTypeOrArrayInternal<K>,
-    valueType: ASerializableTypeOrArrayInternal<V>,
+    valueType: ASerializableTypeOrArrayInternal<V>
 ): IIndexable<JsonType> {
     return serializationContinuation(SerializeMapInternal, sourceMap, keyType, valueType);
 }
@@ -254,7 +265,7 @@ export function Deserialize<T extends IIndexable>(
     type: ASerializableTypeOrArrayInternal<T>,
     target?: T | null,
     instantiationMethod?: InstantiationMethod
-): null
+): null;
 export function Deserialize<T extends IIndexable>(
     data: IJsonObject | IJsonArray | null,
     type: ASerializableTypeOrArrayInternal<T>,

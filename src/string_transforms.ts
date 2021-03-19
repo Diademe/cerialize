@@ -13,13 +13,13 @@ const STRING_DASHERIZE_REGEXP = /([a-z\d])([A-Z])/g;
 export function CamelCase(str: string): string {
     return str
         .replace(STRING_CAMELIZE_REGEXP, (
-            match,
-            separator,
-            chr
+            match: string,
+            separator: string,
+            chr: string
         ): string => {
             return chr ? chr.toUpperCase() : "";
         })
-        .replace(/^([A-Z])/, (match, separator, chr): string => {
+        .replace(/^([A-Z])/, (match): string => {
             return match.toLowerCase();
         });
 }

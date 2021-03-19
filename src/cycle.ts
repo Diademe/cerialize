@@ -1,6 +1,7 @@
 ﻿
 class CycleBreaking {
     private readonly seenSet = new WeakSet<object>();
+
     /**
      * add the object to the seen list
      * @returns true if the object as been seen previously during serialization
@@ -16,6 +17,6 @@ class CycleBreaking {
 
 export let cycleBreaking = new CycleBreaking();
 
-export function cleanCycleBreaking() {
+export function cleanCycleBreaking(): void {
     cycleBreaking = new CycleBreaking();
 }

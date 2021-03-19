@@ -5,6 +5,7 @@ import {
 } from "./meta_data";
 import {
     ArrayHandling,
+    ASerializableType,
     ASerializableTypeOrArrayInternal,
     IConstructable,
     ISerializer,
@@ -17,9 +18,20 @@ import {
     setBitConditionally,
 } from "./utils";
 
+/**
+ * test if value is a prototype (if true, that means that we are on an instance decorator).
+ * static member decorator receive the constructor where instance member decorator receive the prototype
+ */
+function isInstanceMember(value: unknown): asserts value is IConstructable  {
+    if (typeof value === "function") {
+        throw new Error("a decorator of dcerialize has been applied to a static member. this is forbidden");
+    }
+}
+
 /** set a bitmask B. during compilation, if B & x, then the member will be serialized */
 export function serializeBitMask(bitMask: number): any {
-    return (target: any, actualKeyName: string): any => {
+    return (target: unknown, actualKeyName: string): void => {
+        isInstanceMember(target);
         const metadata = PropMetaData.getMetaData(
             target.constructor,
             actualKeyName
@@ -28,20 +40,22 @@ export function serializeBitMask(bitMask: number): any {
     };
 }
 
-export function serializeUsing(serializer: SerializeFn, keyName?: string) {
-    return (target: IConstructable, actualKeyName: string): void => {
+export function serializeUsing(serializer: SerializeFn, keyName?: string): any {
+    return (target: unknown, actualKeyName: string): void => {
+        isInstanceMember(target);
         const metadata = PropMetaData.getMetaData(
             target.constructor,
             actualKeyName
         );
         metadata.serializedKey = keyName ? keyName : actualKeyName;
-        metadata.serializedType = serializer as any;
+        metadata.serializedType = serializer as unknown as ASerializableType<unknown>;
         metadata.flags |= PropMetaDataFlag.SerializeUsing;
     };
 }
 
 export function serializeAs(type: ASerializableTypeOrArrayInternal<any>, keyName?: string) {
-    return (target: IConstructable, actualKeyName: string): void => {
+    return (target: unknown, actualKeyName: string): void => {
+        isInstanceMember(target);
         const metadata = PropMetaData.getMetaData(
             target.constructor,
             actualKeyName
@@ -62,14 +76,15 @@ export function serializeAsArray<T>(
     arrayConstructor?: () => IConstructable,
     keyName?: string
 ) {
-    return (target: any, actualKeyName: string): any => {
+    return (target: unknown, actualKeyName: string): any => {
+        isInstanceMember(target);
         const metadata = PropMetaData.getMetaData(
             target.constructor,
             actualKeyName
         );
         metadata.serializedKey = keyName ? keyName : actualKeyName;
         metadata.serializedKeyType = elementType;
-        metadata.serializedType = arrayConstructor as any || (() => Array);
+        metadata.serializedType = arrayConstructor as unknown as ASerializableType<unknown> ?? (() => Array);
         metadata.flags |= PropMetaDataFlag.SerializeArray;
         metadata.flags = setBitConditionally(
             metadata.flags,
@@ -80,7 +95,8 @@ export function serializeAsArray<T>(
 }
 
 export function serializeAsObjectMap<T>(keyType: ASerializableTypeOrArrayInternal<T>, keyName?: string) {
-    return (target: any, actualKeyName: string): any => {
+    return (target: unknown, actualKeyName: string): any => {
+        isInstanceMember(target);
         const metadata = PropMetaData.getMetaData(
             target.constructor,
             actualKeyName
@@ -100,14 +116,15 @@ export function serializeAsSet<T>(
     valueType: ASerializableTypeOrArrayInternal<T>,
     setConstructor?: () => IConstructable,
     keyName?: string) {
-    return (target: any, actualKeyName: string): any => {
+    return (target: unknown, actualKeyName: string): any => {
+        isInstanceMember(target);
         const metadata = PropMetaData.getMetaData(
             target.constructor,
             actualKeyName
         );
         metadata.serializedKey = keyName ? keyName : actualKeyName;
         metadata.serializedKeyType = valueType;
-        metadata.serializedType = setConstructor as any || (() => Set);
+        metadata.serializedType = setConstructor as unknown as ASerializableType<unknown> ?? (() => Set);
         metadata.flags |= PropMetaDataFlag.SerializeSet;
         metadata.flags = setBitConditionally(
             metadata.flags,
@@ -123,13 +140,14 @@ export function serializeAsMap(
     mapConstructor?: () => IConstructable,
     keyName?: string
 ) {
-    return (target: IConstructable, actualKeyName: string): void => {
+    return (target: unknown, actualKeyName: string): void => {
+        isInstanceMember(target);
         const metadata = PropMetaData.getMetaData(
             target.constructor,
             actualKeyName
         );
         metadata.serializedKey = keyName ? keyName : actualKeyName;
-        metadata.serializedType = mapConstructor ? mapConstructor as any : () => Map;
+        metadata.serializedType = mapConstructor ? mapConstructor as unknown as ASerializableType<unknown> : () => Map;
         metadata.serializedKeyType = keyType;
         metadata.serializedValueType = valueType;
         metadata.flags |= PropMetaDataFlag.SerializeMap;
@@ -145,7 +163,8 @@ export function serializeAsJson(
     keyNameOrTransformKeys?: boolean | string,
     transformKeys = true
 ) {
-    return (target: IConstructable, actualKeyName: string): void => {
+    return (target: unknown, actualKeyName: string): void => {
+        isInstanceMember(target);
         const metadata = PropMetaData.getMetaData(
             target.constructor,
             actualKeyName
@@ -168,19 +187,21 @@ export function serializeAsJson(
 }
 
 export function deserializeUsing(serializer: SerializeFn, keyName?: string) {
-    return (target: IConstructable, actualKeyName: string): void => {
+    return (target: unknown, actualKeyName: string): void => {
+        isInstanceMember(target);
         const metadata = PropMetaData.getMetaData(
             target.constructor,
             actualKeyName
         );
         metadata.deserializedKey = keyName ? keyName : actualKeyName;
-        metadata.deserializedType = serializer as any;
+        metadata.deserializedType = serializer as unknown as ASerializableType<unknown>;
         metadata.flags |= PropMetaDataFlag.DeserializeUsing;
     };
 }
 
 export function deserializeAs(type: ASerializableTypeOrArrayInternal<any>, keyName?: string) {
-    return (target: IConstructable, actualKeyName: string): void => {
+    return (target: unknown, actualKeyName: string): void => {
+        isInstanceMember(target);
         const metadata = PropMetaData.getMetaData(
             target.constructor,
             actualKeyName
@@ -202,14 +223,15 @@ export function deserializeAsArray(
     keyName?: string,
     handling: ArrayHandling = ArrayHandling.Into
 ) {
-    return (target: IConstructable, actualKeyName: string): void => {
+    return (target: unknown, actualKeyName: string): void => {
+        isInstanceMember(target);
         const metadata = PropMetaData.getMetaData(
             target.constructor,
             actualKeyName
         );
         metadata.deserializedKey = keyName ? keyName : actualKeyName;
         metadata.deserializedKeyType = elementType;
-        metadata.deserializedType = arrayConstructor as any || (() => Array);
+        metadata.deserializedType = arrayConstructor as unknown as ASerializableType<unknown> ?? (() => Array);
         metadata.arrayHandling = handling;
         metadata.flags |= PropMetaDataFlag.DeserializeArray;
         metadata.flags = setBitConditionally(
@@ -225,14 +247,15 @@ export function deserializeAsSet(
     setConstructor?: () => IConstructable,
     keyName?: string
 ) {
-    return (target: IConstructable, actualKeyName: string): void => {
+    return (target: unknown, actualKeyName: string): void => {
+        isInstanceMember(target);
         const metadata = PropMetaData.getMetaData(
             target.constructor,
             actualKeyName
         );
         metadata.deserializedKey = keyName ? keyName : actualKeyName;
         metadata.deserializedKeyType = valueType;
-        metadata.deserializedType = setConstructor as any || (() => Set);
+        metadata.deserializedType = setConstructor as unknown as ASerializableType<unknown> ?? (() => Set);
         metadata.flags |= PropMetaDataFlag.DeserializeSet;
         metadata.flags = setBitConditionally(
             metadata.flags,
@@ -248,13 +271,14 @@ export function deserializeAsMap(
     mapConstructor?: () => IConstructable,
     keyName?: string
 ) {
-    return (target: IConstructable, actualKeyName: string): void => {
+    return (target: unknown, actualKeyName: string): void => {
+        isInstanceMember(target);
         const metadata = PropMetaData.getMetaData(
             target.constructor,
             actualKeyName
         );
         metadata.deserializedKey = keyName ? keyName : actualKeyName;
-        metadata.deserializedType = mapConstructor ? mapConstructor as any : () => Map;
+        metadata.deserializedType = mapConstructor ? mapConstructor as unknown as ASerializableType<unknown> : () => Map;
         metadata.deserializedKeyType = keyType;
         metadata.deserializedValueType = valueType;
         metadata.flags |= PropMetaDataFlag.DeserializeMap;
@@ -270,7 +294,8 @@ export function deserializeAsObjectMap(
     valueType: ASerializableTypeOrArrayInternal<any>,
     keyType?: string
 ) {
-    return (target: IConstructable, actualKeyName: string): void => {
+    return (target: unknown, actualKeyName: string): void => {
+        isInstanceMember(target);
         const metadata = PropMetaData.getMetaData(
             target.constructor,
             actualKeyName
@@ -290,7 +315,8 @@ export function deserializeAsJson(
     keyNameOrTransformKeys?: boolean | string,
     transformKeys = true
 ) {
-    return (target: IConstructable, actualKeyName: string): void => {
+    return (target: unknown, actualKeyName: string): void => {
+        isInstanceMember(target);
         const metadata = PropMetaData.getMetaData(
             target.constructor,
             actualKeyName
@@ -316,7 +342,8 @@ export function autoserializeUsing(
     serializer: ISerializer<any>,
     keyName?: string
 ) {
-    return (target: IConstructable, actualKeyName: string): void => {
+    return (target: unknown, actualKeyName: string): void => {
+        isInstanceMember(target);
         const metadata = PropMetaData.getMetaData(
             target.constructor,
             actualKeyName
@@ -324,14 +351,15 @@ export function autoserializeUsing(
         const key = keyName ? keyName : actualKeyName;
         metadata.serializedKey = key;
         metadata.deserializedKey = key;
-        metadata.serializedType = serializer.Serialize as any;
-        metadata.deserializedType = serializer.Deserialize as any;
+        metadata.serializedType = serializer.Serialize as unknown as ASerializableType<unknown>;
+        metadata.deserializedType = serializer.Deserialize as unknown as ASerializableType<unknown>;
         metadata.flags |= PropMetaDataFlag.AutoUsing;
     };
 }
 
 export function autoserializeAs(type: ASerializableTypeOrArrayInternal<any>, keyName?: string) {
-    return (target: IConstructable, actualKeyName: string): void => {
+    return (target: unknown, actualKeyName: string): void => {
+        isInstanceMember(target);
         const metadata = PropMetaData.getMetaData(
             target.constructor,
             actualKeyName
@@ -357,7 +385,8 @@ export function autoserializeAsArray(
     keyName?: string,
     handling: ArrayHandling = ArrayHandling.Into
 ) {
-    return (target: IConstructable, actualKeyName: string): void => {
+    return (target: unknown, actualKeyName: string): void => {
+        isInstanceMember(target);
         const metadata = PropMetaData.getMetaData(
             target.constructor,
             actualKeyName
@@ -367,8 +396,8 @@ export function autoserializeAsArray(
         metadata.serializedKey = key;
         metadata.deserializedKeyType = elementType;
         metadata.serializedKeyType = elementType;
-        metadata.deserializedType = arrayConstructor as any || (() => Array);
-        metadata.serializedType = arrayConstructor as any || (() => Array);
+        metadata.deserializedType = arrayConstructor as unknown as ASerializableType<unknown> ?? (() => Array);
+        metadata.serializedType = arrayConstructor as unknown as ASerializableType<unknown> ?? (() => Array);
         metadata.arrayHandling = handling;
         metadata.flags |=
             PropMetaDataFlag.SerializeArray | PropMetaDataFlag.DeserializeArray;
@@ -385,7 +414,8 @@ export function autoserializeAsSet(
     setConstructor?: () => IConstructable,
     keyName?: string
 ) {
-    return (target: IConstructable, actualKeyName: string): void => {
+    return (target: unknown, actualKeyName: string): void => {
+        isInstanceMember(target);
         const metadata = PropMetaData.getMetaData(
             target.constructor,
             actualKeyName
@@ -395,8 +425,8 @@ export function autoserializeAsSet(
         metadata.serializedKey = key;
         metadata.deserializedKeyType = valueType;
         metadata.serializedKeyType = valueType;
-        metadata.deserializedType = setConstructor as any || (() => Set);
-        metadata.serializedType = setConstructor as any || (() => Set);
+        metadata.deserializedType = setConstructor as unknown as ASerializableType<unknown> ?? (() => Set);
+        metadata.serializedType = setConstructor as unknown as ASerializableType<unknown> ?? (() => Set);
         metadata.flags |=
             PropMetaDataFlag.SerializeSet | PropMetaDataFlag.DeserializeSet;
         metadata.flags = setBitConditionally(
@@ -411,7 +441,8 @@ export function autoserializeAsObjectMap(
     valueType: ASerializableTypeOrArrayInternal<any>,
     keyName?: string
 ) {
-    return (target: IConstructable, actualKeyName: string): void => {
+    return (target: unknown, actualKeyName: string): void => {
+        isInstanceMember(target);
         const metadata = PropMetaData.getMetaData(
             target.constructor,
             actualKeyName
@@ -437,7 +468,8 @@ export function autoserializeAsMap(
     mapConstructor?: () => IConstructable,
     keyName?: string
 ) {
-    return (target: IConstructable, actualKeyName: string): void => {
+    return (target: unknown, actualKeyName: string): void => {
+        isInstanceMember(target);
         const metadata = PropMetaData.getMetaData(
             target.constructor,
             actualKeyName
@@ -445,8 +477,8 @@ export function autoserializeAsMap(
         const key = keyName ? keyName : actualKeyName;
         metadata.deserializedKey = key;
         metadata.serializedKey = key;
-        metadata.deserializedType = mapConstructor ? mapConstructor as any : () => Map;
-        metadata.serializedType = mapConstructor ? mapConstructor as any : () => Map;
+        metadata.deserializedType = mapConstructor ? mapConstructor as unknown as ASerializableType<unknown> : () => Map;
+        metadata.serializedType = mapConstructor ? mapConstructor as unknown as ASerializableType<unknown> : () => Map;
         metadata.serializedKeyType = keyType;
         metadata.serializedValueType = valueType;
         metadata.deserializedKeyType = keyType;
@@ -465,7 +497,8 @@ export function autoserializeAsJson(
     keyNameOrTransformKeys?: boolean | string,
     transformKeys = true
 ) {
-    return (target: IConstructable, actualKeyName: string): void => {
+    return (target: unknown, actualKeyName: string): void => {
+        isInstanceMember(target);
         const metadata = PropMetaData.getMetaData(
             target.constructor,
             actualKeyName
@@ -490,6 +523,7 @@ export function autoserializeAsJson(
     };
 }
 
+// class decorator
 export function inheritSerialization(parentType: () => IConstructable) {
     return (childType: Function): void => {
         if (parentType() === undefined) {
@@ -500,7 +534,8 @@ export function inheritSerialization(parentType: () => IConstructable) {
 }
 
 export function emitDefaultValue(DefaultValue: boolean) {
-    return (target: IConstructable, actualKeyName: string): void => {
+    return (target: unknown, actualKeyName: string): void => {
+        isInstanceMember(target);
         const metadata = PropMetaData.getMetaData(
             target.constructor,
             actualKeyName
@@ -509,8 +544,9 @@ export function emitDefaultValue(DefaultValue: boolean) {
     };
 }
 
-export function onDeserialized(target: IConstructable, actualKeyName: string): void {
-    const metadata = PropMetaData.getMetaData(
+export function onDeserialized(target: unknown, actualKeyName: string): void {
+        isInstanceMember(target);
+        const metadata = PropMetaData.getMetaData(
         target.constructor,
         actualKeyName
     );
@@ -518,7 +554,8 @@ export function onDeserialized(target: IConstructable, actualKeyName: string): v
 }
 
 export function defaultValue(instance: Object) {
-    return (target: IConstructable, actualKeyName: string): void => {
+    return (target: unknown, actualKeyName: string): void => {
+        isInstanceMember(target);
         const metadata = PropMetaData.getMetaData(
             target.constructor,
             actualKeyName
@@ -533,7 +570,7 @@ export function defaultValue(instance: Object) {
  */
 export function isReference(isRef: boolean): any {
     return (classType: Function): void => {
-        const metadata = ClassMetaData.getMetaData(classType);
+        const metadata = ClassMetaData.getMetaDataOrDefault(classType);
         metadata.isReference = isRef ? IsReference.True : IsReference.False;
     };
 }
