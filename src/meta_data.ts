@@ -60,7 +60,7 @@ export const enum PropMetaDataFlag {
     AutoJSONTransformKeys = DeserializeJSONTransformKeys |
     SerializeJSONTransformKeys,
     Collection =
-      DeserializeArray
+    DeserializeArray
     | SerializeArray
     | DeserializeObjectMap
     | SerializeObjectMap

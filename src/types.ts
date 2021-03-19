@@ -81,7 +81,7 @@ export interface IObjectMap<T> {
     [idx: string]: T;
 }
 
-export type ISerializableType<T> = new(...args: any[]) => T;
+export type ISerializableType<T> = new (...args: any[]) => T;
 
 export type deserializedCallback<T> = (
     data: IJsonObject,

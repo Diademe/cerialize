@@ -19,7 +19,7 @@ describe("Number", () => {
         });
 
         it("other", () => {
-            expect(JSON.parse(JSON.stringify({v: 15}), parseNumber)).toEqual({v: 15});
+            expect(JSON.parse(JSON.stringify({ v: 15 }), parseNumber)).toEqual({ v: 15 });
         });
     });
 
@@ -37,7 +37,7 @@ describe("Number", () => {
         });
 
         it("other", () => {
-            expect(JSON.stringify({v: 15}, stringifyNumber)).toEqual("{\"v\":15}");
+            expect(JSON.stringify({ v: 15 }, stringifyNumber)).toEqual("{\"v\":15}");
         });
     });
 });

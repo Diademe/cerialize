@@ -218,7 +218,7 @@ export function SerializePrimitiveInternal(
     function isObjectPrimitive(
         value: string | number | boolean | Date | RegExp | String | Number | Boolean
     ): value is Date | RegExp | String | Number | Boolean {
-           return source instanceof Object;
+        return source instanceof Object;
     }
     const primitiveSource: string | number | boolean =
         isObjectPrimitive(source) ? DowncastPrimitive(source) : source as primitive;

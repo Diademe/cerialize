@@ -1,20 +1,20 @@
 {
-  "compilerOptions": {
-    "noImplicitReturns": true,
-    "noImplicitAny": true,
-    "declarationDir": "./dist",
-    "outDir": "./dist",
-    "preserveConstEnums": false,
-    "removeComments": true,
-    "target": "es6",
-    "module": "ES2020",
-    "stripInternal": true,
-    "experimentalDecorators": true,
-    "noEmitHelpers": false,
-    "declaration": true,
-    "esModuleInterop": true,
-    "sourceMap": true,
-    "moduleResolution": "node",
-    "strict": true,
-  }
+    "compilerOptions": {
+        "noImplicitReturns": true,
+        "noImplicitAny": true,
+        "declarationDir": "./dist",
+        "outDir": "./dist",
+        "preserveConstEnums": false,
+        "removeComments": true,
+        "target": "es6",
+        "module": "ES2020",
+        "stripInternal": true,
+        "experimentalDecorators": true,
+        "noEmitHelpers": false,
+        "declaration": true,
+        "esModuleInterop": true,
+        "sourceMap": true,
+        "moduleResolution": "node",
+        "strict": true,
+    }
 }

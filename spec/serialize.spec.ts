@@ -331,7 +331,7 @@ describe("Serializing", () => {
         });
 
         it("serializes a custom Map of primitives 2", () => {
-            class MyMap extends Map<string, number> {}
+            class MyMap extends Map<string, number> { }
             class Test {
                 @autoserializeAsMap(() => String, () => Number, () => MyMap)
                 public values!: MyMap;
@@ -367,7 +367,7 @@ describe("Serializing", () => {
             }
 
             const t = new Test();
-            t.values = new Map ([
+            t.values = new Map([
                 ["v0", new TestType(0)],
                 ["v1", new TestType(1)],
                 ["v2", new TestType(2)]
@@ -396,7 +396,7 @@ describe("Serializing", () => {
             }
 
             const t = new Test();
-            t.values = new Map ([
+            t.values = new Map([
                 ["v0", new TestType(0)],
                 ["v1", new TestType(1)],
                 ["v2", new TestType(2)]
@@ -427,10 +427,10 @@ describe("Serializing", () => {
 
             const t = new Test();
             t.values = new Map([
-                ["v0", new TestType(new Map([["v00", 1], ["v01", 2] ]))],
-                ["v1", new TestType(new Map([["v10", 2], ["v11", 2] ]))],
-                ["v2", new TestType(new Map([["v20", 3], ["v21", 2] ]))]
-                ]);
+                ["v0", new TestType(new Map([["v00", 1], ["v01", 2]]))],
+                ["v1", new TestType(new Map([["v10", 2], ["v11", 2]]))],
+                ["v2", new TestType(new Map([["v20", 3], ["v21", 2]]))]
+            ]);
             const json: IJsonObject = Serialize(t, () => Test);
             expect(json.values).toEqual({
                 v0: { value: { v00: 1, v01: 2 } },
@@ -758,7 +758,7 @@ describe("Serializing", () => {
 
     describe("SerializeAsSet", () => {
         it("serializes a Set of primitives", () => {
-            class MySet<T> extends Set<T> {}
+            class MySet<T> extends Set<T> { }
             class Test {
                 @serializeAsSet(() => Number, () => MySet)
                 public value!: MySet<number>;
@@ -887,15 +887,15 @@ describe("Serializing", () => {
                         }
                     }
                     @inheritSerialization(() => Satellite)
-                    class Moon extends Satellite {}
-                    class MyDico extends Map<string, Satellite> {}
+                    class Moon extends Satellite { }
+                    class MyDico extends Map<string, Satellite> { }
                     class Test0 {
                         @serializeAsMap(() => String, () => Satellite, () => MyDico)
                         public dico1!: MyDico;
                     }
                     const s = new Test0();
                     s.dico1 = new MyDico([["1", new Moon("Europa")], ["2", new Satellite("Adrastea")]]);
-                    s.dico1.set("3" , new Moon("Callisto"));
+                    s.dico1.set("3", new Moon("Callisto"));
                     RuntimeTypingEnable();
                     RuntimeTypingSetTypeString(Moon, "my Moon type");
                     RuntimeTypingSetTypeString(Satellite, "my Satellite type");
@@ -904,9 +904,9 @@ describe("Serializing", () => {
                     const json: IJsonObject = Serialize(s, () => Test0);
                     RuntimeTypingDisable();
                     RuntimeTypingResetDictionary();
-                    expect((json.dico1 as IJsonObject)["1"]).toEqual({$type: "my Moon type", name: "Europa"});
-                    expect((json.dico1 as IJsonObject)["2"]).toEqual({$type: "my Satellite type", name: "Adrastea"});
-                    expect((json.dico1 as IJsonObject)["3"]).toEqual({$type: "my Moon type", name: "Callisto"});
+                    expect((json.dico1 as IJsonObject)["1"]).toEqual({ $type: "my Moon type", name: "Europa" });
+                    expect((json.dico1 as IJsonObject)["2"]).toEqual({ $type: "my Satellite type", name: "Adrastea" });
+                    expect((json.dico1 as IJsonObject)["3"]).toEqual({ $type: "my Moon type", name: "Callisto" });
                     expect((json.dico1 as IJsonObject).$type).toBe("my MyDico type");
                 });
 
@@ -1119,7 +1119,7 @@ describe("Serializing", () => {
                     }
 
                     const s = new Test();
-                    s.value0 = () => {};
+                    s.value0 = () => { };
                     const json: IJsonObject = Serialize(s, () => Test);
                     expect(json).toEqual({
                         value0: null
@@ -1253,7 +1253,7 @@ describe("Serializing", () => {
     });
 
     describe("SerializeUsing", () => {
-       it("uses the provided function", () => {
+        it("uses the provided function", () => {
             function x() {
                 return "yes";
             }
@@ -1503,7 +1503,7 @@ describe("Serializing", () => {
                 public value: number = 0;
             }
 
-            class MyArray extends Array {}
+            class MyArray extends Array { }
 
             const s = new MyArray();
             s.push(new Test(), new Test(), new Test(), new Test());
@@ -1530,7 +1530,7 @@ describe("Serializing", () => {
                 public valueB: boolean = true;
             }
             @inheritSerialization(() => Test1)
-            class Test2 extends Test1 {}
+            class Test2 extends Test1 { }
             class Test3 {
                 @serializeAs(() => Object)
                 public m1!: Test0;

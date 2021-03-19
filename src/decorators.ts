@@ -22,7 +22,7 @@ import {
  * test if value is a prototype (if true, that means that we are on an instance decorator).
  * static member decorator receive the constructor where instance member decorator receive the prototype
  */
-function isInstanceMember(value: unknown): asserts value is IConstructable  {
+function isInstanceMember(value: unknown): asserts value is IConstructable {
     if (typeof value === "function") {
         throw new Error("a decorator of dcerialize has been applied to a static member. this is forbidden");
     }
@@ -545,8 +545,8 @@ export function emitDefaultValue(DefaultValue: boolean) {
 }
 
 export function onDeserialized(target: unknown, actualKeyName: string): void {
-        isInstanceMember(target);
-        const metadata = PropMetaData.getMetaData(
+    isInstanceMember(target);
+    const metadata = PropMetaData.getMetaData(
         target.constructor,
         actualKeyName
     );

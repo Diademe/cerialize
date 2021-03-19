@@ -8,7 +8,7 @@ import {
 } from "./types";
 
 export function getTarget<T>(
-    type: new(...args: any[]) => T,
+    type: new (...args: any[]) => T,
     target: T,
     instantiationMethod: InstantiationMethod
 ): T {

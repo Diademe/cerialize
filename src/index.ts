@@ -132,11 +132,11 @@ export function Serialize<T>(
 export function Serialize<T>(
     source: T & Partial<IConstructable>,
     type: ItIsAnArrayInternal
-):  (IJsonObject | IJsonArray)[];
+): (IJsonObject | IJsonArray)[];
 export function Serialize<T>(
     source: T & Partial<IConstructable>,
     type: ASerializableType<T>
-):  IJsonObject;
+): IJsonObject;
 export function Serialize<T>(
     source: T & Partial<IConstructable>,
     type: ASerializableTypeOrArrayInternal<T>

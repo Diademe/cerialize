@@ -55,7 +55,7 @@ export function DeserializeObjectMapInternal<T>(
     data: IJsonObject | IJsonArray | null,
     valueType: ASerializableTypeOrArrayInternal<T>,
     target?: IPlainObject,
-    instantiationMethod: InstantiationMethod  = InstantiationMethod.New
+    instantiationMethod: InstantiationMethod = InstantiationMethod.New
 ): IPlainObject | null {
     if (data === null) {
         return null;
@@ -105,7 +105,7 @@ export function DeserializeMapInternal<
     K extends StringConstructor | NumberConstructor,
     V,
     T extends Map<string | number, V>, C extends new () => T
-> (
+>(
     data: null,
     keyType: () => K,
     valueType: ASerializableTypeOrArrayInternal<V>,
@@ -117,7 +117,7 @@ export function DeserializeMapInternal<
     K extends StringConstructor | NumberConstructor,
     V,
     T extends Map<string | number, V>, C extends new () => T
-> (
+>(
     data: IJsonObject,
     keyType: () => K,
     valueType: ASerializableTypeOrArrayInternal<V>,
@@ -130,7 +130,7 @@ export function DeserializeMapInternal<
     V,
     T extends Map<string | number, V>,
     C extends new () => T
-> (
+>(
     data: IJsonObject | null,
     keyType: () => K,
     valueType: ASerializableTypeOrArrayInternal<V>,
@@ -179,8 +179,8 @@ export function DeserializeMapInternal<
             }
             const keyName = keyTypeF(
                 isString ?
-                PropMetaData.deserializeKeyTransform(key) :
-                key
+                    PropMetaData.deserializeKeyTransform(key) :
+                    key
             );
             target.set(keyName, DeserializeInternal<V>(
                 data[key] as IJsonObject,
@@ -203,7 +203,7 @@ export function DeserializeArrayInternal<
         handling: ArrayHandling,
         target?: T,
         instantiationMethod?: InstantiationMethod
-): null;
+    ): null;
 export function DeserializeArrayInternal<
     Value,
     T extends (Value | null)[],
@@ -214,7 +214,7 @@ export function DeserializeArrayInternal<
         handling: ArrayHandling,
         target?: T,
         instantiationMethod?: InstantiationMethod
-): T;
+    ): T;
 export function DeserializeArrayInternal<
     Value,
     T extends (Value | null)[],
@@ -225,7 +225,7 @@ export function DeserializeArrayInternal<
         handling: ArrayHandling,
         target?: T,
         instantiationMethod?: InstantiationMethod
-): T | null {
+    ): T | null {
     if (data === null) {
         return null;
     }
@@ -268,32 +268,32 @@ export function DeserializeSetInternal<
     K,
     T extends Set<K>,
     C extends new () => T>(
-    data: null,
-    keyType: ASerializableTypeOrArrayInternal<K>,
-    setConstructor: () => C,
-    target?: T,
-    instantiationMethod?: InstantiationMethod
-): null;
+        data: null,
+        keyType: ASerializableTypeOrArrayInternal<K>,
+        setConstructor: () => C,
+        target?: T,
+        instantiationMethod?: InstantiationMethod
+    ): null;
 export function DeserializeSetInternal<
     K,
     T extends Set<K>,
     C extends new () => T>(
-    data: IJsonArray,
-    keyType: ASerializableTypeOrArrayInternal<K>,
-    setConstructor: () => C,
-    target?: T,
-    instantiationMethod?: InstantiationMethod
-): T;
+        data: IJsonArray,
+        keyType: ASerializableTypeOrArrayInternal<K>,
+        setConstructor: () => C,
+        target?: T,
+        instantiationMethod?: InstantiationMethod
+    ): T;
 export function DeserializeSetInternal<
     K,
     T extends Set<K>,
     C extends new () => T>(
-    data: IJsonArray | null,
-    keyType: ASerializableTypeOrArrayInternal<K>,
-    setConstructor: () => C,
-    target?: T,
-    instantiationMethod?: InstantiationMethod
-): T | null {
+        data: IJsonArray | null,
+        keyType: ASerializableTypeOrArrayInternal<K>,
+        setConstructor: () => C,
+        target?: T,
+        instantiationMethod?: InstantiationMethod
+    ): T | null {
     if (data === null) {
         return null;
     }
@@ -324,32 +324,32 @@ export function DeserializeSet<
     K,
     T extends Set<K>,
     C extends new () => T>(
-    data: null,
-    keyType: ASerializableTypeOrArrayInternal<K>,
-    setConstructor: () => C,
-    target?: T,
-    instantiationMethod?: InstantiationMethod
-): null;
+        data: null,
+        keyType: ASerializableTypeOrArrayInternal<K>,
+        setConstructor: () => C,
+        target?: T,
+        instantiationMethod?: InstantiationMethod
+    ): null;
 export function DeserializeSet<
     K,
     T extends Set<K>,
     C extends new () => T>(
-    data: IJsonArray,
-    keyType: ASerializableTypeOrArrayInternal<K>,
-    setConstructor: () => C,
-    target?: T,
-    instantiationMethod?: InstantiationMethod
-): T;
+        data: IJsonArray,
+        keyType: ASerializableTypeOrArrayInternal<K>,
+        setConstructor: () => C,
+        target?: T,
+        instantiationMethod?: InstantiationMethod
+    ): T;
 export function DeserializeSet<
     K,
     T extends Set<K>,
     C extends new () => T>(
-    data: IJsonArray | null,
-    keyType: ASerializableTypeOrArrayInternal<K>,
-    setConstructor: () => C = (() => Set as unknown as C),
-    target?: T,
-    instantiationMethod: InstantiationMethod = PropMetaData.deserializeInstantiationMethod
-): T | null {
+        data: IJsonArray | null,
+        keyType: ASerializableTypeOrArrayInternal<K>,
+        setConstructor: () => C = (() => Set as unknown as C),
+        target?: T,
+        instantiationMethod: InstantiationMethod = PropMetaData.deserializeInstantiationMethod
+    ): T | null {
     if (data === null) {
         return null;
     }
@@ -621,7 +621,7 @@ export function DeserializeInternal<T, K extends keyof T>(
                     metadata.deserializedType,
                     target[keyName],
                     instantiationMethod
-                )as unknown as T[K];
+                ) as unknown as T[K];
             }
             else if ((flags & PropMetaDataFlag.DeserializeJSON) !== 0) {
                 target[keyName] = DeserializeJSONInternal(
@@ -640,7 +640,7 @@ export function DeserializeInternal<T, K extends keyof T>(
         }
 
         if (onDeserializedCallbackName !== null) {
-            (target[onDeserializedCallbackName] as unknown as deserializedCallback<T>) (
+            (target[onDeserializedCallbackName] as unknown as deserializedCallback<T>)(
                 data as IJsonObject,
                 target,
                 instantiationMethod
